@@ -21,7 +21,7 @@ int agentFill(int *feat, int f, int q){
 
 int latticeFill(int **lattice, int n, int f, int q){
 
-  for(int i=0; i<n; i++){
+  for(int i=0; i<n*n; i++){
     agentCreate(lattice, i, f);
     agentFill(lattice[i], f, q);
   }

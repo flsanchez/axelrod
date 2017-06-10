@@ -6,15 +6,21 @@
 int main(){
 
   int n = 2;
-  int f = 2;
+  int f = 4;
   int q = 10;
 
   srand(time(NULL));
 
-  int **lattice = malloc(n*n*sizeof(int *));
+  int **lattice = malloc(n * n * sizeof(int*));
 
   latticeFill(lattice, n, f, q);
-  agentPrint(lattice, n, f, 0);
+
+  for(int i=0;i<n*n;i++){
+
+    printf("Agent N. %d:\n",i);
+    agentPrint(lattice, n, f, i);
+
+  }
 
   return 0;
 }
