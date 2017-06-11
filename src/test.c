@@ -5,22 +5,24 @@
 
 int main(){
 
-  int n = 2;
+  int n = 3;
   int f = 4;
   int q = 10;
 
   srand(time(NULL));
 
-  int **lattice = malloc(n * n * sizeof(int*));
+  agent *lattice = (agent*) malloc(n * n * sizeof(agent));
 
   latticeFill(lattice, n, f, q);
 
   for(int i=0;i<n*n;i++){
 
     printf("Agent N. %d:\n",i);
-    agentPrint(lattice, n, f, i);
+    agentPrint(lattice, n, i);
 
   }
+
+  free_all(lattice, n);
 
   return 0;
 }

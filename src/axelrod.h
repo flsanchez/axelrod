@@ -1,9 +1,17 @@
 #ifndef AXELROD_H
 #define AXELROD_H
 
-int agentCreate(int **lattice, int idx, int f);
+typedef struct agent
+{
+  int f;
+  int q;
+  int *feat;
+} agent;
+
+int agentCreate(agent *lattice, int idx, int f, int q);
 int agentFill(int *feat, int f, int q);
-int latticeFill(int **lattice, int n, int f, int q);
-int agentPrint(int **lattice, int n, int f, int idx);
+int latticeFill(agent *lattice, int n, int f, int q);
+int agentPrint(agent *lattice, int n, int idx);
+int free_all(agent *lattice, int n);
 
 #endif
