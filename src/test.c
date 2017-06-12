@@ -9,6 +9,7 @@ int main(){
   int f = 5;
   int q = 10;
   int niter = 100000;
+  int paso = 100;
   FILE *fs;
   char name[100];
 
@@ -20,8 +21,9 @@ int main(){
 
   for(int i=0;i<niter;i++){
 
-    if(i%2000==0){
-      sprintf(name,"test%f.txt",(float)i/(float)niter);
+    if(i%paso==0){
+      printf("Paso: %d\n",i);
+      sprintf(name,"%d.txt",i/paso);
       fs = fopen(name,"w");
       latticePrintToFile(lattice,n,fs);
       fclose(fs);
