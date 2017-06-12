@@ -18,5 +18,6 @@ int getRand(int max);
 int pickPassive(int n, int k);
 int commonTraits(agent *lattice, int k, int r);
 int latticePrint(agent *lattice, int n);
+int latticePrintToFile(agent *lattice, int n, FILE *fs);
 
 #endif

@@ -5,10 +5,12 @@
 
 int main(){
 
-  int n = 5;
+  int n = 10;
   int f = 5;
   int q = 10;
-  int niter = 10000;
+  int niter = 100000;
+  FILE *fs;
+  char name[100];
 
   srand(time(NULL));
 
@@ -17,17 +19,17 @@ int main(){
   latticeFill(lattice, n, f, q);
 
   for(int i=0;i<niter;i++){
-    step(lattice,n);
-    if(i%1000 == 0){
-      printf("Paso Numero %d: \n",i);
-      latticePrint(lattice,n);
-      printf("\n\n");
-    }
-  }
-  printf("Paso Numero %d: \n",niter);
-  latticePrint(lattice,n);
-  printf("\n\n");
 
+    if(i%2000==0){
+      sprintf(name,"test%f.txt",(float)i/(float)niter);
+      fs = fopen(name,"w");
+      latticePrintToFile(lattice,n,fs);
+      fclose(fs);
+    }
+
+    step(lattice,n);
+
+  }
 
   freeAll(lattice, n);
 

@@ -50,7 +50,7 @@ int agentPrint(agent *lattice, int n, int idx){
 
 int freeAll(agent *lattice, int n){
 
-  //for(int i=0;i<n*n;i++) free(lattice[i].feat);
+  for(int i=0;i<n*n;i++) free(lattice[i].feat);
   free(lattice);
 
   return 0;
@@ -194,5 +194,27 @@ int latticePrint(agent *lattice, int n){
     printf("%d ",commonTraits(lattice,(n-1)*n+j,(n-1)*n+j+1));
   }
   printf("*\n");
+
+}
+
+int latticePrintToFile(agent *lattice, int n, FILE *fs){
+
+  int f = lattice[0].f;
+  int q = lattice[0].q;
+
+  fprintf(fs,"# n f q\n# %d %d %d\n",n,f,q);
+
+  for(int i=0;i<n;i++){
+
+    for(int j=0;j<n;j++){
+      for(int k=0;k<f;k++) fprintf(fs,"%d",lattice[i*n+j].feat[k]);
+      fprintf(fs," ");
+    }
+
+    fprintf(fs,"\n");
+
+  }
+
+  return 0;
 
 }
