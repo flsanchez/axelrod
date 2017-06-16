@@ -7,8 +7,8 @@ int main(){
 
   int n = 10;
   int f = 5;
-  int q = 10;
-  int niter = 100000;
+  int q = 3;
+  int niter = 50000;
   int paso = 100;
   FILE *fs;
   char name[100];

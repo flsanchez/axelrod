@@ -7,9 +7,9 @@ import os
 zvals = np.loadtxt(sys.argv[1])
 
 img2 = pyplot.imshow(zvals,interpolation='nearest',
-		                cmap = 'gray',
+		                cmap = 'hot',
 		                origin='upper',vmin=0,vmax=99999)
 
-pyplot.colorbar(img2,cmap='gray')
+pyplot.colorbar(img2,cmap='hot')
 
 pyplot.show()

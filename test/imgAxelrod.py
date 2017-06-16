@@ -5,7 +5,7 @@ import sys
 import os
 import math as mt
 
-niter=100000
+niter=50000
 cwd=os.getcwd()
 ls=os.listdir(cwd)
 cm = 'gist_rainbow'
