@@ -2,4 +2,6 @@
 *.o
 *.txt
 *.png
-data/
+*.mp4
+*.mpg
+*.zip

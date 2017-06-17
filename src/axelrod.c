@@ -9,6 +9,7 @@ int agentCreate(agent *lattice, int idx, int f, int q){
   lattice[idx].q = q;
   lattice[idx].feat = malloc((lattice[idx].f) * sizeof(int));
   lattice[idx].label = 0;
+  lattice[idx].baseq = 0;
 
   return 0;
 
@@ -203,26 +204,31 @@ int latticePrintToFile(agent *lattice, int n, FILE *fs){
   int f = lattice[0].f;
   int q = lattice[0].q;
 
+  latticeBaseq(lattice,n);
+
   if(fs != NULL){
 
     fprintf(fs,"# n f q\n# %d %d %d\n",n,f,q);
 
     for(int i=0;i<n;i++){
       for(int j=0;j<n;j++){
-        for(int k=0;k<f;k++) fprintf(fs,"%d",lattice[i*n+j].feat[k]);
+        fprintf(fs,"%d",lattice[i*n+j].baseq);
         fprintf(fs," ");
       }
       fprintf(fs,"\n");
     }
+
   }
   else{
+
     for(int i=0;i<n;i++){
       for(int j=0;j<n;j++){
-        for(int k=0;k<f;k++) printf("%d",lattice[i*n+j].feat[k]);
+        printf("%d",lattice[i*n+j].baseq);
         printf(" ");
       }
       printf("\n");
     }
+
   }
 
   return 0;
@@ -272,6 +278,27 @@ int clusterSize(agent *lattice, int n, int frag, int *fragsz, int *ns){
 
 	for(int i=1 ; i<frag; i++) if(fragsz[i]!=0) ns[fragsz[i]-1]++;
 
+  return 0;
+
+}
+
+int latticeBaseq(agent *lattice, int n){
+
+  int f = lattice[0].f;
+  int q = lattice[0].q;
+
+  int *base = malloc(f*sizeof(int));
+
+  base[0] = 1;
+
+  for(int i=1;i<f;i++) base[i] = base[i-1] * q;
+
+  for(int i=0;i<n*n;i++){
+    lattice[i].baseq = 0;
+    for(int j=0;j<f;j++) lattice[i].baseq = lattice[i].baseq + base[j] * lattice[i].feat[j];
+  }
+
+  free(base);
   return 0;
 
 }

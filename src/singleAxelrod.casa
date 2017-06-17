@@ -5,11 +5,11 @@
 
 int main(){
 
-  int n = 10;
-  int f = 5;
-  int q = 3;
-  int niter = 50000;
-  int paso = 100;
+  int n = 50;
+  int f = 10;
+  int q = 5;
+  int niter = n*n*n*1000;
+  int paso = 200000;
   FILE *fs;
   char name[100];
 
@@ -25,6 +25,7 @@ int main(){
       printf("Paso: %d\n",i);
       sprintf(name,"%d.txt",i/paso);
       fs = fopen(name,"w");
+      fprintf(fs,"# paso\n# %d\n", paso);
       latticePrintToFile(lattice,n,fs);
       fclose(fs);
     }

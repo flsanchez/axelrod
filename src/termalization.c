@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "axelrod.h"
+#include "label.h"
+
+int main(){
+
+  int n = 50;
+  int f = 10;
+  int q = 5;
+  int frag;
+  int paso = 10*n*n;
+  int repe = 100;
+  FILE *fs;
+  char name[100];
+  int max;
+  int niter;
+  //for(int i=0;i<repe;i++) niter[i]=0;
+
+  srand(time(NULL));
+
+  agent *lattice = (agent*) malloc(n * n * sizeof(agent));
+  sprintf(name,"termalization.txt");
+  fs = fopen(name,"a");
+  fprintf(fs, "# n f q paso=10*n*n\n# %d %d %d %d\n",n,f,q,paso);
+  fclose(fs);
+
+  for(int i=0;i<repe;i++){
+
+    printf("Paso: %d\n",i);
+    max = 0;
+    niter = 0;
+    latticeFill(lattice, n, f, q);
+    while(max!=n*n){
+      for(int j=0; j<paso; j++) step(lattice,n);
+      frag = latticeLabel(lattice,n);
+      max = maxCluster(lattice,n,frag);
+      niter++;
+    }
+    printf("\tNum Iter = %d\n", niter*paso);
+
+    fs = fopen(name,"a");
+    fprintf(fs,"%d\n", niter*paso);
+    fclose(fs);
+
+  }
+
+  freeAll(lattice, n);
+
+  return 0;
+}

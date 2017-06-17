@@ -2,31 +2,49 @@ import matplotlib as mpl
 from matplotlib import pyplot
 import numpy as np
 import sys
-import os
+import os, glob
 import math as mt
 
-niter=50000
 cwd=os.getcwd()
 ls=os.listdir(cwd)
 cm = 'gist_rainbow'
-cont=1.0
-paso=100
+cont=1
+total=len(glob.glob1(cwd,"*.txt"))
 
 for files in ls:
 	if files.endswith(".txt"):
 
-		print(str(cont*100/(len(ls)-2)) + "%")
-		aux=int(files[0:-4])
-		name=aux*paso
+		print(str(cont*100.0/total) + "%")
+
+		fopen = open(files,'r')
+
+		fopen.readline()
+		paso = fopen.readline()
+		paso = paso.split(" ")
+		paso = int(paso[1])
+
+		fopen.readline()
+		aux = fopen.readline()
+		aux = aux.split(" ")
+		n = int(aux[1])
+		f = int(aux[2])
+		q = int(aux[3])
+
+		fopen.close()
+
+		num=int(files[0:-4])
+		name=num*paso
+		maxval=q**f-1
+	
 		fig = pyplot.figure(1)
 		data = np.loadtxt(files)
 
 		img2 = pyplot.imshow(data,interpolation='nearest',
 						            cmap = cm,
-						            origin='upper',vmin=0,vmax=99999)
+						            origin='upper',vmin=0,vmax=maxval)
 
 		pyplot.colorbar(img2,cmap = cm)
-		fig.suptitle("n = "+str(name))
-		fig.savefig(str(name/paso)+".png")
+		fig.suptitle("q = " + str(q) +"; tiempo = " +str(name))
+		fig.savefig(str(num)+".png")
 		fig.clear()
 		cont = cont+1

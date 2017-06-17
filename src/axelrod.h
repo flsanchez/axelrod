@@ -7,6 +7,7 @@ typedef struct agent
   int q;
   int *feat;
   int label;
+  int baseq;
 } agent;
 
 int agentCreate(agent *lattice, int idx, int f, int q);
@@ -23,5 +24,6 @@ int latticePrintToFile(agent *lattice, int n, FILE *fs);
 int latticePrintLabels(agent *lattice, int n);
 int maxCluster(agent *lattice, int n, int frag);
 int clusterSize(agent *lattice, int n, int frag, int *fragsz, int *ns);
+int latticeBaseq(agent *lattice, int n);
 
 #endif
