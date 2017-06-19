@@ -25,8 +25,9 @@ for files in ls:
 
 		minbin=np.min(data)/paso*10
 		maxbin=np.max(data)/paso*10
-		print maxbin
-		binpos=np.arange(minbin,maxbin+1,1000)
+		binpos=np.arange(minbin,maxbin+1,2000)
+		mu = np.sum(data)/np.size(data)/paso*10
+		print mu
 
 		plt.hist(data/paso*10,bins=binpos)
 		plt.show()

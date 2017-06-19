@@ -11,12 +11,11 @@ int main(){
   int q = 5;
   int frag;
   int paso = 10*n*n;
-  int repe = 100;
+  int repe = 1900;
   FILE *fs;
   char name[100];
   int max;
   int niter;
-  //for(int i=0;i<repe;i++) niter[i]=0;
 
   srand(time(NULL));
 

@@ -8,25 +8,29 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int q0 = 5;
-  int niter = (n*n)*n*1000;
-  int prom = 1;
-  int paso = 1000000;
+  int niter = n*n*60000;
+  int prom = 20;
   int *Sprom = malloc(prom*sizeof(int));
   int frag;
   int max;
   FILE *fs;
   char name[100];
+  int qlen = 50;
+  int *qVector = malloc(qlen*sizeof(int));
+  int q;
+  for(int i = 0; i<qlen; i++) qVector[i] = 2*i+3;
 
   srand(time(NULL));
 
   agent *lattice = (agent*) malloc(n * n * sizeof(agent));
 
-  for(int q = q0; q<q0+1; q++){
+  for(int j = 0; j<qlen; j++){
+
+    q = qVector[j];
 
     for(int i = 0; i<prom; i++){
 
-      printf("q = %d, prom = %d \n",q, i);
+      printf("q = %d, prom = %d \n",q,i);
       latticeFill(lattice, n, f, q);
       for(int j=0; j<niter; j++) step(lattice,n);
       frag = latticeLabel(lattice,n);
@@ -36,16 +40,17 @@ int main(){
 
     }
 
-    /*sprintf(name,"q_%d.txt",q);
+    sprintf(name,"q_%d.txt",q);
     fs = fopen(name,"w");
     fprintf(fs,"# n f q niter\n# %d %d %d %d\n",n,f,q,niter);
     for(int i = 0; i<prom; i++) fprintf(fs,"%d\n", Sprom[i]);
-    fclose(fs);*/
+    fclose(fs);
 
   }
 
   freeAll(lattice,n);
   free(Sprom);
+  free(qVector);
   return 0;
 
 }
