@@ -19,6 +19,6 @@ int adjListCreate(adjList* list);
 int adjListAddNode(adjList* list, int value, int rewire);
 int printAdjList(adjList* list);
 int adjListFree(adjList* list);
-int adjListRemNode(adjList list, int n);
+int adjListRmNode(adjList* list, int n);
 
 #endif

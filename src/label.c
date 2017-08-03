@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "axelrod.h"
+#include "agent.h"
+#include "graph.h"
 #include "label.h"
 
 int latticeLabel(agent *lattice, int n){

@@ -2,7 +2,74 @@
 #include <stdlib.h>
 #include <time.h>
 #include "agent.h"
-#include "axelrod.h"
+
+int agentCreate(agent *lattice, int idx, int f, int q){
+
+  lattice[idx].f = f;
+  lattice[idx].q = q;
+  lattice[idx].feat = malloc((lattice[idx].f) * sizeof(int));
+  lattice[idx].label = 0;
+  lattice[idx].baseq = 0;
+
+  return 0;
+
+}
+
+int agentFill(int *feat, int f, int q){
+
+  for(int i=0; i<f; i++) {
+
+    feat[i] = q;
+    while(feat[i] == q){
+      feat[i] = (int) (q * ((float) rand() / (float) RAND_MAX));
+    }
+
+  }
+
+  return 0;
+}
+
+int latticeFill(agent *lattice, int n, int f, int q){
+
+  for(int i=0; i<n*n; i++){
+    agentCreate(lattice, i, f, q);
+    agentFill(lattice[i].feat, lattice[i].f, lattice[i].q);
+  }
+
+  return 0;
+}
+
+int agentPrint(agent *lattice, int n, int idx){
+
+  printf("Agent N. %d:\n",idx);
+  for(int i=0; i<lattice[idx].f; i++){
+    printf("Trait %d = %d\n",i,lattice[idx].feat[i]);
+  }
+
+  return 0;
+
+}
+
+int latticeBaseq(agent *lattice, int n){
+
+  int f = lattice[0].f;
+  int q = lattice[0].q;
+
+  int *base = malloc(f*sizeof(int));
+
+  base[0] = 1;
+
+  for(int i=1;i<f;i++) base[i] = base[i-1] * q;
+
+  for(int i=0;i<n*n;i++){
+    lattice[i].baseq = 0;
+    for(int j=0;j<f;j++) lattice[i].baseq = lattice[i].baseq + base[j] * lattice[i].feat[j];
+  }
+
+  free(base);
+  return 0;
+
+}
 
 int latticePrintLinks(agent *lattice, int n){
 
@@ -75,79 +142,22 @@ int latticePrintLabels(agent *lattice, int n){
 
 }
 
-int agentCreate(agent *lattice, int idx, int f, int q){
+int commonTraits(agent *lattice, int k, int r){
 
-  lattice[idx].f = f;
-  lattice[idx].q = q;
-  lattice[idx].feat = malloc((lattice[idx].f) * sizeof(int));
-  lattice[idx].label = 0;
-  lattice[idx].baseq = 0;
+  int f = lattice[k].f;
+  int res = 0;
 
-  return 0;
+  for(int i=0; i < f; i++) if(lattice[k].feat[i] == lattice[r].feat[i]) res++;
 
-}
-
-int agentFill(int *feat, int f, int q){
-
-  for(int i=0; i<f; i++) {
-
-    feat[i] = q;
-    while(feat[i] == q){
-      feat[i] = (int) (q * ((float) rand() / (float) RAND_MAX));
-    }
-
-  }
-
-  return 0;
-}
-
-int latticeFill(agent *lattice, int n, int f, int q){
-
-  for(int i=0; i<n*n; i++){
-    agentCreate(lattice, i, f, q);
-    agentFill(lattice[i].feat, lattice[i].f, lattice[i].q);
-  }
-
-  return 0;
-}
-
-int agentPrint(agent *lattice, int n, int idx){
-
-  printf("Agent N. %d:\n",idx);
-  for(int i=0; i<lattice[idx].f; i++){
-    printf("Trait %d = %d\n",i,lattice[idx].feat[i]);
-  }
-
-  return 0;
+  return res;
 
 }
 
-int freeAll(agent *lattice, int n){
+int latticeFree(agent *lattice, int n){
 
   for(int i=0;i<n*n;i++) free(lattice[i].feat);
   free(lattice);
 
-  return 0;
-
-}
-
-int latticeBaseq(agent *lattice, int n){
-
-  int f = lattice[0].f;
-  int q = lattice[0].q;
-
-  int *base = malloc(f*sizeof(int));
-
-  base[0] = 1;
-
-  for(int i=1;i<f;i++) base[i] = base[i-1] * q;
-
-  for(int i=0;i<n*n;i++){
-    lattice[i].baseq = 0;
-    for(int j=0;j<f;j++) lattice[i].baseq = lattice[i].baseq + base[j] * lattice[i].feat[j];
-  }
-
-  free(base);
   return 0;
 
 }
