@@ -15,62 +15,154 @@ int vertexInit(vertex* graph, int idx, int nEdges, int nRewire){
 
 /* vertexAssignNumberEdges() se encarga de decir cuantas conexiones
 corresponden al vertice idx, dependiendo de si inicialmente el mismo
-se encuentra en una punta, un borde o el interior del grafo */
+se encuentra en una punta, un borde o el interior del grafo, con neigOrd
+poniendo conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos*/
 
-int vertexAssignNumberEdges(int idx, int n, int nEdges){
+int vertexAssignNumberEdges(int idx, int n, int neigOrd){
   int i = idx/n;
   int j = idx%n;
-  int puntas = 2;
-  int bordes = 3;
-  int interior = nEdges;
+  int puntas;
+  int bordes;
+  int interior;
+  if(neigOrd == 1){
+   puntas = 2;
+   bordes = 3;
+   interior = 4;
+  }
+  else if(neigOrd == 2){
+   puntas = 3;
+   bordes = 5;
+   interior = 8;
+  }
   if( (i == 0 || i == n-1) && (j == 0 || j == n-1) ) return puntas;
   else if( i == 0 || i == n-1 || j == 0 || j == n-1 ) return bordes;
   else return interior;
 }
 
 /* vertexFillEdges() llena el vector de conexiones del vertice, en funcion
-de la topologia que se programe */
+de la topologia que se programe , con neigOrd poniendo conexiones a
+neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 
-int vertexFillEdges(int* edges, int n, int idx){
+int vertexFillEdges(int* edges, int n, int idx, int neigOrd){
 
   int i = idx/n;
   int j = idx%n;
 
-  if(i == 0){
-    if(j == 0){
-      edges[0] = idx + 1;
-      edges[1] = idx + n;
+  if(neigOrd == 1){
+    if(i == 0){
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx + n;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx + n;
+      }
+      else{
+        edges[0] = idx - 1;
+        edges[1] = idx + 1;
+        edges[2] = idx + n;
+      }
     }
-    else if (j == n-1){
-      edges[0] = idx - 1;
-      edges[1] = idx + n;
+    else if(i == n-1){
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx - n;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx - n;
+      }
+      else{
+        edges[0] = idx - 1;
+        edges[1] = idx + 1;
+        edges[2] = idx - n;
+      }
     }
     else{
-      edges[0] = idx - 1;
-      edges[1] = idx + 1;
-      edges[2] = idx + n;
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx - n;
+        edges[2] = idx + n;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx - n;
+        edges[2] = idx + n;
+      }
+      else{
+        edges[0] = idx - n;
+        edges[1] = idx - 1;
+        edges[2] = idx + 1;
+        edges[3] = idx + n;
+      }
     }
   }
-  else if(i == n-1){
-    if(j == 0){
-      edges[0] = idx + 1;
-      edges[1] = idx - n;
+  else if(neigOrd == 2){
+    if(i == 0){
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx + n;
+        edges[2] = idx + n + 1;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx + n;
+        edges[2] = idx + n - 1;
+      }
+      else{
+        edges[0] = idx - 1;
+        edges[1] = idx + 1;
+        edges[2] = idx + n;
+        edges[3] = idx + n - 1;
+        edges[4] = idx + n + 1;
+      }
     }
-    else if (j == n-1){
-      edges[0] = idx - 1;
-      edges[1] = idx - n;
+    else if(i == n-1){
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx - n;
+        edges[2] = idx - n + 1;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx - n;
+        edges[2] = idx - n - 1;
+      }
+      else{
+        edges[0] = idx - 1;
+        edges[1] = idx + 1;
+        edges[2] = idx - n;
+        edges[3] = idx - n + 1;
+        edges[4] = idx - n - 1;
+      }
     }
     else{
-      edges[0] = idx - 1;
-      edges[1] = idx + 1;
-      edges[2] = idx - n;
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx - n;
+        edges[2] = idx + n;
+        edges[3] = idx - n + 1;
+        edges[4] = idx + n + 1;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx - n;
+        edges[2] = idx + n;
+        edges[3] = idx - n - 1;
+        edges[4] = idx + n -1;
+      }
+      else{
+        edges[0] = idx - n;
+        edges[1] = idx - 1;
+        edges[2] = idx + 1;
+        edges[3] = idx + n;
+        edges[4] = idx - n + 1;
+        edges[5] = idx - n - 1;
+        edges[6] = idx + n + 1;
+        edges[7] = idx + n - 1;
+      }
     }
-  }
-  else{
-    edges[0] = idx - n;
-    edges[1] = idx - 1;
-    edges[2] = idx + 1;
-    edges[3] = idx + n;
   }
   return 0;
 }
@@ -101,13 +193,14 @@ int vertexEdgesAdd(vertex* graph, int idx, int edgeVal){
 }
 
 /* graphInit() inicializa todos los atributos de cada uno de los vertices del
-grafo vertex* graph */
+grafo vertex* graph, con neigOrd poniendo conexiones a neigOrd = 1 (1eros)
+o neigOrd = 2 (2dos) vecinos */
 
-int graphInit(vertex* graph, int n, int nEdges, int nRewire){
+int graphInit(vertex* graph, int n, int nRewire, int neigOrd){
 
   int nEdgesReal;
   for(int idx = 0; idx < n*n ; idx++){
-    nEdgesReal = vertexAssignNumberEdges(idx, n, nEdges);
+    nEdgesReal = vertexAssignNumberEdges(idx, n, neigOrd);
     vertexInit(graph, idx, nEdgesReal, nRewire);
   }
 
@@ -115,11 +208,12 @@ int graphInit(vertex* graph, int n, int nEdges, int nRewire){
 }
 
 /* graphFill() se encarga de llenar el vector de conexiones y EL REWIRE para
-cada uno de los vertices contenidos en el grafo */
+cada uno de los vertices contenidos en el grafo, con neigOrd poniendo
+conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 
-int graphFill(vertex* graph, int n){
+int graphFill(vertex* graph, int n, int neigOrd){
   for(int idx = 0; idx < n*n ; idx++){
-    vertexFillEdges(graph[idx].edges, n, idx);
+    vertexFillEdges(graph[idx].edges, n, idx, neigOrd);
     //FALTA LLENAR REWIRE
   }
   return 0;

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "graph.h"
+#include "agent.h"
 #include "axelrod.h"
 
 int main(){
@@ -13,8 +14,9 @@ int main(){
   int nEdges = 4;
   int nRewire = 0;
   int idx = 4;
-  graphInit(graph, n, nEdges, nRewire);
-  graphFill(graph, n);
+  int neigOrd = 2;
+  graphInit(graph, n, nRewire, neigOrd);
+  graphFill(graph, n, neigOrd);
   graphEdgesPrint(graph, n);
   printf("El vecino al azar del agente %d es %d\n", idx, pickPassive(graph,idx));
   graphFree(graph,n);
