@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "graph.h"
 
-int vertexCreate(vertex* graph, int idx, int nEdges, int nRewire){
+int vertexInit(vertex* graph, int idx, int nEdges, int nRewire){
   graph[idx].nEdges = nEdges;
   graph[idx].edges = (int*) malloc(nEdges*sizeof(int));
   graph[idx].nRewire = nRewire;
@@ -10,16 +10,15 @@ int vertexCreate(vertex* graph, int idx, int nEdges, int nRewire){
   return 0;
 }
 
-int graphFill(vertex* graph, int n, int nEdges, int nRewire){
-
-  int nEdgesReal;
-  for(int idx = 0; idx < n*n ; idx++){
-    nEdgesReal = vertexAssignNumberEdges(idx, n, nEdges);
-    vertexCreate(graph, idx, nEdgesReal, nRewire);
-    vertexFillEdges(graph[idx].edges, n, idx);
-  }
-
-  return 0;
+int vertexAssignNumberEdges(int idx, int n, int nEdges){
+  int i = idx/n;
+  int j = idx%n;
+  int puntas = 2;
+  int bordes = 3;
+  int interior = nEdges;
+  if( (i == 0 || i == n-1) && (j == 0 || j == n-1) ) return puntas;
+  else if( i == 0 || i == n-1 || j == 0 || j == n-1 ) return bordes;
+  else return interior;
 }
 
 int vertexFillEdges(int* edges, int n, int idx){
@@ -53,7 +52,7 @@ int vertexFillEdges(int* edges, int n, int idx){
     else{
       edges[0] = idx - 1;
       edges[1] = idx + 1;
-      edges[2] = idx + n;
+      edges[2] = idx - n;
     }
   }
   else{
@@ -65,23 +64,7 @@ int vertexFillEdges(int* edges, int n, int idx){
   return 0;
 }
 
-int vertexAssignNumberEdges(int idx, int n, int nEdges){
-  int i = idx/n;
-  int j = idx%n;
-  int puntas = 2;
-  int bordes = 3;
-  int interior = nEdges;
-  if( (i == 0 || i == n-1) && (j == 0 || j == n-1) ) return puntas;
-  else if( i == 0 || i == n-1 || j == 0 || j == n-1 ) return bordes;
-  else return interior;
-}
-
-int graphFree(vertex* graph, int n){
-  for(int i = 0; i < n*n; i++){
-    free(graph[i].edges);
-    free(graph[i].rewire);
-  }
-  free(graph);
+int vertexFillRewire(int* rewire, int n, int idx){
   return 0;
 }
 
@@ -93,7 +76,39 @@ int vertexEdgesPrint(vertex* graph, int n, int idx){
   return 0;
 }
 
+int vertexEdgesAdd(vertex* graph, int idx, int edgeVal){
+  return 0;
+}
+
+int graphInit(vertex* graph, int n, int nEdges, int nRewire){
+
+  int nEdgesReal;
+  for(int idx = 0; idx < n*n ; idx++){
+    nEdgesReal = vertexAssignNumberEdges(idx, n, nEdges);
+    vertexInit(graph, idx, nEdgesReal, nRewire);
+  }
+
+  return 0;
+}
+
+int graphFill(vertex* graph, int n){
+  for(int idx = 0; idx < n*n ; idx++){
+    vertexFillEdges(graph[idx].edges, n, idx);
+    //FALTA LLENAR REWIRE
+  }
+  return 0;
+}
+
 int graphEdgesPrint(vertex* graph, int n){
   for(int i = 0; i<n*n; i++) vertexEdgesPrint(graph,n,i);
+  return 0;
+}
+
+int graphFree(vertex* graph, int n){
+  for(int i = 0; i < n*n; i++){
+    free(graph[i].edges);
+    free(graph[i].rewire);
+  }
+  free(graph);
   return 0;
 }

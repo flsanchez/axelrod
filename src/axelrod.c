@@ -12,7 +12,7 @@ int step(vertex* graph, agent *lattice, int n){
   int cont = 0;
   float prob;
   k = getRand(n*n); //indice del activo
-  r = pickPassive(graph, k); //indice del pasivo(vecino al azar, CC periodicas)
+  r = pickPassive(graph, k); //indice del pasivo(vecino al azar)
   f = lattice[k].f;
 
   nkr = commonTraits(lattice,k,r);

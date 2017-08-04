@@ -3,7 +3,6 @@
 
 typedef struct vertex
 {
-  //struct agent* agent;//agente del nodo
   int nEdges;  //numero de conexiones
   int* edges;  //lista de adyacencias, con los indices de los vecinos en cada
                //componente
@@ -12,12 +11,14 @@ typedef struct vertex
                //admiten rewire
 } vertex;
 
-int vertexCreate(vertex* graph, int idx, int nEdges, int nRewire);
-int vertexFillEdges(int* edges, int n, int idx);
+int vertexInit(vertex* graph, int idx, int nEdges, int nRewire);
 int vertexAssignNumberEdges(int idx, int n, int nEdges);
+int vertexFillEdges(int* edges, int n, int idx);
+int vertexFillRewire(int* rewire, int n, int idx);
 int vertexEdgesPrint(vertex* graph, int n, int idx);
 int vertexEdgesAdd(vertex* graph, int idx, int edgeVal);
-int graphFill(vertex* graph, int n, int nEdges, int nRewire);
+int graphInit(vertex* graph, int n, int nEdges, int nRewire);
+int graphFill(vertex* graph, int n);
 int graphEdgesPrint(vertex* graph, int n);
 int graphFree(vertex* graph, int n);
 

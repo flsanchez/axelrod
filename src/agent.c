@@ -3,7 +3,7 @@
 #include <time.h>
 #include "agent.h"
 
-int agentCreate(agent *lattice, int idx, int f, int q){
+int agentInit(agent *lattice, int idx, int f, int q){
 
   lattice[idx].f = f;
   lattice[idx].q = q;
@@ -29,16 +29,6 @@ int agentFill(int *feat, int f, int q){
   return 0;
 }
 
-int latticeFill(agent *lattice, int n, int f, int q){
-
-  for(int i=0; i<n*n; i++){
-    agentCreate(lattice, i, f, q);
-    agentFill(lattice[i].feat, lattice[i].f, lattice[i].q);
-  }
-
-  return 0;
-}
-
 int agentPrint(agent *lattice, int n, int idx){
 
   printf("Agent N. %d:\n",idx);
@@ -48,6 +38,22 @@ int agentPrint(agent *lattice, int n, int idx){
 
   return 0;
 
+}
+
+int latticeInit(agent *lattice, int n, int f, int q){
+
+  for(int i=0; i<n*n; i++) agentInit(lattice, i, f, q);
+
+  return 0;
+}
+
+int latticeFill(agent *lattice, int n){
+
+  for(int i=0; i<n*n; i++){
+    agentFill(lattice[i].feat, lattice[i].f, lattice[i].q);
+  }
+
+  return 0;
 }
 
 int latticeBaseq(agent *lattice, int n){

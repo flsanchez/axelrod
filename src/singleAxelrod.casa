@@ -1,24 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "axelrod.h"
 #include "agent.h"
+#include "graph.h"
+#include "axelrod.h"
+
 
 int main(){
 
   int n = 50;
   int f = 10;
   int q = 5;
-  int niter = n*n*n*1000;
-  int paso = 200000;
+  int nEdges = 4;
+  int nRewire = 0;
+  int niter = n*n*60000;
+  int paso = niter/100;
   FILE *fs;
   char name[100];
 
   srand(time(NULL));
 
   agent *lattice = (agent*) malloc(n * n * sizeof(agent));
+  vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
 
   latticeFill(lattice, n, f, q);
+  graphFill(graph, n, nEdges, nRewire);
 
   for(int i=0;i<niter;i++){
 
@@ -30,12 +36,14 @@ int main(){
       latticePrintToFile(lattice,n,fs);
       fclose(fs);
     }
+    // printf("Paso: %d\n",i);
 
-    step(lattice,n);
+    step(graph,lattice,n);
 
   }
 
-  freeAll(lattice, n);
+  latticeFree(lattice, n);
+  graphFree(graph, n);
 
   return 0;
 }

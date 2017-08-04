@@ -7,3 +7,5 @@ do
 	rm *.png
 	rm *.txt
 done
+cd result/
+ffmpeg -framerate 24 -i joinres%d.png final.mp4

@@ -10,10 +10,11 @@ typedef struct agent
   int baseq;  //codificacion unica del estado, en base q
 } agent;
 
-int agentCreate(agent *lattice, int idx, int f, int q);
+int agentInit(agent *lattice, int idx, int f, int q);
 int agentFill(int *feat, int f, int q);
 int agentPrint(agent *agent, int n, int idx);
-int latticeFill(agent *lattice, int n, int f, int q);
+int latticeInit(agent *lattice, int n, int f, int q);
+int latticeFill(agent *lattice, int n);
 int latticeBaseq(agent *lattice, int n);
 int latticePrintLinks(agent *lattice, int n); //
 int latticePrintToFile(agent *lattice, int n, FILE *fs); //
