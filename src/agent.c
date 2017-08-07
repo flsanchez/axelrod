@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "misc.h"
 #include "agent.h"
 
 int agentInit(agent *lattice, int idx, int f, int q){

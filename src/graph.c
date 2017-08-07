@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "misc.h"
 #include "graph.h"
 
 /* vertexInit() inicializa los atributos del vertice idx y aloca la memoria
@@ -8,17 +9,20 @@ correspondiente */
 int vertexInit(vertex* graph, int idx, int nEdges, int nRewire){
   graph[idx].nEdges = nEdges;
   graph[idx].edges = (int*) malloc(nEdges*sizeof(int));
-  graph[idx].nRewire = nRewire;
+
+  if(nRewire>nEdges) graph[idx].nRewire = nEdges;
+  else graph[idx].nRewire = nRewire;
+
   graph[idx].rewire = (int*) malloc(nRewire*sizeof(int));
   return 0;
 }
 
-/* vertexAssignNumberEdges() se encarga de decir cuantas conexiones
+/* vertexEdgesAssignNumber() se encarga de decir cuantas conexiones
 corresponden al vertice idx, dependiendo de si inicialmente el mismo
 se encuentra en una punta, un borde o el interior del grafo, con neigOrd
 poniendo conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos*/
 
-int vertexAssignNumberEdges(int idx, int n, int neigOrd){
+int vertexEdgesAssignNumber(int idx, int n, int neigOrd){
   int i = idx/n;
   int j = idx%n;
   int puntas;
@@ -39,11 +43,11 @@ int vertexAssignNumberEdges(int idx, int n, int neigOrd){
   else return interior;
 }
 
-/* vertexFillEdges() llena el vector de conexiones del vertice, en funcion
+/* vertexEdgesFill() llena el vector de conexiones del vertice, en funcion
 de la topologia que se programe , con neigOrd poniendo conexiones a
 neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 
-int vertexFillEdges(int* edges, int n, int idx, int neigOrd){
+int vertexEdgesFill(int* edges, int n, int idx, int neigOrd){
 
   int i = idx/n;
   int j = idx%n;
@@ -167,29 +171,101 @@ int vertexFillEdges(int* edges, int n, int idx, int neigOrd){
   return 0;
 }
 
-/* vertexFillRewire() llena el vector de rewire dependiendo de cuantas
+/* vertexRewireFill() llena el vector de rewire dependiendo de cuantas
 conexiones aleatorias se hayan determinado */
 
-int vertexFillRewire(int* rewire, int n, int idx){
+int vertexRewireFill(vertex* graph, int idx){
+
+  int* shuffled = (int*) malloc(sizeof(int)*graph[idx].nEdges);
+  for(int i = 0; i<graph[idx].nEdges; i++) shuffled[i] = graph[idx].edges[i];
+  shuffleArray(shuffled,graph[idx].nEdges);
+  for(int i = 0; i<graph[idx].nRewire; i++) graph[idx].rewire[i] = shuffled[i];
+  free(shuffled);
+
   return 0;
 }
 
 /* vertexEdgesPrint() imprime todas las conexiones del vertice idx */
 
-int vertexEdgesPrint(vertex* graph, int n, int idx){
+int vertexEdgesPrint(vertex* graph, int idx){
+
   int nEdges = graph[idx].nEdges;
   printf("Vertex N. %d:\nEdges: [ ",idx);
   for(int i = 0; i<nEdges; i++) printf("%d ", graph[idx].edges[i]);
   printf("]\n");
   return 0;
+
+}
+
+/* vertexRewirePrint() imprime todas los rewire del vertice idx */
+
+int vertexRewirePrint(vertex* graph, int idx){
+
+  int nRewire = graph[idx].nRewire;
+  printf("Vertex N. %d:\nRewire: [ ",idx);
+  for(int i = 0; i<nRewire; i++) printf("%d ", graph[idx].rewire[i]);
+  printf("]\n");
+  return 0;
+
+}
+
+/* vertexIsConnected() devuelve 1 o 0 dependiendo de si el vertice src
+esta o no conectado al vertice dest respectivamente */
+
+int vertexIsConnected(vertex* graph, int src, int dest){
+
+  for(int i = 0; i<graph[src].nEdges; i++){
+    if(graph[src].edges[i] == dest) return 1;
+  }
+
+  return 0;
 }
 
 /* vertexEdgesAdd() añade un elemento a la lista de edges del vertice
 realocando la memoria en el medio y cambiando el atributo del numero de
-conexiones */
+conexiones en los vertices src y dest, (NO CHEQUEA SI HAY CONEXION)*/
 
-int vertexEdgesAdd(vertex* graph, int idx, int edgeVal){
+int vertexEdgesAdd(vertex* graph, int src, int dest){
+
+  /*int* newEdges = (int*) malloc( sizeof(int) * (graph[src].nEdges+1) );
+  for(int i = 0; i<graph[src].nEdges; i++) newEdges[i] = graph[src].edges[i];
+  newEdges[graph[src].nEdges] = dest;
+  graph[src].nEdges++;
+  free(graph[src].edges);
+  graph[src].edges = newEdges;*/
+
+  graph[src].edges = (int*) realloc(graph[src].edges,sizeof(int)*(graph[src].nEdges+1));
+  graph[src].edges[graph[src].nEdges] = dest;
+  graph[src].nEdges++;
+
   return 0;
+}
+
+/* vertexEdgesRm() remueve la conexion dest del vector de conexiones del
+vertice src */
+
+int vertexEdgesRm(vertex* graph, int src, int dest){
+
+  int i = 0;
+  int swap, aux;
+  int idx = -1;
+  //busco el indice de dest dentro de la lista de conexiones de graph[src] y
+  //hago un swap entre dest y el ultimo elemento
+  while(idx == -1){
+    if(graph[src].edges[i] == dest) {
+      idx = i;
+      aux = graph[src].edges[idx];
+      graph[src].edges[idx] = graph[src].edges[graph[src].nEdges-1];
+      graph[src].edges[graph[src].nEdges-1] = aux;
+    }
+    else i++;
+  }
+
+  graph[src].edges = (int*) realloc(graph[src].edges,sizeof(int)*(graph[src].nEdges-1));
+  graph[src].nEdges--;
+
+  return 0;
+
 }
 
 /* graphInit() inicializa todos los atributos de cada uno de los vertices del
@@ -200,7 +276,7 @@ int graphInit(vertex* graph, int n, int nRewire, int neigOrd){
 
   int nEdgesReal;
   for(int idx = 0; idx < n*n ; idx++){
-    nEdgesReal = vertexAssignNumberEdges(idx, n, neigOrd);
+    nEdgesReal = vertexEdgesAssignNumber(idx, n, neigOrd);
     vertexInit(graph, idx, nEdgesReal, nRewire);
   }
 
@@ -213,17 +289,52 @@ conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 
 int graphFill(vertex* graph, int n, int neigOrd){
   for(int idx = 0; idx < n*n ; idx++){
-    vertexFillEdges(graph[idx].edges, n, idx, neigOrd);
-    //FALTA LLENAR REWIRE
+    vertexEdgesFill(graph[idx].edges, n, idx, neigOrd);
+    vertexRewireFill(graph, idx);
   }
   return 0;
+}
+
+/* graphEdgesAdd() añade el elemento conecta los vertices src y dest
+(pues grafo undirected) */
+
+int graphEdgesAdd(vertex* graph, int src, int dest){
+
+  if(vertexIsConnected(graph,src,dest) == 0 && (src != dest)){
+    vertexEdgesAdd(graph, src, dest);
+    vertexEdgesAdd(graph, dest, src);
+  }
+
+  return 0;
+
+}
+
+/* graphEdgesRm() elimina la conexion entre src y dest en caso de existir */
+
+int graphEdgesRm(vertex* graph, int src, int dest){
+
+  if(vertexIsConnected(graph,src,dest) == 1 && (src != dest)){
+    vertexEdgesRm(graph, src, dest);
+    vertexEdgesRm(graph, dest, src);
+  }
+
+  return 0;
+
 }
 
 /* graphEdgesPrint() imprime el vector de conexiones para cada uno de los
 vertices */
 
 int graphEdgesPrint(vertex* graph, int n){
-  for(int i = 0; i<n*n; i++) vertexEdgesPrint(graph,n,i);
+  for(int i = 0; i<n*n; i++) vertexEdgesPrint(graph,i);
+  return 0;
+}
+
+/* graphRewirePrint() imprime el vector de rewire para cada uno de los
+vertices */
+
+int graphRewirePrint(vertex* graph, int n){
+  for(int i = 0; i<n*n; i++) vertexRewirePrint(graph,i);
   return 0;
 }
 

@@ -3,21 +3,25 @@
 #include <time.h>
 #include "graph.h"
 #include "agent.h"
+#include "misc.h"
 #include "axelrod.h"
 
 int main(){
 
   srand(time(NULL));
 
-  int n = 3;
+  int n = 4;
   vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
-  int nEdges = 4;
-  int nRewire = 0;
-  int idx = 4;
+  int nRewire = 1;
+  int t = time(NULL);
+  int idx = 10;
   int neigOrd = 2;
   graphInit(graph, n, nRewire, neigOrd);
   graphFill(graph, n, neigOrd);
-  graphEdgesPrint(graph, n);
-  printf("El vecino al azar del agente %d es %d\n", idx, pickPassive(graph,idx));
+
+  graphRewirePrint(graph,n);
+
+  t = time(NULL)-t;
+  printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
   graphFree(graph,n);
 }

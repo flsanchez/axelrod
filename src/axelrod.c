@@ -3,6 +3,7 @@
 #include <time.h>
 #include "agent.h"
 #include "graph.h"
+#include "misc.h"
 #include "axelrod.h"
 
 int step(vertex* graph, agent *lattice, int n){
@@ -35,14 +36,6 @@ int step(vertex* graph, agent *lattice, int n){
   }
 
   return 0;
-
-}
-
-int getRand(int max){
-
-  int res = max;
-  while(res == max) res = (int) (max * ((float) rand() / (float) RAND_MAX));
-  return res;
 
 }
 

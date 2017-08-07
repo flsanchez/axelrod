@@ -7,21 +7,24 @@ typedef struct vertex
   int* edges;  //lista de adyacencias, con los indices de los vecinos en cada
                //componente
   int nRewire; //numero de conexiones que admiten rewire
-  int *rewire; //vector de rewire, contiene los indices del vector de edges que
-               //admiten rewire
+  int *rewire; //vector de rewire, contiene los edges que admiten rewire
 } vertex;
 
 int vertexInit(vertex* graph, int idx, int nEdges, int nRewire);
-int vertexAssignNumberEdges(int idx, int n, int neigOrd);
-int vertexFillEdges(int* edges, int n, int idx, int neigOrd);
-int vertexFillRewire(int* rewire, int n, int idx);
-int vertexEdgesPrint(vertex* graph, int n, int idx);
-int vertexEdgesAdd(vertex* graph, int idx, int edgeVal);
+int vertexEdgesAssignNumber(int idx, int n, int neigOrd);
+int vertexEdgesFill(int* edges, int n, int idx, int neigOrd);
+int vertexRewireFill(vertex* graph, int idx);
+int vertexEdgesPrint(vertex* graph, int idx);
+int vertexRewirePrint(vertex* graph, int idx);
+int vertexIsConnected(vertex* graph, int src, int dest);
+int vertexEdgesAdd(vertex* graph, int src, int dest);
+int vertexEdgesRm(vertex* graph, int src, int dest);
 int graphInit(vertex* graph, int n, int nRewire, int neigOrd);
 int graphFill(vertex* graph, int n, int neigOrd);
+int graphEdgesAdd(vertex* graph, int src, int dest);
+int graphEdgesRm(vertex* graph, int src, int dest);
 int graphEdgesPrint(vertex* graph, int n);
+int graphRewirePrint(vertex* graph, int n);
 int graphFree(vertex* graph, int n);
-
-
 
 #endif
