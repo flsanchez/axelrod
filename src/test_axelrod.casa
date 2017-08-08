@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "agent.h"
+#include "graph.h"
+#include "label.h"
+#include "misc.h"
+#include "axelrod.h"
+
+
+int main(){
+
+  int n = 50;
+  int f = 10;
+  int q = 400;
+  int neigOrd = 2;
+  int nRewire = 1;
+  int niter = 30E6;
+  int paso = niter/100;
+  int frag,max;
+  FILE *fs;
+  char name[100];
+  int num = 100;
+
+  srand(time(NULL));
+
+  agent *lattice = (agent*) malloc(n * n * sizeof(agent));
+//  vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+
+  latticeInit(lattice, n, f, q);
+  int i,stop;
+
+  for(int j=0; j<num; j++){
+    latticeFill(lattice, n, q);
+    vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+    graphInit(graph, n, nRewire, neigOrd);
+    graphFill(graph, n, neigOrd);
+    printf("Repe %d\n",j);
+    i = 0;
+    stop = 0;
+    while(stop == 0){// && i<niter) {
+      step(graph,lattice,n);
+      // if(i%paso == 0){
+      //   printf("Repe %d;Paso N %d\n",j,i);
+      // }
+      stop = stopReached(graph, lattice, n);
+      i++;
+    }
+    printf("Terminado en %d pasos\n", i-1);
+
+
+    graphFree(graph, n);
+
+  }
+
+  latticeFree(lattice, n);
+
+  return 0;
+}

@@ -16,7 +16,8 @@ int vertexEdgesFill(int* edges, int n, int idx, int neigOrd);
 int vertexRewireFill(vertex* graph, int idx);
 int vertexEdgesPrint(vertex* graph, int idx);
 int vertexRewirePrint(vertex* graph, int idx);
-int vertexIsConnected(vertex* graph, int src, int dest);
+int vertexEdgeIsConnected(vertex* graph, int src, int dest);
+int vertexRewireIsConnected(vertex* graph, int src, int dest);
 int vertexEdgesAdd(vertex* graph, int src, int dest);
 int vertexEdgesRm(vertex* graph, int src, int dest);
 int graphInit(vertex* graph, int n, int nRewire, int neigOrd);
@@ -24,6 +25,7 @@ int graphFill(vertex* graph, int n, int neigOrd);
 int graphEdgesAdd(vertex* graph, int src, int dest);
 int graphEdgesRm(vertex* graph, int src, int dest);
 int graphEdgesPrint(vertex* graph, int n);
+//int graphRewire(vertex* graph, int src, int dest);
 int graphRewirePrint(vertex* graph, int n);
 int graphFree(vertex* graph, int n);
 

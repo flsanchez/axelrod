@@ -6,23 +6,50 @@
 #include "misc.h"
 #include "axelrod.h"
 
+/* step() es la funcion encargada de realizar el paso tempora de axelrod */
+
 int step(vertex* graph, agent *lattice, int n){
 
   int i, j, hij;
   i = getRand(n*n); //indice del activo
-  j = pickPassiveNeigh(graph, i); //indice del pasivo(vecino al azar)
+  j = pickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
   hij = commonTraits(lattice, i, j);
 
-  opinionInteraction(lattice, i, j, hij);
+  if(vertexRewireIsConnected(graph, i, j)){
+
+    int k = pickPassiveNotNeig(graph, n, i);
+    int hik = commonTraits(lattice, i, k);
+
+    if(hij < hik) socialInteraction(graph, i, j, k);
+    else opinionInteraction(lattice, i, j, hij);
+
+  }
+  else opinionInteraction(lattice, i, j, hij);
 
   return 0;
 
 }
 
-int pickPassiveNeigh(vertex* graph, int k){
-  int idx = getRand(graph[k].nEdges);
-  return graph[k].edges[idx];
+/* pickPassiveNeig() agarra un vecino al azar del agente i, usando la lista de
+conexiones */
+
+int pickPassiveNeig(vertex* graph, int i){
+  int idx = getRand(graph[i].nEdges);
+  return graph[i].edges[idx];
 }
+
+/* pickPassiveNotNeig() agarra un NO vecino al azar del agente i */
+
+int pickPassiveNotNeig(vertex* graph, int n, int i){
+  int idx = getRand(n*n);
+  while(vertexEdgeIsConnected(graph,i,idx) ||
+  vertexRewireIsConnected(graph,idx,i) || idx == i){
+    idx = getRand(n*n);
+  }
+  return idx;
+}
+
+/* maxCluster() devuelve el tamanio del cluster mas grande */
 
 int maxCluster(agent *lattice, int n, int frag){
 
@@ -47,6 +74,8 @@ int maxCluster(agent *lattice, int n, int frag){
 
 }
 
+/* clusterSize() hace la distribucion de fragmentos sobre la red labeleada*/
+
 int clusterSize(agent *lattice, int n, int frag, int *fragsz, int *ns){
 
 	for(int i=0 ; i<n*n; i++) fragsz[lattice[i].label]++;
@@ -57,6 +86,9 @@ int clusterSize(agent *lattice, int n, int frag, int *fragsz, int *ns){
   return 0;
 
 }
+
+/* opinionInteraction() realiza el intercambio de opiniones entre los agentes
+i y j con homofilia hij */
 
 int opinionInteraction(agent* lattice, int i, int j, int hij){
 
@@ -85,4 +117,26 @@ int opinionInteraction(agent* lattice, int i, int j, int hij){
   }
 
   return 0;
+}
+/* socialInteraction() hace el rewire de i/j -> i/k, modificando
+el rewire de i */
+int socialInteraction(vertex* graph, int i, int j, int k){
+  graphEdgesRm(graph, i, j); // desconecto la conexion entre i y j para los dos
+  graphEdgesAdd(graph, i, k); // conecto i y k en ambos agentes
+  graph[i].rewire[0] = k; // cambio el rewiring del agente i al k
+  return 0;
+}
+
+/* stopReached() devuelve 0 o 1 si hay o no transiciones disponibles
+respectivamente (si no hay, la interaccion es terminada) */
+
+int stopReached(vertex* graph, agent* lattice, int n){
+  for(int idx = 0; idx < n*n; idx++){
+    for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
+      if(commonTraits(lattice,idx,graph[idx].edges[edgesIdx])!=lattice[idx].f){
+        return 0;
+      }
+    }
+  }
+  return 1;
 }

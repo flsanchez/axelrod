@@ -37,11 +37,12 @@ for files in ls:
 		maxval=q**f-1
 	
 		fig = pyplot.figure(1)
-		data = np.loadtxt(files)
+		data = np.loadtxt(files,dtype=np.uint64)
+		data = data/np.max(data)
 
 		img2 = pyplot.imshow(data,interpolation='nearest',
 						            cmap = cm,
-						            origin='upper',vmin=0,vmax=maxval)
+						            origin='upper',vmin=0,vmax=1)
 
 		pyplot.colorbar(img2,cmap = cm)
 		fig.suptitle("q = " + str(q) +"; tiempo = " +str(name))

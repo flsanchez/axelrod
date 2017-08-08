@@ -48,9 +48,10 @@ int latticeInit(agent *lattice, int n, int f, int q){
   return 0;
 }
 
-int latticeFill(agent *lattice, int n){
+int latticeFill(agent *lattice, int n, int q){
 
   for(int i=0; i<n*n; i++){
+    lattice[i].q = q;
     agentFill(lattice[i].feat, lattice[i].f, lattice[i].q);
   }
 
@@ -113,7 +114,7 @@ int latticePrintToFile(agent *lattice, int n, FILE *fs){
 
     for(int i=0;i<n;i++){
       for(int j=0;j<n;j++){
-        fprintf(fs,"%d",lattice[i*n+j].baseq);
+        fprintf(fs,"%llu",lattice[i*n+j].baseq);
         fprintf(fs," ");
       }
       fprintf(fs,"\n");
@@ -124,7 +125,7 @@ int latticePrintToFile(agent *lattice, int n, FILE *fs){
 
     for(int i=0;i<n;i++){
       for(int j=0;j<n;j++){
-        printf("%d",lattice[i*n+j].baseq);
+        printf("%llu",lattice[i*n+j].baseq);
         printf(" ");
       }
       printf("\n");
@@ -149,12 +150,14 @@ int latticePrintLabels(agent *lattice, int n){
 
 }
 
-int commonTraits(agent *lattice, int k, int r){
+int commonTraits(agent *lattice, int i, int j){
 
-  int f = lattice[k].f;
+  int f = lattice[i].f;
   int res = 0;
 
-  for(int i=0; i < f; i++) if(lattice[k].feat[i] == lattice[r].feat[i]) res++;
+  for(int idx=0; idx < f; idx++){
+    if(lattice[i].feat[idx] == lattice[j].feat[idx]) res++;
+  }
 
   return res;
 

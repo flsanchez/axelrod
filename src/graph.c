@@ -255,13 +255,25 @@ int vertexRewirePrint(vertex* graph, int idx){
 
 }
 
-/* vertexIsConnected() devuelve 1 o 0 dependiendo de si el vertice src
+/* vertexEdgeIsConnected() devuelve 1 o 0 dependiendo de si el vertice src
 esta o no conectado al vertice dest respectivamente */
 
-int vertexIsConnected(vertex* graph, int src, int dest){
+int vertexEdgeIsConnected(vertex* graph, int src, int dest){
 
   for(int i = 0; i<graph[src].nEdges; i++){
     if(graph[src].edges[i] == dest) return 1;
+  }
+
+  return 0;
+}
+
+/* vertexRewireIsConnected() chequea si src tiene a dest como rewire
+OJO: IMPORTA ORDEN! */
+
+int vertexRewireIsConnected(vertex* graph, int src, int dest){
+
+  for(int i = 0; i<graph[src].nRewire; i++){
+    if(graph[src].rewire[i] == dest) return 1;
   }
 
   return 0;
@@ -355,7 +367,7 @@ int graphFill(vertex* graph, int n, int neigOrd){
 
 int graphEdgesAdd(vertex* graph, int src, int dest){
 
-  if(vertexIsConnected(graph,src,dest) == 0 && (src != dest)){
+  if(vertexEdgeIsConnected(graph,src,dest) == 0 && (src != dest)){
     vertexEdgesAdd(graph, src, dest);
     vertexEdgesAdd(graph, dest, src);
   }
@@ -368,7 +380,7 @@ int graphEdgesAdd(vertex* graph, int src, int dest){
 
 int graphEdgesRm(vertex* graph, int src, int dest){
 
-  if(vertexIsConnected(graph,src,dest) == 1 && (src != dest)){
+  if(vertexEdgeIsConnected(graph,src,dest) == 1 && (src != dest)){
     vertexEdgesRm(graph, src, dest);
     vertexEdgesRm(graph, dest, src);
   }
