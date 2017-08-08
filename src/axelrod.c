@@ -8,38 +8,18 @@
 
 int step(vertex* graph, agent *lattice, int n){
 
-  int k,r,nkr,f, uncomTrait;
-  int uncomIdx = -1;
-  int cont = 0;
-  float prob;
-  k = getRand(n*n); //indice del activo
-  r = pickPassive(graph, k); //indice del pasivo(vecino al azar)
-  f = lattice[k].f;
+  int i, j, hij;
+  i = getRand(n*n); //indice del activo
+  j = pickPassiveNeigh(graph, i); //indice del pasivo(vecino al azar)
+  hij = commonTraits(lattice, i, j);
 
-  nkr = commonTraits(lattice,k,r);
-  prob = (float) nkr / f;
-
-  if( ((float) rand() / (float) RAND_MAX) < prob){
-
-    if(nkr != f){
-
-      uncomTrait = getRand(f-nkr) + 1;
-      while(cont != uncomTrait){
-        uncomIdx++;
-        if(lattice[k].feat[uncomIdx] != lattice[r].feat[uncomIdx]) cont++;
-      }
-
-      lattice[k].feat[uncomIdx] = lattice[r].feat[uncomIdx];
-
-    }
-
-  }
+  opinionInteraction(lattice, i, j, hij);
 
   return 0;
 
 }
 
-int pickPassive(vertex* graph, int k){
+int pickPassiveNeigh(vertex* graph, int k){
   int idx = getRand(graph[k].nEdges);
   return graph[k].edges[idx];
 }
@@ -76,4 +56,33 @@ int clusterSize(agent *lattice, int n, int frag, int *fragsz, int *ns){
 
   return 0;
 
+}
+
+int opinionInteraction(agent* lattice, int i, int j, int hij){
+
+  int uncomTrait, f;
+  float prob;
+  f = lattice[i].f;
+
+  prob = (float) hij / f;
+
+  if( ((float) rand() / (float) RAND_MAX) < prob){
+
+    if(hij != f){
+
+      int cont = 0;
+      int uncomIdx = -1;
+      uncomTrait = getRand(f-hij) + 1;
+      while(cont != uncomTrait){
+        uncomIdx++;
+        if(lattice[i].feat[uncomIdx] != lattice[j].feat[uncomIdx]) cont++;
+      }
+
+      lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+
+    }
+
+  }
+
+  return 0;
 }

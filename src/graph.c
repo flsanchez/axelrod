@@ -172,17 +172,63 @@ int vertexEdgesFill(int* edges, int n, int idx, int neigOrd){
 }
 
 /* vertexRewireFill() llena el vector de rewire dependiendo de cuantas
-conexiones aleatorias se hayan determinado */
+conexiones aleatorias se hayan determinado, y ademas teniendo en cuenta de
+que no haya conexiones mutuas disponibles para el rewire (i.e., evita que
+i tenga a j como rewire y j a i al mismo tiempo). En caso de que no haya
+rewiring posible (porque idx tiene a todos sus vecinos conectados), esta
+funcion devuelve 1 */
 
 int vertexRewireFill(vertex* graph, int idx){
+
+  // armo un array shuffled con los indices de los vecinos de mi agente
+  // y la mezclo con dist de proba uniforme
 
   int* shuffled = (int*) malloc(sizeof(int)*graph[idx].nEdges);
   for(int i = 0; i<graph[idx].nEdges; i++) shuffled[i] = graph[idx].edges[i];
   shuffleArray(shuffled,graph[idx].nEdges);
-  for(int i = 0; i<graph[idx].nRewire; i++) graph[idx].rewire[i] = shuffled[i];
+
+  // este while anidado se encarga de agarrar un vecino de idx para hacer
+  // rewire que no este haciendo rewire previamente
+
+  int cont = 0; // cuenta cuantos elementos hay dentro de graph[idx].rewire
+  int shuffledIdx = 0; // recorre los indices de shuffled
+  int flag,rewIdx,idxj;
+  while(cont < graph[idx].nRewire && shuffledIdx < graph[idx].nEdges){
+    // si el de la lista al azar es mayor a idx, lo guardo directamente pues
+    // el rewire con un indice mayor a idx no trae problemas. Si el de la lista
+    // es menor, tengo que chequear posibles problemas de conexion mutua
+    if(shuffled[shuffledIdx] > idx){
+      graph[idx].rewire[cont] = shuffled[shuffledIdx];
+      cont++;
+    }
+    else{
+      // idxj es el agente j con el que intento poner como rewire de idx
+      idxj = shuffled[shuffledIdx];
+
+      // recorro graph[idxj].rewire para ver si esta conectdo a idx por rewire
+      flag = 0;
+      rewIdx = 0;
+      while(rewIdx < graph[idxj].nRewire && flag == 0){
+        // si hay conexion, rompo el loop y descarto el elemento
+        if(graph[idxj].rewire[rewIdx] == idx) flag = 1;
+        rewIdx++;
+      }
+
+      // si no esta conectado previamente, lo conecto, sino no hago nada
+      if(flag == 0){
+        graph[idx].rewire[cont] = shuffled[shuffledIdx];
+        cont++;
+      }
+
+    }
+
+    shuffledIdx++;
+
+  }
+
   free(shuffled);
 
-  return 0;
+  return shuffledIdx/graph[idx].nEdges;
 }
 
 /* vertexEdgesPrint() imprime todas las conexiones del vertice idx */
@@ -226,13 +272,6 @@ realocando la memoria en el medio y cambiando el atributo del numero de
 conexiones en los vertices src y dest, (NO CHEQUEA SI HAY CONEXION)*/
 
 int vertexEdgesAdd(vertex* graph, int src, int dest){
-
-  /*int* newEdges = (int*) malloc( sizeof(int) * (graph[src].nEdges+1) );
-  for(int i = 0; i<graph[src].nEdges; i++) newEdges[i] = graph[src].edges[i];
-  newEdges[graph[src].nEdges] = dest;
-  graph[src].nEdges++;
-  free(graph[src].edges);
-  graph[src].edges = newEdges;*/
 
   graph[src].edges = (int*) realloc(graph[src].edges,sizeof(int)*(graph[src].nEdges+1));
   graph[src].edges[graph[src].nEdges] = dest;
@@ -288,11 +327,27 @@ cada uno de los vertices contenidos en el grafo, con neigOrd poniendo
 conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 
 int graphFill(vertex* graph, int n, int neigOrd){
+
+  // lleno los edges con los vecinos para cada agente de la red
   for(int idx = 0; idx < n*n ; idx++){
     vertexEdgesFill(graph[idx].edges, n, idx, neigOrd);
-    vertexRewireFill(graph, idx);
   }
-  return 0;
+
+  int control = 0; // flag de control, por si vertexRewireFill sale mal, se
+                   // pone a 1 y se repite el loop de llenado de rewire
+  int idx = 0;
+  int tries = 0;
+  while(idx < n*n){
+    control = vertexRewireFill(graph, idx);
+    idx++;
+    // si control se pone a 1, se arranca de nuevo con el llenado desde el 0
+    if(control == 1){
+      idx = 0;
+      tries++;
+    }
+  }
+
+  return tries;
 }
 
 /* graphEdgesAdd() añade el elemento conecta los vertices src y dest

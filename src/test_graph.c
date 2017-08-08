@@ -10,14 +10,14 @@ int main(){
 
   srand(time(NULL));
 
-  int n = 4;
+  int n = 3;
   vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
-  int nRewire = 1;
+  int nRewire = 2;
   int t = time(NULL);
   int idx = 10;
   int neigOrd = 2;
   graphInit(graph, n, nRewire, neigOrd);
-  graphFill(graph, n, neigOrd);
+  printf("Attempts: %d\n", graphFill(graph, n, neigOrd));
 
   graphRewirePrint(graph,n);
 
