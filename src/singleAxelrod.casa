@@ -11,11 +11,11 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int q = 100;
+  int q = 20;
   int neigOrd = 2;
   int nRewire = 1;
-  int niter = 20E6;
-  int paso = niter/100;
+  int niter = 50E6;
+  int paso = 0.5E6;
   int frag,max;
   FILE *fs;
   char name[100];
@@ -29,8 +29,27 @@ int main(){
   latticeFill(lattice, n, q);
   graphInit(graph, n, nRewire, neigOrd);
   graphFill(graph, n, neigOrd);
+  int i = 0;
+  int stop = 0;
+  int t = time(NULL);
+  while(stop == 0/*i < niter && stop == 0*/){
 
-  for(int i=0;i<niter;i++){
+    if(i%paso==0){
+      //printf("Paso: %d\n",i);
+      stop = stopReached(graph,lattice,n);
+
+      /*frag = latticeLabel(lattice,n);
+      max = maxCluster(lattice,n,frag);
+      //stop = stopReached(graph,lattice,n);
+      printf("%d; stop = %d\n",max,stop);*/
+    }
+    step(graph,lattice,n);
+    i++;
+  }
+  frag = latticeLabel(lattice,n);
+  max = maxCluster(lattice,n,frag);
+  printf("Smax = %d; t = %d\n",max,time(NULL)-t);
+  /*for(int i=0;i<niter;i++){
 
     if(i%paso==0){
       printf("Paso: %d\n",i);
@@ -48,7 +67,7 @@ int main(){
 
     step(graph,lattice,n);
 
-  }
+  }*/
 
   latticeFree(lattice, n);
   graphFree(graph, n);

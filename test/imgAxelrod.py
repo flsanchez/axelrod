@@ -37,7 +37,7 @@ for files in ls:
 		maxval=q**f-1
 	
 		fig = pyplot.figure(1)
-		data = np.loadtxt(files,dtype=np.uint64)
+		data = np.loadtxt(files,dtype=np.float64)
 		data = data/np.max(data)
 
 		img2 = pyplot.imshow(data,interpolation='nearest',

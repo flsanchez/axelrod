@@ -118,8 +118,10 @@ int opinionInteraction(agent* lattice, int i, int j, int hij){
 
   return 0;
 }
+
 /* socialInteraction() hace el rewire de i/j -> i/k, modificando
 el rewire de i */
+
 int socialInteraction(vertex* graph, int i, int j, int k){
   graphEdgesRm(graph, i, j); // desconecto la conexion entre i y j para los dos
   graphEdgesAdd(graph, i, k); // conecto i y k en ambos agentes
@@ -131,9 +133,11 @@ int socialInteraction(vertex* graph, int i, int j, int k){
 respectivamente (si no hay, la interaccion es terminada) */
 
 int stopReached(vertex* graph, agent* lattice, int n){
+  int h;
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
-      if(commonTraits(lattice,idx,graph[idx].edges[edgesIdx])!=lattice[idx].f){
+      h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != lattice[idx].f && h != 0){
         return 0;
       }
     }
