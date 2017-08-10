@@ -42,8 +42,8 @@ int pickPassiveNeig(vertex* graph, int i){
 
 int pickPassiveNotNeig(vertex* graph, int n, int i){
   int idx = getRand(n*n);
-  while(vertexEdgeIsConnected(graph,i,idx) ||
-  vertexRewireIsConnected(graph,idx,i) || idx == i){
+  while(vertexEdgeIsConnected(graph,i,idx) /*||
+  vertexRewireIsConnected(graph,idx,i)*/ || idx == i){
     idx = getRand(n*n);
   }
   return idx;

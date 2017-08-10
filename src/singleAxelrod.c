@@ -11,11 +11,11 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int q = 20;
+  int q = 1200;
   int neigOrd = 2;
   int nRewire = 1;
   int niter = 50E6;
-  int paso = 0.5E6;
+  int paso = 1E3;
   int frag,max;
   FILE *fs;
   char name[100];
@@ -48,7 +48,7 @@ int main(){
   }
   frag = latticeLabel(lattice,n);
   max = maxCluster(lattice,n,frag);
-  printf("Smax = %d; t = %d\n",max,time(NULL)-t);
+  printf("Smax = %d; t = %d; pasos = %d\n",max,time(NULL)-t,i-1);
   /*for(int i=0;i<niter;i++){
 
     if(i%paso==0){
