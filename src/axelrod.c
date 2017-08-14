@@ -6,7 +6,8 @@
 #include "misc.h"
 #include "axelrod.h"
 
-/* step() es la funcion encargada de realizar el paso tempora de axelrod */
+/* step() es la funcion encargada de realizar el paso tempora de axelrod, si
+hubo rewiring devuelve 1, si hubo imitacion devuelve 0 */
 
 int step(vertex* graph, agent *lattice, int n){
 
@@ -20,7 +21,7 @@ int step(vertex* graph, agent *lattice, int n){
     int k = pickPassiveNotNeig(graph, n, i);
     int hik = commonTraits(lattice, i, k);
 
-    if(hij < hik) socialInteraction(graph, i, j, k);
+    if(hij < hik) return socialInteraction(graph, i, j, k);
     else opinionInteraction(lattice, i, j, hij);
 
   }
@@ -120,13 +121,13 @@ int opinionInteraction(agent* lattice, int i, int j, int hij){
 }
 
 /* socialInteraction() hace el rewire de i/j -> i/k, modificando
-el rewire de i */
+el rewire de i, devuelve siempre 1 */
 
 int socialInteraction(vertex* graph, int i, int j, int k){
   graphEdgesRm(graph, i, j); // desconecto la conexion entre i y j para los dos
   graphEdgesAdd(graph, i, k); // conecto i y k en ambos agentes
   graph[i].rewire[0] = k; // cambio el rewiring del agente i al k
-  return 0;
+  return 1;
 }
 
 /* stopReached() devuelve 0 o 1 si hay o no transiciones disponibles

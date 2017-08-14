@@ -243,6 +243,26 @@ int vertexEdgesPrint(vertex* graph, int idx){
 
 }
 
+/* vertexEdgesPrint() imprime todas las conexiones del vertice idx en archivo */
+
+int vertexEdgesPrintToFile(vertex* graph, int idx, FILE *fs){
+
+  int nEdges = graph[idx].nEdges;
+  int nRewire = graph[idx].nRewire;
+  for(int i = 0; i<nEdges; i++){
+    fprintf(fs, "%d,", graph[idx].edges[i]);
+    for(int j = 0; j < nRewire; j++){
+      if(graph[idx].edges[i] == graph[idx].rewire[j]){
+        fprintf(fs, "%d ", 1);
+      }
+      else fprintf(fs, "%d ", 0);
+    }
+  }
+  fprintf(fs, "\n");
+  return 0;
+
+}
+
 /* vertexRewirePrint() imprime todas los rewire del vertice idx */
 
 int vertexRewirePrint(vertex* graph, int idx){
@@ -394,6 +414,13 @@ vertices */
 
 int graphEdgesPrint(vertex* graph, int n){
   for(int i = 0; i<n*n; i++) vertexEdgesPrint(graph,i);
+  return 0;
+}
+
+/* graphEdgesPrintToFile() imprime la lista de adyacencias a un archivo */
+
+int graphEdgesPrintToFile(vertex* graph, int n, FILE *fs){
+  for(int i = 0; i<n*n; i++) vertexEdgesPrintToFile(graph,i,fs);
   return 0;
 }
 

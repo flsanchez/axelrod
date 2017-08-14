@@ -30,4 +30,7 @@ for files in ls:
 		print mu
 
 		plt.hist(data/paso*10,bins=binpos)
+		plt.xlabel("# de pasos (por agente)")
+		plt.ylabel("Frecuencia")
+		plt.savefig("term.png")
 		plt.show()

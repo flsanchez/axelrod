@@ -13,6 +13,7 @@ int main(){
   int niter = 30E6;
   int prom = 50;
   int *Sprom = malloc(prom*sizeof(int));
+  int *nmbrOfRew = malloc(prom*sizeof(int));
   int frag;
   int max;
   int neigOrd = 2;
@@ -50,8 +51,9 @@ int main(){
 
       stop = 0;
       k = 0;
+      nmbrOfRew[i] = 0;
       while(stop == 0){
-        step(graph,lattice,n);
+        nmbrOfRew[i] = nmbrOfRew[i] + step(graph,lattice,n);
         if(k%paso == 0) stop = stopReached(graph,lattice,n);
         k++;
       }
@@ -60,7 +62,7 @@ int main(){
       frag = latticeLabel(lattice,n);
       max = maxCluster(lattice,n,frag);
       Sprom[i] = max;
-      printf("Smax = %d; Pasos = %d\n",max,k-1);
+      printf("Smax = %d; Pasos = %d; Rewires = %d\n",max,k-1,nmbrOfRew[i]);
       tLoop = time(NULL)-tLoop;
       printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tLoop/3600, (tLoop/60)%60, tLoop%60);
       graphFree(graph,n);
@@ -70,8 +72,10 @@ int main(){
     sprintf(name,"q_%d.txt",q);
     fs = fopen(name,"w");
     fprintf(fs,"# n f q niter\n# %d %d %d %d\n",n,f,q,niter);
-    for(int i = 0; i<prom; i++) fprintf(fs,"%d %d\n", Sprom[i],term[i]);
-    fprintf(fs,"# Smax pasos\n");
+    for(int i = 0; i<prom; i++){
+      fprintf(fs,"%d %d %d\n", Sprom[i],term[i],nmbrOfRew[i]);
+    }
+    fprintf(fs,"# Smax pasos nmbrOfRew\n");
     fclose(fs);
 
   }
@@ -80,6 +84,7 @@ int main(){
 
   latticeFree(lattice,n);
 
+  free(nmbrOfRew);
   free(Sprom);
   free(qVector);
   free(term);
