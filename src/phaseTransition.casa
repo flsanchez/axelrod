@@ -6,6 +6,12 @@
 #include "label.h"
 #include "axelrod.h"
 
+/* para una lista de q's, y para un numero prom de repeticiones para cada q,
+se ejecutan pasos temporales de axelrod hasta alcanzar la condicion de stop.
+La data se guarda en diferentes txt para cada q, y adentro se guardan, para
+cada repeticion Smax, iteraciones hasta llegar al stop y numero de rewires
+hasta llegar al stop */
+
 int main(){
 
   int n = 50;

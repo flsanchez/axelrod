@@ -101,7 +101,7 @@ int latticePrintLinks(agent *lattice, int n){
 
 }
 
-int latticePrintToFile(agent *lattice, int n, FILE *fs){
+int latticePrintBaseqToFile(agent *lattice, int n, FILE *fs){
 
   int f = lattice[0].f;
   int q = lattice[0].q;

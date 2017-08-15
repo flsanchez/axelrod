@@ -6,6 +6,9 @@
 #include "label.h"
 #include "axelrod.h"
 
+/* graba en un txt la cantidad de rewires en funcion de los pasos e identifica 
+el paso de stop */
+
 
 int main(){
 
