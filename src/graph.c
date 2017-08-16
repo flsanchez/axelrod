@@ -243,26 +243,6 @@ int vertexEdgesPrint(vertex* graph, int idx){
 
 }
 
-/* vertexEdgesPrint() imprime todas las conexiones del vertice idx en archivo */
-
-int vertexEdgesPrintToFile(vertex* graph, int idx, FILE *fs){
-
-  int nEdges = graph[idx].nEdges;
-  int nRewire = graph[idx].nRewire;
-  for(int i = 0; i<nEdges; i++){
-    fprintf(fs, "%d,", graph[idx].edges[i]);
-    for(int j = 0; j < nRewire; j++){
-      if(graph[idx].edges[i] == graph[idx].rewire[j]){
-        fprintf(fs, "%d ", 1);
-      }
-      else fprintf(fs, "%d ", 0);
-    }
-  }
-  fprintf(fs, "\n");
-  return 0;
-
-}
-
 /* vertexRewirePrint() imprime todas los rewire del vertice idx */
 
 int vertexRewirePrint(vertex* graph, int idx){
@@ -270,7 +250,7 @@ int vertexRewirePrint(vertex* graph, int idx){
   int nRewire = graph[idx].nRewire;
   printf("Vertex N. %d:\nRewire: [ ",idx);
   for(int i = 0; i<nRewire; i++) printf("%d ", graph[idx].rewire[i]);
-  printf("]\n");
+  printf("]; nRewire = %d\n", nRewire);
   return 0;
 
 }
@@ -288,7 +268,9 @@ int vertexEdgeIsConnected(vertex* graph, int src, int dest){
 }
 
 /* vertexRewireIsConnected() chequea si src tiene a dest como rewire
-OJO: IMPORTA ORDEN! */
+OJO: IMPORTA ORDEN! (igualmente, si i tiene como rewiring a j, dentro
+de la lista de rewiring de i esta j y en la de j esta i, por eso
+chequeo solo las conexiones de uno de los dos nodos, pues grafo undirected) */
 
 int vertexRewireIsConnected(vertex* graph, int src, int dest){
 
@@ -322,18 +304,62 @@ int vertexEdgesRm(vertex* graph, int src, int dest){
   int idx = -1;
   //busco el indice de dest dentro de la lista de conexiones de graph[src] y
   //hago un swap entre dest y el ultimo elemento
-  while(idx == -1){
-    if(graph[src].edges[i] == dest) {
-      idx = i;
-      aux = graph[src].edges[idx];
-      graph[src].edges[idx] = graph[src].edges[graph[src].nEdges-1];
-      graph[src].edges[graph[src].nEdges-1] = aux;
+  if(graph[src].nEdges != 0){
+    while(idx == -1){
+      if(graph[src].edges[i] == dest) {
+        idx = i;
+        aux = graph[src].edges[idx];
+        graph[src].edges[idx] = graph[src].edges[graph[src].nEdges-1];
+        graph[src].edges[graph[src].nEdges-1] = aux;
+      }
+      else i++;
     }
-    else i++;
+
+    graph[src].edges = (int*) realloc(graph[src].edges,sizeof(int)*(graph[src].nEdges-1));
+    graph[src].nEdges--;
   }
 
-  graph[src].edges = (int*) realloc(graph[src].edges,sizeof(int)*(graph[src].nEdges-1));
-  graph[src].nEdges--;
+  return 0;
+
+}
+
+/* vertexRewireAdd() añade un elemento a la lista de rewire del vertice
+realocando la memoria en el medio y cambiando el atributo del numero de
+conexiones en los vertices src y dest, (NO CHEQUEA SI HAY CONEXION) */
+
+int vertexRewireAdd(vertex* graph, int src, int dest){
+
+  graph[src].rewire = (int*) realloc(graph[src].rewire,sizeof(int)*(graph[src].nRewire+1));
+  graph[src].rewire[graph[src].nRewire] = dest;
+  graph[src].nRewire++;
+
+  return 0;
+}
+
+/* vertexRewireRm() remueve la conexion dest de la lista de rewire del agente
+src */
+
+int vertexRewireRm(vertex* graph, int src, int dest){
+
+  int i = 0;
+  int swap, aux;
+  int idx = -1;
+  //busco el indice de dest dentro de la lista de rewire de graph[src] y
+  //hago un swap entre dest y el ultimo elemento
+  if(graph[src].nRewire != 0){
+    while(idx == -1){
+      if(graph[src].rewire[i] == dest) {
+        idx = i;
+        aux = graph[src].rewire[idx];
+        graph[src].rewire[idx] = graph[src].rewire[graph[src].nRewire-1];
+        graph[src].rewire[graph[src].nRewire-1] = aux;
+      }
+      else i++;
+    }
+
+    graph[src].rewire = (int*) realloc(graph[src].rewire,sizeof(int)*(graph[src].nRewire-1));
+    graph[src].nRewire--;
+  }
 
   return 0;
 
@@ -360,7 +386,10 @@ conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 
 int graphFill(vertex* graph, int n, int neigOrd){
 
-  // lleno los edges con los vecinos para cada agente de la red
+  /* lleno los edges con los vecinos para cada agente de la red, teniendo
+  en cuenta que haya efectivamente N links en el sistema, i.e., que no haya
+  conexiones mutuas */
+
   for(int idx = 0; idx < n*n ; idx++){
     vertexEdgesFill(graph[idx].edges, n, idx, neigOrd);
   }
@@ -377,6 +406,23 @@ int graphFill(vertex* graph, int n, int neigOrd){
       idx = 0;
       tries++;
     }
+  }
+
+  /* para cada agente i, miro los vecinos j de este y si i esta en la lista de
+  rewire de j, agrego j a la lista de rewire de i */
+
+  int j;
+  for(int i = 0; i<n*n; i++){
+
+    for(int idxj = 0; idxj<graph[i].nEdges; idxj++){
+      j = graph[i].edges[idxj]; //vecino j
+      for(int idxRew = 0; idxRew<graph[j].nRewire ; idxRew++){
+        if(graph[j].rewire[idxRew] == i && vertexRewireIsConnected(graph,i,j) == 0){
+          vertexRewireAdd(graph, i, j);
+        }
+      }
+    }
+
   }
 
   return tries;
@@ -409,6 +455,33 @@ int graphEdgesRm(vertex* graph, int src, int dest){
 
 }
 
+/* graphRewireAdd() agrega el link src-dest como link de reconexion */
+
+int graphRewireAdd(vertex* graph, int src, int dest){
+  //pregunto ademas si esta conectado para que no haya problemas
+  if(vertexRewireIsConnected(graph,src,dest) == 0 &&
+      vertexEdgeIsConnected(graph,src,dest) == 1 && (src != dest)){
+    vertexRewireAdd(graph, src, dest);
+    vertexRewireAdd(graph, dest, src);
+  }
+
+  return 0;
+
+}
+
+/* graphRewireRm() elimina el link src-dest como link de reconexion */
+
+int graphRewireRm(vertex* graph, int src, int dest){
+
+  if(vertexRewireIsConnected(graph,src,dest) == 1 && (src != dest)){
+    vertexRewireRm(graph, src, dest);
+    vertexRewireRm(graph, dest, src);
+  }
+
+  return 0;
+
+}
+
 /* graphEdgesPrint() imprime el vector de conexiones para cada uno de los
 vertices */
 
@@ -417,10 +490,23 @@ int graphEdgesPrint(vertex* graph, int n){
   return 0;
 }
 
-/* graphEdgesPrintToFile() imprime la lista de adyacencias a un archivo */
+/* graphPrintToFile() imprime la lista de adyacencias a un archivo */
 
-int graphEdgesPrintToFile(vertex* graph, int n, FILE *fs){
-  for(int i = 0; i<n*n; i++) vertexEdgesPrintToFile(graph,i,fs);
+int graphPrintToFile(vertex* graph, int n, FILE *fs){
+
+  int nEdges,nRewire;
+  fprintf(fs, "# n %d\n",n);
+  for(int idx = 0; idx<n*n; idx++){
+    nEdges = graph[idx].nEdges;
+    for(int j=0; j<nEdges; j++) fprintf(fs, "%d,%d ", idx,graph[idx].edges[j]);
+  }
+  fprintf(fs, "\n");
+  for(int idx = 0; idx<n*n; idx++){
+    nRewire = graph[idx].nRewire;
+    for(int j=0; j<nRewire; j++) fprintf(fs, "%d,%d ", idx,graph[idx].rewire[j]);
+  }
+  fprintf(fs, "\n");
+
   return 0;
 }
 

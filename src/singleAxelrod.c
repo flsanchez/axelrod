@@ -13,7 +13,7 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int q = 1200;
+  int q = 10;
   int neigOrd = 2;
   int nRewire = 1;
   int nmbrOfRew = 0;
@@ -34,26 +34,37 @@ int main(){
   graphInit(graph, n, nRewire, neigOrd);
   graphFill(graph, n, neigOrd);
 
-
   int i = 0;
   int stop = 0;
   int t = time(NULL);
   while(stop == 0){
 
+    nmbrOfRew = nmbrOfRew + step(graph,lattice,n);
+    //graphEdgesPrintToFile(graph, n, fs);
+
+
     if(i%paso==0){
       stop = stopReached(graph,lattice,n);
       if(stop == 1 && end == 0) end = i;
-      frag = latticeLabel(lattice,n);
-      max = maxCluster(lattice,n,frag);
-      printf("Smax = %d; Paso: %d; Stop = %d\n",max,i,stop);
+      //frag = latticeLabel(lattice,n);
+      //max = maxCluster(lattice,n,frag);
+      //printf("Smax = %d; Paso: %d; Stop = %d\n",max,i,stop);
+      //printf("Paso: %d; Stop = %d; NRew = %d\n",i,stop,nmbrOfRew);
     }
 
-    step(graph,lattice,n);
     i++;
+
   }
+  frag = latticeLabel(lattice,n);
+  max = maxCluster(lattice,n,frag);
+  t = time(NULL)-t;
+  printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);
+  fs = fopen("net.txt","w");
+  graphPrintToFile(graph,n,fs);
   fclose(fs);
 
-  frag = latticeLabel(lattice,n);
+
+  /*frag = latticeLabel(lattice,n);
   max = maxCluster(lattice,n,frag);
   t = time(NULL)-t;
   printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);

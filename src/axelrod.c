@@ -13,7 +13,9 @@ int step(vertex* graph, agent *lattice, int n){
 
   int i, j, hij;
   i = getRand(n*n); //indice del activo
+  while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
   j = pickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
+
   hij = commonTraits(lattice, i, j);
 
   if(vertexRewireIsConnected(graph, i, j)){
@@ -43,8 +45,7 @@ int pickPassiveNeig(vertex* graph, int i){
 
 int pickPassiveNotNeig(vertex* graph, int n, int i){
   int idx = getRand(n*n);
-  while(vertexEdgeIsConnected(graph,i,idx) /*||
-  vertexRewireIsConnected(graph,idx,i)*/ || idx == i){
+  while((vertexEdgeIsConnected(graph,i,idx) || idx == i)){
     idx = getRand(n*n);
   }
   return idx;
@@ -126,7 +127,8 @@ el rewire de i, devuelve siempre 1 */
 int socialInteraction(vertex* graph, int i, int j, int k){
   graphEdgesRm(graph, i, j); // desconecto la conexion entre i y j para los dos
   graphEdgesAdd(graph, i, k); // conecto i y k en ambos agentes
-  graph[i].rewire[0] = k; // cambio el rewiring del agente i al k
+  graphRewireRm(graph, i, j); // desconecto el rewire entre i y j
+  graphRewireAdd(graph, i, k); // conecto el rewire entre i y k
   return 1;
 }
 

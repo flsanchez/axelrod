@@ -12,14 +12,26 @@ int main(){
 
   int n = 3;
   vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
-  int nRewire = 2;
+  int nRewire = 1;
   int t = time(NULL);
   int idx = 10;
   int neigOrd = 2;
   graphInit(graph, n, nRewire, neigOrd);
   printf("Attempts: %d\n", graphFill(graph, n, neigOrd));
+  vertexRewirePrint(graph,2);
+  vertexRewirePrint(graph,1);
+  graphRewireAdd(graph,2,1);
+  vertexRewirePrint(graph,2);
+  vertexRewirePrint(graph,1);
 
-  graphRewirePrint(graph,n);
+
+  /*graphEdgesPrint(graph,n);
+  graphRewirePrint(graph,n);*/
+
+  FILE *fs;
+  fs = fopen("net.txt","w");
+  graphEdgesPrintToFile(graph, n, fs);
+  fclose(fs);
 
   t = time(NULL)-t;
   printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
