@@ -79,6 +79,14 @@ int latticeBaseq(agent *lattice, int n){
 
 }
 
+int latticePrint(agent *lattice, int n){
+  for(int i = 0; i<n; i++){
+    for(int j = 0; j<n; j++) printf("%d ", lattice[i*n+j].feat[0]);
+    printf("\n");
+  }
+  return 0;
+}
+
 int latticePrintLinks(agent *lattice, int n){
 
   for(int i=0;i<n-1;i++){

@@ -1,47 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "axelrod.h"
+#include "agent.h"
+#include "graph.h"
 #include "label.h"
+#include "axelrod.h"
 
 int main(){
 
-  int n = 5;
-  int f = 4;
+  int n = 3;
+  int f = 1;
   int q = 3;
   int niter = 500;
   int paso = 100;
+  int nRewire = 1;
+  int neigOrd = 2;
   FILE *fs;
   char name[100];
 
   srand(time(NULL));
 
   agent *lattice = (agent*) malloc(n * n * sizeof(agent));
+  vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+  latticeInit(lattice, n, f, q);
+  latticeFill(lattice, n, q);
+  graphInit(graph, n, nRewire, neigOrd);
+  graphFill(graph, n, neigOrd);
+  //graphEdgesRm(graph, 0, 3);
+  //graphEdgesRm(graph, 0, 4);
+  graphEdgesAdd(graph,0,8);
+  int feats[] = {1,2,0,0,0,0,0,2,2};
+  for(int i = 0; i<9; i++) lattice[i].feat[0] = i;
+  lattice[8].feat[0] = 0;
 
-  latticeFill(lattice, n, f, q);
 
-  /*latticePrintToFile(lattice,n,NULL);
+  latticePrint(lattice,n);
+  latticeLabel(graph,lattice,n);
   printf("\n");
-
-  latticePrintLinks(lattice,n);
-  printf("\n");
-
-  latticeLabel(lattice,n);
-  latticePrintLabels(lattice,n);*/
-
-  printf("Hago %d pasos\n",niter);
-
-  for(int i=0;i<niter;i++) step(lattice,n);
-
-  latticePrintToFile(lattice,n,NULL);
-  printf("\n");
-
-  int frag = latticeLabel(lattice,n);
   latticePrintLabels(lattice,n);
 
-  printf("Cluster mas grande: %d\n", maxCluster(lattice,n,frag));
-
-  freeAll(lattice, n);
+  latticeFree(lattice,n);
+  graphFree(graph,n);
 
   return 0;
 }

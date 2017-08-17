@@ -16,6 +16,7 @@ int agentPrint(agent *agent, int n, int idx);
 int latticeInit(agent *lattice, int n, int f, int q);
 int latticeFill(agent *lattice, int n, int q);
 int latticeBaseq(agent *lattice, int n);
+int latticePrint(agent *lattice, int n);
 int latticePrintLinks(agent *lattice, int n); //
 int latticePrintBaseqToFile(agent *lattice, int n, FILE *fs); //
 int latticePrintLabels(agent *lattice, int n); //

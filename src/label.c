@@ -5,89 +5,75 @@
 #include "graph.h"
 #include "label.h"
 
-int latticeLabel(agent *lattice, int n){
+int latticeLabel(vertex* graph, agent* lattice, int n){
 
-  int frag = 2;
+  int j;
   int f = lattice[0].f;
-  int *clase = malloc(n*n*sizeof(int));
+  int frag = 2;
+  int* clase = malloc(sizeof(int)*n*n);
+  int* commNeig = malloc(sizeof(int)*n*n);
+  int nCommNeig;
 
   clase[0] = 0;
   clase[1] = 1;
+  for(int i = 2; i<n*n; i++) clase[i] = 0;
+  lattice[0].label = 1;
 
-  for(int i=2; i<n*n; i++) clase[i] = 0;
-
-  lattice[0].label = 1; // primer elemento de la red
-
-  for(int j=1;j<n;j++) updateLabel(lattice,clase,j-1,j,&frag); //primera fila
-
-  for(int i=1;i<n;i++){
-
-    updateLabel(lattice,clase,(i-1)*n,i*n,&frag); //primer elemento de cada fila
-
-    for(int j=1;j<n;j++){
-
-      if(commonTraits(lattice,(i-1)*n+j,i*n+j-1) == f){
-        if(commonTraits(lattice,(i-1)*n+j,i*n+j) == f){
-          falseLabel(lattice,clase,(i-1)*n+j,i*n+j-1,i*n+j);
+  for(int idx = 1; idx<n*n; idx++){
+    nCommNeig = 0;
+    for(int idxj = 0; idxj<graph[idx].nEdges; idxj++){
+      j = graph[idx].edges[idxj];
+      if(j<idx){
+        if(commonTraits(lattice, idx, j) == f){
+          commNeig[nCommNeig] = j;
+          nCommNeig++;
         }
-          else updateLabel(lattice,clase,(i-1)*n+j,i*n+j,&frag);
-        }
-      else{
-        if(commonTraits(lattice,(i-1)*n+j,i*n+j) == f){
-          updateLabel(lattice,clase,(i-1)*n+j,i*n+j,&frag);
-        }
-        else updateLabel(lattice,clase,i*n+j-1,i*n+j,&frag);
       }
-
     }
+
+    if(nCommNeig == 0){
+      lattice[idx].label = frag;
+      clase[frag] = frag;
+      frag++;
+    }
+    else if(nCommNeig == 1){
+      j = commNeig[0];
+      lattice[idx].label = lattice[j].label;
+    }
+    else falseLabel(lattice, clase, commNeig, nCommNeig, idx);
   }
 
-  fixLabel(lattice, clase, n);
+  fixLabel(lattice, n, clase);
+
   free(clase);
-
+  free(commNeig);
   return frag;
-
 }
 
-int updateLabel(agent *lattice, int *clase, int idx1, int idx2, int *frag){	 //cambia la red por numeros de etiqueta
+int falseLabel(agent *lattice, int *clase, int* commNeig, int nCommNeig, int idx){
 
-  int f = lattice[0].f;
+  int* s = malloc(nCommNeig*sizeof(int));
+  for(int i = 0; i<nCommNeig; i++) s[i] = lattice[commNeig[i]].label; // copio commNeig a s
+  int minS = s[0]; //valor inicial
 
-	if (commonTraits(lattice,idx1,idx2) != f){
-		lattice[idx2].label = *frag;
-    clase[*frag] = *frag;
-		*frag = *frag + 1;
-	}
-	else lattice[idx2].label = lattice[idx1].label;
+  for(int i = 0; i<nCommNeig; i++){
+    while(clase[s[i]]<0) s[i] = -clase[s[i]];
+    if(s[i]<minS) minS = s[i];
+  }
 
+  for(int i = 0; i<nCommNeig; i++){
+    if(s[i] == minS) clase[s[i]] = s[i];
+    else clase[s[i]] = -minS;
+  }
+
+  lattice[idx].label = minS;
+
+  free(s);
   return 0;
 
 }
 
-int falseLabel(agent *lattice, int *clase, int idx1, int idx2, int idx){
-
-  int s1 = lattice[idx1].label;
-  int s2 = lattice[idx2].label;
-
-	while(clase[s1]<0) s1=-clase[s1];
-	while(clase[s2]<0) s2=-clase[s2];
-
-	if(s1<s2) {
-		clase[s2]=-s1;
-		clase[s1]=s1;
-		lattice[idx].label=s1;
-	}
-	else{
-		clase[s1]=-s2;
-		clase[s2]=s2;
-		lattice[idx].label=s2;
-	}
-
-  return 0;
-
-}
-
-int fixLabel(agent *lattice, int *clase, int n){
+int fixLabel(agent *lattice, int n, int *clase){
 
 	int s;
 

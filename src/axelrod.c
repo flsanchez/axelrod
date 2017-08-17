@@ -53,7 +53,7 @@ int pickPassiveNotNeig(vertex* graph, int n, int i){
 
 /* maxCluster() devuelve el tamanio del cluster mas grande */
 
-int maxCluster(agent *lattice, int n, int frag){
+int maxCluster(agent *lattice, int* nsAcum, int n, int frag){
 
   //fragsz[i] contiene el tamaño del cluster de etiqueta i
   int *fragsz = malloc(frag*sizeof(int));
@@ -65,12 +65,13 @@ int maxCluster(agent *lattice, int n, int frag){
 
   clusterSize(lattice, n, frag, fragsz, ns);
 
+  if(nsAcum != NULL) for(int i = 0; i<n*n; i++) nsAcum[i] = ns[i] + nsAcum[i];
+
   int mayor = 0;
 
   for(int i = 1; i<frag; i++) if(fragsz[i]>mayor) mayor = fragsz[i];
 
   free(fragsz);
-  free(ns);
 
   return mayor;
 

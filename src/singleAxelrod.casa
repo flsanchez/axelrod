@@ -13,7 +13,7 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int q = 10;
+  int q = 680;
   int neigOrd = 2;
   int nRewire = 1;
   int nmbrOfRew = 0;
@@ -55,7 +55,7 @@ int main(){
     i++;
 
   }
-  frag = latticeLabel(lattice,n);
+  frag = latticeLabel(graph, lattice, n);
   max = maxCluster(lattice,n,frag);
   t = time(NULL)-t;
   printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);

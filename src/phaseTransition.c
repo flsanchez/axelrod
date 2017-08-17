@@ -17,9 +17,10 @@ int main(){
   int n = 50;
   int f = 10;
   int niter = 30E6;
-  int prom = 50;
-  int *Sprom = malloc(prom*sizeof(int));
-  int *nmbrOfRew = malloc(prom*sizeof(int));
+  int prom = 100;
+  int* Sprom = malloc(prom*sizeof(int));
+  int* nmbrOfRew = malloc(prom*sizeof(int));
+  int* nsAcum = malloc(n*n*sizeof(int));
   int frag;
   int max;
   int neigOrd = 2;
@@ -27,23 +28,26 @@ int main(){
   int* term = malloc(prom*sizeof(int));
   FILE *fs;
   char name[100];
-  int qlen = 120;
+  int qlen = 100;
   int *qVector = malloc(qlen*sizeof(int));
   int q;
-  for(int i = 0; i<qlen; i++) qVector[i] = 10*(i+1);
+  for(int i = 0; i<qlen; i++) qVector[i] = 20*(i+1);
+
   int tLoop,tTotal;
   srand(time(NULL));
 
   agent *lattice = (agent*) malloc(n * n * sizeof(agent));
   latticeInit(lattice, n, f, q);
   int k,stop;
-  int paso = 1E3;
+  int paso = n*n;
 
   tTotal = time(NULL);
 
   for(int j = 0; j<qlen; j++){
 
     q = qVector[j];
+
+    for(int k=0; k<n*n; k++) nsAcum[k] = 0;
 
     for(int i = 0; i<prom; i++){
 
@@ -65,8 +69,8 @@ int main(){
       }
 
       term[i] = k-1;
-      frag = latticeLabel(lattice,n);
-      max = maxCluster(lattice,n,frag);
+      frag = latticeLabel(graph, lattice, n);
+      max = maxCluster(lattice, nsAcum, n, frag);
       Sprom[i] = max;
       printf("Smax = %d; Pasos = %d; Rewires = %d\n",max,k-1,nmbrOfRew[i]);
       tLoop = time(NULL)-tLoop;
@@ -84,12 +88,22 @@ int main(){
     fprintf(fs,"# Smax pasos nmbrOfRew\n");
     fclose(fs);
 
+    sprintf(name,"q_%d.frag",q);
+    fs = fopen(name,"w");
+    fprintf(fs,"# n f q niter\n# %d %d %d %d\n# tamaño_de_fragmento frecuencia\n"
+            ,n,f,q,niter);
+    for(int i = 0; i<n*n; i++){
+      fprintf(fs,"%d %d\n", i+1, nsAcum[i]);
+    }
+    fclose(fs);
+
   }
   tTotal = time(NULL) - tTotal;
   printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tTotal/3600, (tTotal/60)%60, tTotal%60);
 
   latticeFree(lattice,n);
 
+  free(nsAcum);
   free(nmbrOfRew);
   free(Sprom);
   free(qVector);
