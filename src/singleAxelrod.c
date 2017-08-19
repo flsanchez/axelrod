@@ -13,12 +13,13 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int q = 680;
+  int q = 10;
   int neigOrd = 2;
   int nRewire = 1;
   int nmbrOfRew = 0;
+  int nEdgeRew = 0;
   int niter = 50E6;
-  int paso = 1E3;
+  int paso = n*n;
   int frag,max;
   int end = 0;
   FILE *fs;
@@ -31,8 +32,12 @@ int main(){
 
   latticeInit(lattice, n, f, q);
   latticeFill(lattice, n, q);
-  graphInit(graph, n, nRewire, neigOrd);
-  graphFill(graph, n, neigOrd);
+  graphInit(graph, n, neigOrd);
+  graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
+
+  fs = fopen("netIni.txt","w");
+  graphPrintToFile(graph,n,fs);
+  fclose(fs);
 
   int i = 0;
   int stop = 0;
@@ -40,53 +45,23 @@ int main(){
   while(stop == 0){
 
     nmbrOfRew = nmbrOfRew + step(graph,lattice,n);
-    //graphEdgesPrintToFile(graph, n, fs);
-
 
     if(i%paso==0){
       stop = stopReached(graph,lattice,n);
       if(stop == 1 && end == 0) end = i;
-      //frag = latticeLabel(lattice,n);
-      //max = maxCluster(lattice,n,frag);
-      //printf("Smax = %d; Paso: %d; Stop = %d\n",max,i,stop);
-      //printf("Paso: %d; Stop = %d; NRew = %d\n",i,stop,nmbrOfRew);
     }
 
     i++;
 
   }
   frag = latticeLabel(graph, lattice, n);
-  max = maxCluster(lattice,n,frag);
+  max = maxCluster(lattice, NULL, n, frag);
   t = time(NULL)-t;
   printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);
-  fs = fopen("net.txt","w");
+
+  fs = fopen("netFin.txt","w");
   graphPrintToFile(graph,n,fs);
   fclose(fs);
-
-
-  /*frag = latticeLabel(lattice,n);
-  max = maxCluster(lattice,n,frag);
-  t = time(NULL)-t;
-  printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);
-  /*for(int i=0;i<niter;i++){
-
-    if(i%paso==0){
-      printf("Paso: %d\n",i);
-      sprintf(name,"%d.txt",i/paso);
-      fs = fopen(name,"w");
-      fprintf(fs,"# paso\n# %d\n", paso);
-      latticePrintToFile(lattice,n,fs);
-      fclose(fs);
-      frag = latticeLabel(lattice,n);
-      max = maxCluster(lattice,n,frag);
-      printf("%d\n",max);
-    }
-
-    //printf("Paso: %d\n",i);
-
-    step(graph,lattice,n);
-
-  }*/
 
   latticeFree(lattice, n);
   graphFree(graph, n);

@@ -28,10 +28,10 @@ int main(){
   int* term = malloc(prom*sizeof(int));
   FILE *fs;
   char name[100];
-  int qlen = 100;
+  int qlen = 101;
   int *qVector = malloc(qlen*sizeof(int));
   int q;
-  for(int i = 0; i<qlen; i++) qVector[i] = 20*(i+1);
+  for(int i = 0; i<qlen; i++) qVector[i] = i+800;
 
   int tLoop,tTotal;
   srand(time(NULL));

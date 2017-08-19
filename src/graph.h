@@ -10,7 +10,8 @@ typedef struct vertex
   int *rewire; //vector de rewire, contiene los edges que admiten rewire
 } vertex;
 
-int vertexInit(vertex* graph, int idx, int nEdges, int nRewire);
+int vertexEdgesInit(vertex* graph, int idx, int nEdges);
+int vertexRewireInit(vertex* graph, int idx, int nRewire);
 int vertexEdgesAssignNumber(int idx, int n, int neigOrd);
 int vertexEdgesFill(int* edges, int n, int idx, int neigOrd);
 int vertexRewireFill(vertex* graph, int idx);
@@ -22,8 +23,10 @@ int vertexEdgesAdd(vertex* graph, int src, int dest);
 int vertexEdgesRm(vertex* graph, int src, int dest);
 int vertexRewireAdd(vertex* graph, int src, int dest);
 int vertexRewireRm(vertex* graph, int src, int dest);
-int graphInit(vertex* graph, int n, int nRewire, int neigOrd);
-int graphFill(vertex* graph, int n, int neigOrd);
+
+int graphInit(vertex* graph, int n, int neigOrd);
+int graphFill(vertex* graph, int n, int neigOrd, int nAgentRew, int nRewire);
+int graphFillRewire(vertex* graph, int n);
 int graphEdgesAdd(vertex* graph, int src, int dest);
 int graphEdgesRm(vertex* graph, int src, int dest);
 int graphRewireAdd(vertex* graph, int src, int dest);

@@ -3,17 +3,28 @@
 #include "misc.h"
 #include "graph.h"
 
-/* vertexInit() inicializa los atributos del vertice idx y aloca la memoria
+/* vertexEdgesInit() inicializa los edges del vertice idx y aloca la memoria
 correspondiente */
 
-int vertexInit(vertex* graph, int idx, int nEdges, int nRewire){
+int vertexEdgesInit(vertex* graph, int idx, int nEdges){
+
   graph[idx].nEdges = nEdges;
   graph[idx].edges = (int*) malloc(nEdges*sizeof(int));
 
-  if(nRewire>nEdges) graph[idx].nRewire = nEdges;
-  else graph[idx].nRewire = nRewire;
+  return 0;
+}
 
+
+/* vertexRewireInit() inicializa los edges del vertice idx y aloca la memoria
+correspondiente */
+
+int vertexRewireInit(vertex* graph, int idx, int nRewire){
+  if(graph[idx].rewire != NULL){
+    free(graph[idx].rewire);
+  }
+  graph[idx].nRewire = nRewire;
   graph[idx].rewire = (int*) malloc(nRewire*sizeof(int));
+
   return 0;
 }
 
@@ -369,12 +380,13 @@ int vertexRewireRm(vertex* graph, int src, int dest){
 grafo vertex* graph, con neigOrd poniendo conexiones a neigOrd = 1 (1eros)
 o neigOrd = 2 (2dos) vecinos */
 
-int graphInit(vertex* graph, int n, int nRewire, int neigOrd){
+int graphInit(vertex* graph, int n, int neigOrd){
 
   int nEdgesReal;
+
   for(int idx = 0; idx < n*n ; idx++){
     nEdgesReal = vertexEdgesAssignNumber(idx, n, neigOrd);
-    vertexInit(graph, idx, nEdgesReal, nRewire);
+    vertexEdgesInit(graph, idx, nEdgesReal);
   }
 
   return 0;
@@ -384,27 +396,60 @@ int graphInit(vertex* graph, int n, int nRewire, int neigOrd){
 cada uno de los vertices contenidos en el grafo, con neigOrd poniendo
 conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 
-int graphFill(vertex* graph, int n, int neigOrd){
+int graphFill(vertex* graph, int n, int neigOrd, int nEdgeRew, int nRewire){
 
-  /* lleno los edges con los vecinos para cada agente de la red, teniendo
-  en cuenta que haya efectivamente N links en el sistema, i.e., que no haya
-  conexiones mutuas */
+  // lleno los edges con sus respectivos vecinos
 
   for(int idx = 0; idx < n*n ; idx++){
     vertexEdgesFill(graph[idx].edges, n, idx, neigOrd);
   }
 
+  /* idxList guarda en la posicion i el valor i */
+
+  int* idxList = malloc(n*n*sizeof(int));
+  for(int i = 0; i<n*n; i++) idxList[i] = i;
+  shuffleArray(idxList,n*n); //mezclo el array
+  int rewireFlag = 1; // si este flag se pone a 0, es seguro que cada nodo tiene
+                      // al menos un link que no es de rewire
+
+  //int try = 0;
+  while(rewireFlag == 1){
+
+    /* inicializo los primeros nEdgeRew con nRewire links de rewire */
+    for(int idx = 0; idx < nEdgeRew ; idx++) vertexRewireInit(graph,idx,nRewire);
+    /* inicializo n*n-nEdgeRew nodos de idxList con 0 links de rewire */
+    for(int idx = nEdgeRew; idx < n*n; idx++) vertexRewireInit(graph,idx,0);
+    /* proceso de llenado de rewire */
+    rewireFlag = graphFillRewire(graph, n);
+    /*try++;
+    printf("Try %d\n", try);*/
+
+  }
+
+  free(idxList);
+
+  return 0;
+}
+
+/* graphFillRewire() llena los rewires con los vecinos para cada agente de la
+  red, teniendo en cuenta que haya efectivamente N links en el sistema, i.e.,
+  que no haya conexiones mutuas. Si tengo algun vertice donde todos los edges
+  pueden hacer rewire, se devuelve 1 y se tiene que correr de nuevo. sino
+  se devuelve 0 */
+
+int graphFillRewire(vertex* graph, int n){
+
   int control = 0; // flag de control, por si vertexRewireFill sale mal, se
                    // pone a 1 y se repite el loop de llenado de rewire
   int idx = 0;
-  int tries = 0;
+  //int tries = 0;
   while(idx < n*n){
     control = vertexRewireFill(graph, idx);
     idx++;
     // si control se pone a 1, se arranca de nuevo con el llenado desde el 0
     if(control == 1){
       idx = 0;
-      tries++;
+      //tries++;
     }
   }
 
@@ -423,9 +468,14 @@ int graphFill(vertex* graph, int n, int neigOrd){
       }
     }
 
+    // si todos los links son de rewire, devuelvo 1
+    if(graph[i].nEdges == graph[i].nRewire) return 1;
+
   }
 
-  return tries;
+  // si todo salio bien, devuelvo 0
+  return 0;
+
 }
 
 /* graphEdgesAdd() añade el elemento conecta los vertices src y dest
