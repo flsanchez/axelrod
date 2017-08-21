@@ -19,9 +19,7 @@ int vertexEdgesInit(vertex* graph, int idx, int nEdges){
 correspondiente */
 
 int vertexRewireInit(vertex* graph, int idx, int nRewire){
-  if(graph[idx].rewire != NULL){
-    free(graph[idx].rewire);
-  }
+
   graph[idx].nRewire = nRewire;
   graph[idx].rewire = (int*) malloc(nRewire*sizeof(int));
 
@@ -399,30 +397,47 @@ conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
 int graphFill(vertex* graph, int n, int neigOrd, int nEdgeRew, int nRewire){
 
   // lleno los edges con sus respectivos vecinos
-
   for(int idx = 0; idx < n*n ; idx++){
     vertexEdgesFill(graph[idx].edges, n, idx, neigOrd);
   }
 
   /* idxList guarda en la posicion i el valor i */
-
+  int idx;
   int* idxList = malloc(n*n*sizeof(int));
   for(int i = 0; i<n*n; i++) idxList[i] = i;
   shuffleArray(idxList,n*n); //mezclo el array
   int rewireFlag = 1; // si este flag se pone a 0, es seguro que cada nodo tiene
                       // al menos un link que no es de rewire
 
-  //int try = 0;
+  /* inicializo los primeros nEdgeRew con nRewire links de rewire */
+  for(int i = 0; i < nEdgeRew ; i++){
+    idx = idxList[i];
+    vertexRewireInit(graph,idx,nRewire);
+  }
+  /* inicializo n*n-nEdgeRew nodos de idxList con 0 links de rewire */
+  for(int i = nEdgeRew; i < n*n; i++){
+    idx = idxList[i];
+    vertexRewireInit(graph,idx,0);
+  }
+  rewireFlag = graphFillRewire(graph, n);
+
   while(rewireFlag == 1){
 
     /* inicializo los primeros nEdgeRew con nRewire links de rewire */
-    for(int idx = 0; idx < nEdgeRew ; idx++) vertexRewireInit(graph,idx,nRewire);
+    for(int i = 0; i < nEdgeRew ; i++){
+      idx = idxList[i];
+      free(graph[idx].rewire);
+      vertexRewireInit(graph,idx,nRewire);
+    }
     /* inicializo n*n-nEdgeRew nodos de idxList con 0 links de rewire */
-    for(int idx = nEdgeRew; idx < n*n; idx++) vertexRewireInit(graph,idx,0);
+    for(int i = nEdgeRew; i < n*n; i++){
+      idx = idxList[i];
+      free(graph[idx].rewire);
+      vertexRewireInit(graph,idx,0);
+    }
+
     /* proceso de llenado de rewire */
     rewireFlag = graphFillRewire(graph, n);
-    /*try++;
-    printf("Try %d\n", try);*/
 
   }
 

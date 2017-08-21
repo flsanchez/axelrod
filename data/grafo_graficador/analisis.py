@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import sys
 import os
+import time
 import graphImportData as gid
 
 
@@ -20,11 +21,15 @@ for files in ls:
 
 		g = nx.Graph(edges)
 		#gRew = nx.Graph(rewire)
+		l0 = 23.336
+		c0 = 0.442651428571
 
 		print "Links Totales: {0}".format(nx.number_of_edges(g))
 		#print "Links de rewiring: {0}".format(nx.number_of_edges(gRew))
-		print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g)/23.336)
-		print "Clustering medio: {0}".format(nx.average_clustering(g)/0.442651428571)
+		t = time.clock()
+		print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g))
+		print time.clock() - t
+		print "Clustering medio: {0}".format(nx.average_clustering(g))
 
 		plt.plot(nx.degree_histogram(g),'ro-')
 		#nx.draw(g,pos)

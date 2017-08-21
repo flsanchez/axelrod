@@ -16,28 +16,29 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int niter = 30E6;
-  int prom = 100;
+  int prom = 3;
   int* Sprom = malloc(prom*sizeof(int));
   int* nmbrOfRew = malloc(prom*sizeof(int));
   int* nsAcum = malloc(n*n*sizeof(int));
   int frag;
   int max;
   int neigOrd = 2;
+  int nEdgeRew = n*n/2;
   int nRewire = 1;
   int* term = malloc(prom*sizeof(int));
   FILE *fs;
   char name[100];
-  int qlen = 101;
+  int qlen = 20;
   int *qVector = malloc(qlen*sizeof(int));
   int q;
-  for(int i = 0; i<qlen; i++) qVector[i] = i+800;
+  for(int i = 0; i<qlen; i++) qVector[i] = 60*(i+1);
 
   int tLoop,tTotal;
   srand(time(NULL));
 
   agent *lattice = (agent*) malloc(n * n * sizeof(agent));
   latticeInit(lattice, n, f, q);
+
   int k,stop;
   int paso = n*n;
 
@@ -54,10 +55,13 @@ int main(){
       tLoop = time(NULL);
 
       printf("q = %d, prom = %d \n",q,i);
+
       vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
-      graphInit(graph, n, nRewire, neigOrd);
-      graphFill(graph, n, neigOrd);
+      graphInit(graph, n, neigOrd);
+      graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
+
       latticeFill(lattice, n, q);
+
 
       stop = 0;
       k = 0;
@@ -73,15 +77,22 @@ int main(){
       max = maxCluster(lattice, nsAcum, n, frag);
       Sprom[i] = max;
       printf("Smax = %d; Pasos = %d; Rewires = %d\n",max,k-1,nmbrOfRew[i]);
-      tLoop = time(NULL)-tLoop;
-      printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tLoop/3600, (tLoop/60)%60, tLoop%60);
+
+      sprintf(name,"q_%d_%d.net",q,i);
+      fs = fopen(name,"w");
+      graphPrintToFile(graph,n,fs);
+      fclose(fs);
+
       graphFree(graph,n);
 
+      tLoop = time(NULL)-tLoop;
+      printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tLoop/3600, (tLoop/60)%60, tLoop%60);
+      
     }
 
     sprintf(name,"q_%d.txt",q);
     fs = fopen(name,"w");
-    fprintf(fs,"# n f q niter\n# %d %d %d %d\n",n,f,q,niter);
+    fprintf(fs,"# n f q\n# %d %d %d\n",n,f,q);
     for(int i = 0; i<prom; i++){
       fprintf(fs,"%d %d %d\n", Sprom[i],term[i],nmbrOfRew[i]);
     }
@@ -90,8 +101,8 @@ int main(){
 
     sprintf(name,"q_%d.frag",q);
     fs = fopen(name,"w");
-    fprintf(fs,"# n f q niter\n# %d %d %d %d\n# tamaño_de_fragmento frecuencia\n"
-            ,n,f,q,niter);
+    fprintf(fs,"# n f q\n# %d %d %d\n# tamaño_de_fragmento frecuencia\n"
+            ,n,f,q);
     for(int i = 0; i<n*n; i++){
       fprintf(fs,"%d %d\n", i+1, nsAcum[i]);
     }

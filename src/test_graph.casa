@@ -2,31 +2,42 @@
 #include <stdlib.h>
 #include <time.h>
 #include "graph.h"
-#include "agent.h"
-#include "misc.h"
-#include "axelrod.h"
+#include "functions.h"
 
 int main(){
 
   srand(time(NULL));
 
-  int n = 50;
-  vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
+  int n = 3;
   int nRewire = 1;
   int t = time(NULL);
   int idx = 10;
   int neigOrd = 2;
-  int nEdgeRew = n*n;
+  int nEdgeRew = 1;
   char name[100];
   int cont;
   FILE *fs;
 
-  graphInit(graph, n, neigOrd);
-  graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
-  graphRewirePrint(graph, n);
+  for(int i = 0; i<10; i++){
+    vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
+    graphInit(graph, n, neigOrd);
+    printf("%d\n", i);
+    graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
+    fs = fopen("net.net","w");
+    graphPrintToFile(graph, n, fs);
+    fclose(fs);
+    graphFree(graph,n);
+  }
 
-
-  t = time(NULL)-t;
-  printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
-  graphFree(graph,n);
+  // fs = fopen("net.txt","w");
+  // graphPrintToFile(graph, n, fs);
+  // fclose(fs);
+  //
+  // printf("%f\n",avMinPathLen(graph, n));
+  //
+  // t = time(NULL)-t;
+  // printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
+  //
+  // //free(dist);
+  // //graphFree(graph,n);
 }
