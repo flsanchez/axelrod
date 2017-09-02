@@ -16,14 +16,16 @@ int main(){
 
   int n = 50;
   int f = 10;
-  int prom = 3;
+  int prom = 50;
+  int niter = 300E6; /* condicion de escape, por si se queda trabado el
+                        programa por algun motivo desconocido */
   int* Sprom = malloc(prom*sizeof(int));
   int* nmbrOfRew = malloc(prom*sizeof(int));
   int* nsAcum = malloc(n*n*sizeof(int));
   int frag;
   int max;
   int neigOrd = 2;
-  int nEdgeRew = n*n/2;
+  int nEdgeRew =  243;
   int nRewire = 1;
   int* term = malloc(prom*sizeof(int));
   FILE *fs;
@@ -31,10 +33,17 @@ int main(){
   int qlen = 20;
   int *qVector = malloc(qlen*sizeof(int));
   int q;
-  for(int i = 0; i<qlen; i++) qVector[i] = 60*(i+1);
+  int m = 13;
+  int b = 0;
+  for(int i = 0; i<qlen; i++) qVector[i] = m*(i+1) + b;
 
   int tLoop,tTotal;
   srand(time(NULL));
+
+  fs = fopen("run.log","w");
+  fprintf(fs, "# numero_de_qs prom m b nRewire nEdgeRew\n");
+  fprintf(fs, "%d\n%d\n%d\n%d\n%d\n%d\n",qlen,prom,m,b,nRewire,nEdgeRew);
+  fclose(fs);
 
   agent *lattice = (agent*) malloc(n * n * sizeof(agent));
   latticeInit(lattice, n, f, q);
@@ -66,7 +75,7 @@ int main(){
       stop = 0;
       k = 0;
       nmbrOfRew[i] = 0;
-      while(stop == 0){
+      while(stop == 0 &&  k < niter ){
         nmbrOfRew[i] = nmbrOfRew[i] + step(graph,lattice,n);
         if(k%paso == 0) stop = stopReached(graph,lattice,n);
         k++;
@@ -87,7 +96,7 @@ int main(){
 
       tLoop = time(NULL)-tLoop;
       printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tLoop/3600, (tLoop/60)%60, tLoop%60);
-      
+
     }
 
     sprintf(name,"q_%d.txt",q);
@@ -110,7 +119,7 @@ int main(){
 
   }
   tTotal = time(NULL) - tTotal;
-  printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tTotal/3600, (tTotal/60)%60, tTotal%60);
+  printf("Tiempo transcurrido total: %d:%d:%d\n", tTotal/3600, (tTotal/60)%60, tTotal%60);
 
   latticeFree(lattice,n);
 

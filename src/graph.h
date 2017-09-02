@@ -25,8 +25,11 @@ int vertexRewireAdd(vertex* graph, int src, int dest);
 int vertexRewireRm(vertex* graph, int src, int dest);
 
 int graphInit(vertex* graph, int n, int neigOrd);
-int graphFill(vertex* graph, int n, int neigOrd, int nAgentRew, int nRewire);
-int graphFillRewire(vertex* graph, int n);
+int graphRewireInit(vertex* graph, int n, int* idxList, int nEdgeRew, int nRewire);
+int graphEdgesFill(vertex* graph, int n, int neigOrd);
+int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew, int nRewire);
+int graphRewireFillNeigAux(vertex* graph, int n);
+int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int neigOrd);
 int graphEdgesAdd(vertex* graph, int src, int dest);
 int graphEdgesRm(vertex* graph, int src, int dest);
 int graphRewireAdd(vertex* graph, int src, int dest);
@@ -34,6 +37,8 @@ int graphRewireRm(vertex* graph, int src, int dest);
 int graphEdgesPrint(vertex* graph, int n);
 int graphPrintToFile(vertex* graph, int n, FILE *fs);
 int graphRewirePrint(vertex* graph, int n);
+int graphEdgesFree(vertex* graph, int n);
+int graphRewireFree(vertex* graph, int n);
 int graphFree(vertex* graph, int n);
 
 #endif

@@ -6,14 +6,21 @@ import os
 import time
 import graphImportData as gid
 
+f = open("run.log")
+f = f.readlines()
+numOfQs = int(f[1])
+numOfProms = int(f[2])
+m = int(f[3])
+b = int(f[4])
 
 l0 = 23.336
 c0 = 0.442651428571
-qs = [60*(i+1) for i in range(20)]
-proms = [i for i in range(3)]
+qs = [m*(i+1) + b for i in range(numOfQs)]
+proms = [i for i in range(numOfProms)]
 
 lprom = []
 cprom = []
+cont = 1.0
 
 for q in qs:
 	
@@ -22,7 +29,7 @@ for q in qs:
 
 	for prom in proms:
 		name = "q_{0}_{1}.net".format(q,prom)
-		print name
+		print "{0}%: {1}".format(100*cont/(len(qs)*len(proms)),name)
 		edges = gid.loadGraphEdges(name)
 		rewire = gid.loadGraphRewire(name)
 		n = gid.loadGraphN(name)
@@ -30,6 +37,7 @@ for q in qs:
 		g = nx.Graph(edges)
 		l.append(nx.average_shortest_path_length(g)/l0)
 		c.append(nx.average_clustering(g)/c0)
+		cont = cont + 1
 
 	lprom.append(np.mean(np.array(l)))
 	cprom.append(np.mean(np.array(c)))

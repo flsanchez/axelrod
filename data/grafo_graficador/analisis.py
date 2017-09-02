@@ -15,21 +15,21 @@ for files in ls:
 	if files.endswith(".txt"):
 		name = files
 		edges = gid.loadGraphEdges(name)
-		#rewire = gid.loadGraphRewire(name)
+		rewire = gid.loadGraphRewire(name)
 		n = gid.loadGraphN(name)
 		pos = gid.loadGraphPositions(n)
 
 		g = nx.Graph(edges)
-		#gRew = nx.Graph(rewire)
+		gRew = nx.Graph(rewire)
 		l0 = 23.336
 		c0 = 0.442651428571
 
 		print "Links Totales: {0}".format(nx.number_of_edges(g))
-		#print "Links de rewiring: {0}".format(nx.number_of_edges(gRew))
+		print "Links de rewiring: {0}".format(nx.number_of_edges(gRew))
 		t = time.clock()
-		print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g))
+		#print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g))
 		print time.clock() - t
-		print "Clustering medio: {0}".format(nx.average_clustering(g))
+		#print "Clustering medio: {0}".format(nx.average_clustering(g))
 
 		plt.plot(nx.degree_histogram(g),'ro-')
 		#nx.draw(g,pos)

@@ -34,22 +34,36 @@ poniendo conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos*/
 int vertexEdgesAssignNumber(int idx, int n, int neigOrd){
   int i = idx/n;
   int j = idx%n;
-  int puntas;
-  int bordes;
-  int interior;
+  int puntas, bordes, interior,casiPuntas;
   if(neigOrd == 1){
-   puntas = 2;
-   bordes = 3;
-   interior = 4;
+    puntas = 2;
+    bordes = 3;
+    interior = 4;
   }
   else if(neigOrd == 2){
-   puntas = 3;
-   bordes = 5;
-   interior = 8;
+    puntas = 3;
+    bordes = 5;
+    interior = 8;
   }
-  if( (i == 0 || i == n-1) && (j == 0 || j == n-1) ) return puntas;
-  else if( i == 0 || i == n-1 || j == 0 || j == n-1 ) return bordes;
-  else return interior;
+  else if(neigOrd == 3){
+    puntas = 5;
+    casiPuntas = 6;
+    bordes = 9;
+    interior = 16;
+  }
+
+  if(neigOrd == 1 || neigOrd == 2){
+    if( (i == 0 || i == n-1) && (j == 0 || j == n-1) ) return puntas;
+    else if( i == 0 || i == n-1 || j == 0 || j == n-1 ) return bordes;
+    else return interior;
+  }
+  else if(neigOrd == 3){
+    if( (i == 0 || i == n-1) && (j == 0 || j == n-1) ) return puntas;
+    else if( (i == 1 || i == n-2) && (j == 0 || j == n-1) ||
+             (i == 0 || i == n-1) && (j == 1 || j == n-2) ) return casiPuntas;
+    else if( i == 0 || i == n-1 || j == 0 || j == n-1 ) return bordes;
+    else return interior;
+  }
 }
 
 /* vertexEdgesFill() llena el vector de conexiones del vertice, en funcion
@@ -111,7 +125,73 @@ int vertexEdgesFill(int* edges, int n, int idx, int neigOrd){
       }
     }
   }
-  else if(neigOrd == 2){
+  if(neigOrd == 2){
+    if(i == 0){
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx + n;
+        edges[2] = idx + n + 1;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx + n;
+        edges[2] = idx + n - 1;
+      }
+      else{
+        edges[0] = idx - 1;
+        edges[1] = idx + 1;
+        edges[2] = idx + n;
+        edges[3] = idx + n - 1;
+        edges[4] = idx + n + 1;
+      }
+    }
+    else if(i == n-1){
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx - n;
+        edges[2] = idx - n + 1;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx - n;
+        edges[2] = idx - n - 1;
+      }
+      else{
+        edges[0] = idx - 1;
+        edges[1] = idx + 1;
+        edges[2] = idx - n;
+        edges[3] = idx - n + 1;
+        edges[4] = idx - n - 1;
+      }
+    }
+    else{
+      if(j == 0){
+        edges[0] = idx + 1;
+        edges[1] = idx - n;
+        edges[2] = idx + n;
+        edges[3] = idx - n + 1;
+        edges[4] = idx + n + 1;
+      }
+      else if (j == n-1){
+        edges[0] = idx - 1;
+        edges[1] = idx - n;
+        edges[2] = idx + n;
+        edges[3] = idx - n - 1;
+        edges[4] = idx + n -1;
+      }
+      else{
+        edges[0] = idx - n;
+        edges[1] = idx - 1;
+        edges[2] = idx + 1;
+        edges[3] = idx + n;
+        edges[4] = idx - n + 1;
+        edges[5] = idx - n - 1;
+        edges[6] = idx + n + 1;
+        edges[7] = idx + n - 1;
+      }
+    }
+  }
+  if(neigOrd == 3){
     if(i == 0){
       if(j == 0){
         edges[0] = idx + 1;
@@ -187,6 +267,8 @@ i tenga a j como rewire y j a i al mismo tiempo). En caso de que no haya
 rewiring posible (porque idx tiene a todos sus vecinos conectados), esta
 funcion devuelve 1 */
 
+/* tengo que agregar el vector de posibles rewire(y su tamaño), y eso copiarlo en shuffled*/
+
 int vertexRewireFill(vertex* graph, int idx){
 
   // armo un array shuffled con los indices de los vecinos de mi agente
@@ -197,7 +279,7 @@ int vertexRewireFill(vertex* graph, int idx){
   shuffleArray(shuffled,graph[idx].nEdges);
 
   // este while anidado se encarga de agarrar un vecino de idx para hacer
-  // rewire que no este haciendo rewire previamente
+  // rewire que no este haciendo rewire previamente con el
 
   int cont = 0; // cuenta cuantos elementos hay dentro de graph[idx].rewire
   int shuffledIdx = 0; // recorre los indices de shuffled
@@ -390,25 +472,9 @@ int graphInit(vertex* graph, int n, int neigOrd){
   return 0;
 }
 
-/* graphFill() se encarga de llenar el vector de conexiones y EL REWIRE para
-cada uno de los vertices contenidos en el grafo, con neigOrd poniendo
-conexiones a neigOrd = 1 (1eros) o neigOrd = 2 (2dos) vecinos */
+int graphRewireInit(vertex* graph, int n, int* idxList, int nEdgeRew, int nRewire){
 
-int graphFill(vertex* graph, int n, int neigOrd, int nEdgeRew, int nRewire){
-
-  // lleno los edges con sus respectivos vecinos
-  for(int idx = 0; idx < n*n ; idx++){
-    vertexEdgesFill(graph[idx].edges, n, idx, neigOrd);
-  }
-
-  /* idxList guarda en la posicion i el valor i */
   int idx;
-  int* idxList = malloc(n*n*sizeof(int));
-  for(int i = 0; i<n*n; i++) idxList[i] = i;
-  shuffleArray(idxList,n*n); //mezclo el array
-  int rewireFlag = 1; // si este flag se pone a 0, es seguro que cada nodo tiene
-                      // al menos un link que no es de rewire
-
   /* inicializo los primeros nEdgeRew con nRewire links de rewire */
   for(int i = 0; i < nEdgeRew ; i++){
     idx = idxList[i];
@@ -419,26 +485,44 @@ int graphFill(vertex* graph, int n, int neigOrd, int nEdgeRew, int nRewire){
     idx = idxList[i];
     vertexRewireInit(graph,idx,0);
   }
-  rewireFlag = graphFillRewire(graph, n);
+  return 0;
+}
 
+/* graphEdgesFill() se encarga de llenar el vector de conexiones */
+
+int graphEdgesFill(vertex* graph, int n, int neigOrd){
+  // lleno los edges con sus respectivos vecinos
+  for(int idx = 0; idx < n*n ; idx++){
+    vertexEdgesFill(graph[idx].edges, n, idx, neigOrd);
+  }
+  return 0;
+}
+
+/* graphRewireFillNeig() se encarga de llenar el vector de REWIRE para
+una cantidad nEdgeRew de vertices contenidos en el grafo, eligiendo para
+cada vertice seleccionado un numero nRewire de vecinos */
+
+int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew, int nRewire){
+
+  /* idxList guarda en la posicion i el valor i */
+  int idx;
+  int* idxList = malloc(n*n*sizeof(int));
+  for(int i = 0; i<n*n; i++) idxList[i] = i;
+  shuffleArray(idxList,n*n); //mezclo el array
+  int rewireFlag = 1; // si este flag se pone a 0, es seguro que cada nodo tiene
+                      // al menos un link que no es de rewire
+  
+  graphRewireInit(graph, n, idxList, nEdgeRew, nRewire);
+  rewireFlag = graphRewireFillNeigAux(graph, n);
+
+  // mientras el llenado halla fallado
   while(rewireFlag == 1){
-
-    /* inicializo los primeros nEdgeRew con nRewire links de rewire */
-    for(int i = 0; i < nEdgeRew ; i++){
-      idx = idxList[i];
-      free(graph[idx].rewire);
-      vertexRewireInit(graph,idx,nRewire);
-    }
-    /* inicializo n*n-nEdgeRew nodos de idxList con 0 links de rewire */
-    for(int i = nEdgeRew; i < n*n; i++){
-      idx = idxList[i];
-      free(graph[idx].rewire);
-      vertexRewireInit(graph,idx,0);
-    }
-
+    // libero los vectores de rewire
+    graphRewireFree(graph, n);
+    // inicializo de nuevo
+    graphRewireInit(graph, n, idxList, nEdgeRew, nRewire);
     /* proceso de llenado de rewire */
-    rewireFlag = graphFillRewire(graph, n);
-
+    rewireFlag = graphRewireFillNeigAux(graph, n);
   }
 
   free(idxList);
@@ -446,13 +530,13 @@ int graphFill(vertex* graph, int n, int neigOrd, int nEdgeRew, int nRewire){
   return 0;
 }
 
-/* graphFillRewire() llena los rewires con los vecinos para cada agente de la
+/* graphRewireFillNeigAux() llena los rewires con los vecinos para cada agente de la
   red, teniendo en cuenta que haya efectivamente N links en el sistema, i.e.,
   que no haya conexiones mutuas. Si tengo algun vertice donde todos los edges
   pueden hacer rewire, se devuelve 1 y se tiene que correr de nuevo. sino
   se devuelve 0 */
 
-int graphFillRewire(vertex* graph, int n){
+int graphRewireFillNeigAux(vertex* graph, int n){
 
   int control = 0; // flag de control, por si vertexRewireFill sale mal, se
                    // pone a 1 y se repite el loop de llenado de rewire
@@ -493,6 +577,39 @@ int graphFillRewire(vertex* graph, int n){
 
 }
 
+/* graphRewireFillNotNeig() llena el vector de rewire de una cantidad nEdgeRew
+  de vertices del grafo, eligiendo nRewire no vecinos de orden neigOrd*/
+
+int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int neigOrd){
+
+  /* idxList guarda en la posicion i el valor i */
+  int idx, neigNmbr;
+  int* rewire = NULL;
+  int* idxList = malloc(n*n*sizeof(int));
+  for(int i = 0; i<n*n; i++) idxList[i] = i;
+  shuffleArray(idxList, n*n); //mezclo el array
+
+  // inicializo los array de rewire
+  graphRewireInit(graph, n, idxList, nEdgeRew, nRewire);
+
+  for(int i = 0; i < nEdgeRew; i++){
+    idx = idxList[i];
+    neigNmbr = vertexEdgesAssignNumber(idx, n, neigOrd);
+    rewire = realloc(rewire,neigNmbr*sizeof(int));
+    vertexEdgesFill(rewire, n, idx, neigOrd); // me llena con los neigOrd vecinos
+    shuffleArray(rewire, neigNmbr); // mezclo los rewire
+    for(int neigIdx = 0; neigIdx < nRewire; neigIdx++){
+      graphEdgesAdd(graph, idx, rewire[neigIdx]);
+      graphRewireAdd(graph, idx, rewire[neigIdx]);
+    }
+  }
+
+  free(rewire);
+  free(idxList);
+
+  return 0;
+}
+
 /* graphEdgesAdd() añade el elemento conecta los vertices src y dest
 (pues grafo undirected) */
 
@@ -501,9 +618,10 @@ int graphEdgesAdd(vertex* graph, int src, int dest){
   if(vertexEdgeIsConnected(graph,src,dest) == 0 && (src != dest)){
     vertexEdgesAdd(graph, src, dest);
     vertexEdgesAdd(graph, dest, src);
+    return 0;
   }
 
-  return 0;
+  return 1;
 
 }
 
@@ -514,9 +632,10 @@ int graphEdgesRm(vertex* graph, int src, int dest){
   if(vertexEdgeIsConnected(graph,src,dest) == 1 && (src != dest)){
     vertexEdgesRm(graph, src, dest);
     vertexEdgesRm(graph, dest, src);
+    return 0;
   }
 
-  return 0;
+  return 1;
 
 }
 
@@ -528,9 +647,10 @@ int graphRewireAdd(vertex* graph, int src, int dest){
       vertexEdgeIsConnected(graph,src,dest) == 1 && (src != dest)){
     vertexRewireAdd(graph, src, dest);
     vertexRewireAdd(graph, dest, src);
+    return 0;
   }
 
-  return 0;
+  return 1;
 
 }
 
@@ -541,9 +661,10 @@ int graphRewireRm(vertex* graph, int src, int dest){
   if(vertexRewireIsConnected(graph,src,dest) == 1 && (src != dest)){
     vertexRewireRm(graph, src, dest);
     vertexRewireRm(graph, dest, src);
+    return 0;
   }
 
-  return 0;
+  return 1;
 
 }
 
@@ -583,14 +704,26 @@ int graphRewirePrint(vertex* graph, int n){
   return 0;
 }
 
+/* graphEdgesFree() libera todos los array de edges */
+
+int graphEdgesFree(vertex* graph, int n){
+  for(int i = 0; i < n*n; i++) free(graph[i].edges);
+  return 0;
+}
+
+/* graphRewireFree() libera todos los arrays de rewire */
+
+int graphRewireFree(vertex* graph, int n){
+  for(int i = 0; i < n*n; i++) free(graph[i].rewire);
+  return 0;
+}
+
 /* graphFree() libera la memoria del grafo, liberando todos los mallocs hechos
 en cada uno de los vertices primero */
 
 int graphFree(vertex* graph, int n){
-  for(int i = 0; i < n*n; i++){
-    free(graph[i].edges);
-    free(graph[i].rewire);
-  }
+  graphEdgesFree(graph, n);
+  graphRewireFree(graph, n);
   free(graph);
   return 0;
 }
