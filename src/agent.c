@@ -174,8 +174,6 @@ int commonTraits(agent *lattice, int i, int j){
 int latticeFree(agent *lattice, int n){
 
   for(int i=0;i<n*n;i++) free(lattice[i].feat);
-  free(lattice);
-
   return 0;
 
 }

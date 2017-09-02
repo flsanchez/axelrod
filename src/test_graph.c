@@ -8,30 +8,35 @@ int main(){
 
   srand(time(NULL));
 
-  int n = 5;
+  int n = 50;
   int nRewire = 1;
   int t = time(NULL);
   int idx = 10;
   int neigOrdEdges = 2;
   int neigOrdRewire = 3;
-  int nEdgeRew = 6;
+  int nEdgeRew = n*n;
   char name[100];
   int cont;
   FILE *fs;
 
 
-  /*vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
-  graphInit(graph, n, neigOrdEdges);
-  graphEdgesFill(graph, n, neigOrdEdges);
-  graphRewireFillNotNeig(graph, n, nEdgeRew, nRewire, neigOrdRewire);
-  fs = fopen("net.net","w");
-  graphPrintToFile(graph, n, fs);
-  fclose(fs);
-  graphFree(graph,n);*/
-  for(int i = 0; i < n; i++){
+  vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
+  for(int i = 0; i<100; i++){
+    graphInit(graph, n, neigOrdEdges);
+    graphEdgesFill(graph, n, neigOrdEdges);
+    graphRewireFillNeig(graph, n, nEdgeRew, nRewire, neigOrdEdges);
+    fs = fopen("net.net","w");
+    graphPrintToFile(graph, n, fs);
+    fclose(fs);
+    graphFree(graph,n);
+  }
+
+  free(graph);
+
+  /*for(int i = 0; i < n; i++){
     for(int j = 0; j < n; j++) printf("%d ", vertexEdgesAssignNumber(i*n+j,n,neigOrdRewire));
     printf("\n");
-  }
+  }*/
 
 
   // fs = fopen("net.txt","w");

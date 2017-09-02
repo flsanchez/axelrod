@@ -12,9 +12,9 @@ typedef struct vertex
 
 int vertexEdgesInit(vertex* graph, int idx, int nEdges);
 int vertexRewireInit(vertex* graph, int idx, int nRewire);
-int vertexEdgesAssignNumber(int idx, int n, int neigOrd);
-int vertexEdgesFill(int* edges, int n, int idx, int neigOrd);
-int vertexRewireFill(vertex* graph, int idx);
+int vertexEdgesAssignNumber(int idx, int n, int neigOrdEdges);
+int vertexEdgesFill(int* edges, int n, int idx, int neigOrdEdges);
+int vertexRewireFill(vertex* graph, int idx, int* rewArray, int nRewArray, int nRewire);
 int vertexEdgesPrint(vertex* graph, int idx);
 int vertexRewirePrint(vertex* graph, int idx);
 int vertexEdgeIsConnected(vertex* graph, int src, int dest);
@@ -24,12 +24,12 @@ int vertexEdgesRm(vertex* graph, int src, int dest);
 int vertexRewireAdd(vertex* graph, int src, int dest);
 int vertexRewireRm(vertex* graph, int src, int dest);
 
-int graphInit(vertex* graph, int n, int neigOrd);
-int graphRewireInit(vertex* graph, int n, int* idxList, int nEdgeRew, int nRewire);
-int graphEdgesFill(vertex* graph, int n, int neigOrd);
-int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew, int nRewire);
-int graphRewireFillNeigAux(vertex* graph, int n);
-int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int neigOrd);
+int graphInit(vertex* graph, int n, int neigOrdEdges);
+int graphRewireInit(vertex* graph, int n);
+int graphEdgesFill(vertex* graph, int n, int neigOrdEdges);
+int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int neigOrdEdges);
+int graphRewireFillNeigAux(vertex* graph, int n, int* idxList, int nEdgeRew, int nRewire);
+int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int neigOrdEdges);
 int graphEdgesAdd(vertex* graph, int src, int dest);
 int graphEdgesRm(vertex* graph, int src, int dest);
 int graphRewireAdd(vertex* graph, int src, int dest);

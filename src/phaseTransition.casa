@@ -47,6 +47,8 @@ int main(){
 
   agent *lattice = (agent*) malloc(n * n * sizeof(agent));
   latticeInit(lattice, n, f, q);
+  vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+
 
   int k,stop;
   int paso = n*n;
@@ -65,7 +67,6 @@ int main(){
 
       printf("q = %d, prom = %d \n",q,i);
 
-      vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
       graphInit(graph, n, neigOrd);
       graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
 
@@ -122,7 +123,8 @@ int main(){
   printf("Tiempo transcurrido total: %d:%d:%d\n", tTotal/3600, (tTotal/60)%60, tTotal%60);
 
   latticeFree(lattice,n);
-
+  free(lattice);
+  free(graph);
   free(nsAcum);
   free(nmbrOfRew);
   free(Sprom);
