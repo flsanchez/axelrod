@@ -13,7 +13,8 @@ typedef struct vertex
 int vertexEdgesInit(vertex* graph, int idx, int nEdges);
 int vertexRewireInit(vertex* graph, int idx, int nRewire);
 int vertexEdgesAssignNumber(int idx, int n, int neigOrdEdges);
-int vertexEdgesFill(int* edges, int n, int idx, int neigOrdEdges);
+//int vertexEdgesFill(int* edges, int n, int idx, int neigOrdEdges);
+int vertexEdgesFill(vertex* graph, int n, int* patterni, int* patternj, int nPattern, int idx);
 int vertexRewireFill(vertex* graph, int idx, int* rewArray, int nRewArray, int nRewire);
 int vertexEdgesPrint(vertex* graph, int idx);
 int vertexRewirePrint(vertex* graph, int idx);
@@ -24,7 +25,8 @@ int vertexEdgesRm(vertex* graph, int src, int dest);
 int vertexRewireAdd(vertex* graph, int src, int dest);
 int vertexRewireRm(vertex* graph, int src, int dest);
 
-int graphInit(vertex* graph, int n, int neigOrdEdges);
+//int graphInit(vertex* graph, int n, int neigOrdEdges);
+int graphInit(vertex* graph, int n);
 int graphRewireInit(vertex* graph, int n);
 int graphEdgesFill(vertex* graph, int n, int neigOrdEdges);
 int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int neigOrdEdges);

@@ -8,7 +8,7 @@ int main(){
 
   srand(time(NULL));
 
-  int n = 50;
+  int n = 5;
   int nRewire = 1;
   int t = time(NULL);
   int idx = 10;
@@ -21,8 +21,8 @@ int main(){
 
 
   vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
-  for(int i = 0; i<100; i++){
-    graphInit(graph, n, neigOrdEdges);
+  for(int i = 0; i<1; i++){
+    graphInit(graph, n);
     graphEdgesFill(graph, n, neigOrdEdges);
     graphRewireFillNeig(graph, n, nEdgeRew, nRewire, neigOrdEdges);
     fs = fopen("net.net","w");

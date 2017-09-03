@@ -27,9 +27,9 @@ for files in ls:
 		print "Links Totales: {0}".format(nx.number_of_edges(g))
 		print "Links de rewiring: {0}".format(nx.number_of_edges(gRew))
 		t = time.clock()
-		#print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g))
+		print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g)/l0)
 		print time.clock() - t
-		#print "Clustering medio: {0}".format(nx.average_clustering(g))
+		print "Clustering medio: {0}".format(nx.average_clustering(g)/c0)
 
 		#plt.plot(nx.degree_histogram(g),'ro-')
 		#nx.draw(g,pos)
