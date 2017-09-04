@@ -35,7 +35,7 @@ int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew,
 int graphRewireFillNeigAux(vertex* graph, int n, int* idxList,
                           int nEdgeRew, int nRewire);
 int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew,
-                          int nRewire, int neigOrdEdges);
+                          int nRewire, int neigOrdEdges, int neigOrdRewire);
 int graphEdgesAdd(vertex* graph, int src, int dest);
 int graphEdgesRm(vertex* graph, int src, int dest);
 int graphRewireAdd(vertex* graph, int src, int dest);

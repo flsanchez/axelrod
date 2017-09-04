@@ -24,7 +24,9 @@ int main(){
   for(int i = 0; i<1; i++){
     graphInit(graph, n);
     graphEdgesFill(graph, n, neigOrdEdges);
-    graphRewireFillNeig(graph, n, nEdgeRew, nRewire, neigOrdEdges);
+    graphRewireFillNotNeig(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+    graphEdgesPrint(graph,n);
+    graphRewirePrint(graph,n);
     fs = fopen("net.net","w");
     graphPrintToFile(graph, n, fs);
     fclose(fs);

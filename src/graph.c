@@ -305,40 +305,55 @@ int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew,
   return 0;
 }
 
-/* graphRewireFillNotNeig() llena el vector de rewire de una cantidad nEdgeRew
-  de vertices del grafo, eligiendo nRewire no vecinos de orden neigOrdEdges*/
+/* graphRewireFillNeig() se encarga de llenar el vector de REWIRE para
+  una cantidad nEdgeRew de vertices contenidos en el grafo, eligiendo para
+  cada vertice seleccionado un numero nRewire de no vecinos de orden
+  neigOrdRewire para asignar */
 
 int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew,
-                          int nRewire, int neigOrdEdges){
+                          int nRewire, int neigOrdEdges, int neigOrdRewire){
 
   /* idxList guarda en la posicion i el valor i */
-  /*
-  int idx, neigNmbr;
-  int* rewire = NULL;
+  int idx;
   int* idxList = malloc(n*n*sizeof(int));
-  for(int i = 0; i<n*n; i++) idxList[i] = i;
+  for(int i = 0; i<n*n; i++) idxList[i] = i; // lleno con los indices de la red
   shuffleArray(idxList, n*n); //mezclo el array
 
-  // inicializo los array de rewire
-  graphRewireInit(graph, n, idxList, nEdgeRew, nRewire);
+  int* patterni; // guardo los indices i de los vecinos admitidos
+  int* patternj; // guardo los indices j de los vecinos admitidos
+  int nNeigArray; // tamaño de neigArray
+  int nPattern; // el tamaño de los vectores patterni y patternj
+  //lleno los pattern dependiendo de la topologia de la red (orden de vecinos)
+  nPattern = patternFill(&patterni, &patternj, n, neigOrdRewire);
 
-  for(int i = 0; i < nEdgeRew; i++){
+  int control = 0; // flag de control, por si vertexRewireFill sale mal, se
+                   // pone a 1 y se repite el loop de llenado de rewire
+  int i = 0;
+  while(i < nEdgeRew){
     idx = idxList[i];
-    neigNmbr = vertexEdgesAssignNumber(idx, n, neigOrdEdges);
-    rewire = realloc(rewire,neigNmbr*sizeof(int));
-    vertexEdgesFill(rewire, n, idx, neigOrdEdges); // me llena con los neigOrdEdges vecinos
-    shuffleArray(rewire, neigNmbr); // mezclo los rewire
-    for(int neigIdx = 0; neigIdx < nRewire; neigIdx++){
-      graphEdgesAdd(graph, idx, rewire[neigIdx]);
-      graphRewireAdd(graph, idx, rewire[neigIdx]);
+    int* neigArray; // lista con vecinos admitidos para cada idx
+    // lleno la lista con los vecinos que admite cada idx
+    nNeigArray = fillNeigArray(patterni, patternj, nPattern, &neigArray, idx, n);
+    control = vertexRewireFill(graph, idx, neigArray, nNeigArray, nRewire);
+    free(neigArray);
+    i++;
+    // si control se pone a 1 o el nodo idx tiene todos sus links de rewire,
+    // se arranca de nuevo con el llenado desde el 0
+    if(control == 1 || graph[idx].nRewire == graph[idx].nEdges){
+      // libero los vectores de rewire y edges
+      graphFree(graph, n);
+      // inicializo de nuevo
+      graphInit(graph, n);
+      graphEdgesFill(graph, n, neigOrdEdges);
+      i = 0;
     }
   }
 
-  free(rewire);
+  free(patterni);
+  free(patternj);
   free(idxList);
 
   return 0;
-  */
 }
 
 /* graphEdgesAdd() añade el elemento conecta los vertices src y dest
