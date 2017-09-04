@@ -117,7 +117,8 @@ int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray, i
   int iNeig;
   int jNeig;
   int idxPattern;
-
+  int nNeigArray = 0;
+  *neigArray = NULL;
 
   for(int k = 0; k<nPattern; k++){
     iPattern = patterni[k];
@@ -125,9 +126,10 @@ int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray, i
     iNeig = i + iPattern;
     jNeig = j + jPattern;
     if( iNeig >= 0 && iNeig < n && jNeig >= 0 && jNeig < n ){
-      //(*neigArray) = realloc( idx, iNeig*n + jNeig);
+      *neigArray = realloc( *neigArray, nNeigArray + 1 );
+      (*neigArray)[nNeigArray] = iNeig*n + jNeig;
+      nNeigArray++;
     }
   }
-
-  return 0;
+  return nNeigArray;
 }

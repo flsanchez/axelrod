@@ -507,7 +507,7 @@ int graphEdgesFill(vertex* graph, int n, int neigOrdEdges){
   for(int idx = 0; idx < n*n ; idx++){
     //nNeigArray = fillNeigArray(patterni, patternj, nPattern, &neigArray, idx, n);
     vertexEdgesFill(graph, n, patterni, patternj, nPattern, idx);
-    //free(neigIdx);
+    //free(neigArray);
     //int* nNeigArray;
   }
   free(patterni);
@@ -530,7 +530,7 @@ int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int nei
   int control = 0; // flag de control, por si vertexRewireFill sale mal, se
                    // pone a 1 y se repite el loop de llenado de rewire
   int i = 0;
-  int try = 0;
+  //int try = 0;
   while(i < nEdgeRew){
     idx = idxList[i];
     control = vertexRewireFill(graph, idx, graph[idx].edges, graph[idx].nEdges, nRewire);
@@ -544,8 +544,8 @@ int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew, int nRewire, int nei
       graphInit(graph, n);
       graphEdgesFill(graph, n, neigOrdEdges);
       i = 0;
-      printf("Try %d\n", try);
-      try++;
+      //printf("Try %d\n", try);
+      //try++;
     }
   }
 
