@@ -33,6 +33,9 @@ int main(){
 
   free(graph);
 
+  t = time(NULL)-t;
+  printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
+
   /*for(int i = 0; i < n; i++){
     for(int j = 0; j < n; j++) printf("%d ", vertexEdgesAssignNumber(i*n+j,n,neigOrdRewire));
     printf("\n");

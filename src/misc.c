@@ -39,6 +39,11 @@ int isElemInArray(int* array, int n, int elem){
   return 0;
 }
 
+/* patternFill() llena el vector de patterni y patternj con las posibles
+  conexiones que puede hacer cada nodo dependiendo de la topologia asignada
+  dada por el neigOrd (neigOrd = 1: vecindad de von Neumann orden 1;
+  neigOrd = 2: vecindad de Moore orden 1; neigOrd = 3: vecindad de Moore o. 2)*/
+
 int patternFill(int** patterni, int** patternj, int n, int neigOrd){
   int idxPattern;
   int nPattern;
@@ -109,24 +114,31 @@ int patternFill(int** patterni, int** patternj, int n, int neigOrd){
   return nPattern;
 }
 
-int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray, int idx, int n){
-  int i = idx/n;
-  int j = idx%n;
-  int iPattern;
-  int jPattern;
-  int iNeig;
-  int jNeig;
-  int idxPattern;
-  int nNeigArray = 0;
-  *neigArray = NULL;
+/* fillNeigArray() llena, para el nodo idx, a partir de patterni y patternj,
+  el vector neigArray con las posibles conexiones dadas las CC no-periodicas*/
 
+int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray,
+                  int idx, int n){
+                    
+  int i = idx/n; // componente i de idx
+  int j = idx%n; // componente j de idx
+  int iPattern; // guardo la componente i del patron
+  int jPattern; // guardo la componente j del patron
+  int iNeig; // voy a guardar la comp i del posible vecino resultante
+  int jNeig; // idem con j
+  int nNeigArray = 0; // tamaño del neigArray
+  *neigArray = NULL; // inicializo el neigArray
+
+  // para cada elemento de los vectores de pattern
   for(int k = 0; k<nPattern; k++){
     iPattern = patterni[k];
     jPattern = patternj[k];
-    iNeig = i + iPattern;
-    jNeig = j + jPattern;
+    iNeig = i + iPattern; // componente i del vecino final
+    jNeig = j + jPattern; // componente j del vecino final
+    // si el elemento resultante se encuentra dentro de la red, lo agrego a
+    // neigArray como posible conexion
     if( iNeig >= 0 && iNeig < n && jNeig >= 0 && jNeig < n ){
-      *neigArray = realloc( *neigArray, nNeigArray + 1 );
+      *neigArray = realloc( *neigArray, sizeof(int)*(nNeigArray + 1) );
       (*neigArray)[nNeigArray] = iNeig*n + jNeig;
       nNeigArray++;
     }
