@@ -266,52 +266,14 @@ int graphEdgesFill(vertex* graph, int n, int neigOrdEdges){
   return 0;
 }
 
-/* graphRewireFillNeig() se encarga de llenar el vector de REWIRE para
-una cantidad nEdgeRew de vertices contenidos en el grafo, eligiendo para
-cada vertice seleccionado un numero nRewire de vecinos para asignar */
-
-int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew,
-                        int nRewire, int neigOrdEdges){
-
-  /* idxList guarda en la posicion i el valor i */
-  int idx;
-  int* idxList = malloc(n*n*sizeof(int));
-  for(int i = 0; i<n*n; i++) idxList[i] = i; // lleno con los indices de la red
-  shuffleArray(idxList, n*n); //mezclo el array
-
-  int control = 0; // flag de control, por si vertexRewireFill sale mal, se
-                   // pone a 1 y se repite el loop de llenado de rewire
-  int i = 0;
-  while(i < nEdgeRew){
-    idx = idxList[i];
-    // hago el fill de rewire para ese idx con el vector de vecinos
-    control = vertexRewireFill(graph, idx, graph[idx].edges,
-                              graph[idx].nEdges, nRewire);
-    i++;
-    // si control se pone a 1 o el nodo idx tiene todos sus links de rewire,
-    // se arranca de nuevo con el llenado desde el 0
-    if(control == 1 || graph[idx].nRewire == graph[idx].nEdges){
-      // libero los vectores de rewire y edges
-      graphFree(graph, n);
-      // inicializo de nuevo
-      graphInit(graph, n);
-      graphEdgesFill(graph, n, neigOrdEdges);
-      i = 0;
-    }
-  }
-
-  free(idxList);
-
-  return 0;
-}
-
-/* graphRewireFillNeig() se encarga de llenar el vector de REWIRE para
+/* graphRewireFill() se encarga de llenar el vector de REWIRE para
   una cantidad nEdgeRew de vertices contenidos en el grafo, eligiendo para
-  cada vertice seleccionado un numero nRewire de no vecinos de orden
-  neigOrdRewire para asignar */
+  cada vertice seleccionado un numero nRewire de vecinos o no vecinos de orden
+  neigOrdRewire para asignar. Si neigOrdRewire = neigOrdEdges, elige de vecinos
+  sino elige del orden de vecinos de neigOrdRewire */
 
-int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew,
-                          int nRewire, int neigOrdEdges, int neigOrdRewire){
+int graphRewireFill(vertex* graph, int n, int nEdgeRew, int nRewire,
+                    int neigOrdEdges, int neigOrdRewire){
 
   /* idxList guarda en la posicion i el valor i */
   int idx;
@@ -353,6 +315,14 @@ int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew,
   free(patternj);
   free(idxList);
 
+  return 0;
+}
+
+int graphFill(vertex* graph, int n, int nEdgeRew, int nRewire,
+              int neigOrdEdges, int neigOrdRewire)
+{
+  graphEdgesFill(graph, n, neigOrdEdges);
+  graphRewireFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
   return 0;
 }
 

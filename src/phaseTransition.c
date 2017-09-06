@@ -12,7 +12,7 @@ La data se guarda en diferentes txt para cada q, y adentro se guardan, para
 cada repeticion Smax, iteraciones hasta llegar al stop y numero de rewires
 hasta llegar al stop */
 
-int main(){
+int main(int argc, char *argv[]){
 
   int n = 50;
   int f = 10;
@@ -24,7 +24,8 @@ int main(){
   int* nsAcum = malloc(n*n*sizeof(int));
   int frag;
   int max;
-  int neigOrd = 2;
+  int neigOrdEdges = 2;
+  int neigOrdRewire = 3;
   int nEdgeRew =  243;
   int nRewire = 1;
   int* term = malloc(prom*sizeof(int));
@@ -35,6 +36,13 @@ int main(){
   int q;
   int m = 13;
   int b = 0;
+
+  if(argc>3){
+    sscanf(argv[1], "%d", &nEdgeRew);
+    sscanf(argv[2], "%d", &m);
+    sscanf(argv[3], "%d", &prom);
+  }
+
   for(int i = 0; i<qlen; i++) qVector[i] = m*(i+1) + b;
 
   int tLoop,tTotal;
@@ -67,11 +75,15 @@ int main(){
 
       printf("q = %d, prom = %d \n",q,i);
 
-      graphInit(graph, n, neigOrd);
-      graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
+      graphInit(graph, n);
+      graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+
+      sprintf(name,"q_%d_%d_Ini.net",q,i);
+      fs = fopen(name,"w");
+      graphPrintToFile(graph,n,fs);
+      fclose(fs);
 
       latticeFill(lattice, n, q);
-
 
       stop = 0;
       k = 0;
@@ -88,7 +100,7 @@ int main(){
       Sprom[i] = max;
       printf("Smax = %d; Pasos = %d; Rewires = %d\n",max,k-1,nmbrOfRew[i]);
 
-      sprintf(name,"q_%d_%d.net",q,i);
+      sprintf(name,"q_%d_%d_Fin.net",q,i);
       fs = fopen(name,"w");
       graphPrintToFile(graph,n,fs);
       fclose(fs);

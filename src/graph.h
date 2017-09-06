@@ -30,12 +30,10 @@ int graphInit(vertex* graph, int n);
 int graphEdgesInit(vertex* graph, int n);
 int graphRewireInit(vertex* graph, int n);
 int graphEdgesFill(vertex* graph, int n, int neigOrdEdges);
-int graphRewireFillNeig(vertex* graph, int n, int nEdgeRew,
-                        int nRewire, int neigOrdEdges);
-int graphRewireFillNeigAux(vertex* graph, int n, int* idxList,
-                          int nEdgeRew, int nRewire);
-int graphRewireFillNotNeig(vertex* graph, int n, int nEdgeRew,
+int graphRewireFill(vertex* graph, int n, int nEdgeRew,
                           int nRewire, int neigOrdEdges, int neigOrdRewire);
+int graphFill(vertex* graph, int n, int nEdgeRew, int nRewire,
+                                        int neigOrdEdges, int neigOrdRewire);
 int graphEdgesAdd(vertex* graph, int src, int dest);
 int graphEdgesRm(vertex* graph, int src, int dest);
 int graphRewireAdd(vertex* graph, int src, int dest);
