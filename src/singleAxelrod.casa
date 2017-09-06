@@ -14,10 +14,11 @@ int main(){
   int n = 50;
   int f = 10;
   int q = 10;
-  int neigOrd = 2;
+  int neigOrdEdges = 2;
+  int neigOrdRewire = 3;
   int nRewire = 1;
   int nmbrOfRew = 0;
-  int nEdgeRew = 0;
+  int nEdgeRew = n*n;
   int niter = 50E6;
   int paso = n*n;
   int frag,max;
@@ -32,10 +33,11 @@ int main(){
 
   latticeInit(lattice, n, f, q);
   latticeFill(lattice, n, q);
-  graphInit(graph, n, neigOrd);
-  graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
+  graphInit(graph, n);
+  graphEdgesFill(graph, n, neigOrdEdges);
+  graphRewireFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
 
-  fs = fopen("netIni.txt","w");
+  fs = fopen("netIni.net","w");
   graphPrintToFile(graph,n,fs);
   fclose(fs);
 
@@ -59,12 +61,14 @@ int main(){
   t = time(NULL)-t;
   printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);
 
-  fs = fopen("netFin.txt","w");
+  fs = fopen("netFin.net","w");
   graphPrintToFile(graph,n,fs);
   fclose(fs);
 
   latticeFree(lattice, n);
+  free(lattice);
   graphFree(graph, n);
+  free(graph);
 
   return 0;
 }

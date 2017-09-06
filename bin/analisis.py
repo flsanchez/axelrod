@@ -12,7 +12,7 @@ ls=os.listdir(cwd)
 ls = [sys.argv[1]]
 
 for files in ls:
-	if files.endswith(".txt"):
+	if files.endswith(".net"):
 		name = files
 		edges = gid.loadGraphEdges(name)
 		rewire = gid.loadGraphRewire(name)
@@ -27,17 +27,17 @@ for files in ls:
 		print "Links Totales: {0}".format(nx.number_of_edges(g))
 		print "Links de rewiring: {0}".format(nx.number_of_edges(gRew))
 		t = time.clock()
-		#print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g))
+		print "Camino minimo medio: {0}".format(nx.average_shortest_path_length(g)/l0)
 		print time.clock() - t
-		#print "Clustering medio: {0}".format(nx.average_clustering(g))
+		print "Clustering medio: {0}".format(nx.average_clustering(g)/c0)
 
-		plt.plot(nx.degree_histogram(g),'ro-')
+		#plt.plot(nx.degree_histogram(g),'ro-')
 		#nx.draw(g,pos)
-		plt.show()
+		#plt.show()
 
-		#nx.draw(g,pos,edge_color = 'r',node_size=50)
-		#plt.show()
+		nx.draw(g,pos,edge_color = 'r',node_size=50)
+		plt.show()
 		#print nx.number_of_edges(gRew)
-		#nx.draw(gRew,pos,edge_color = 'g',node_size=50)
-		#plt.show()
+		nx.draw(gRew,pos,edge_color = 'g',node_size=50)
+		plt.show()
 

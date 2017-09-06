@@ -8,26 +8,41 @@ int main(){
 
   srand(time(NULL));
 
-  int n = 3;
+  int n = 5;
   int nRewire = 1;
   int t = time(NULL);
   int idx = 10;
-  int neigOrd = 2;
-  int nEdgeRew = 1;
+  int neigOrdEdges = 2;
+  int neigOrdRewire = 3;
+  int nEdgeRew = n*n;
   char name[100];
   int cont;
   FILE *fs;
 
-  for(int i = 0; i<10; i++){
-    vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
-    graphInit(graph, n, neigOrd);
-    printf("%d\n", i);
-    graphFill(graph, n, neigOrd, nEdgeRew, nRewire);
+
+  vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
+  for(int i = 0; i<1; i++){
+    graphInit(graph, n);
+    graphEdgesFill(graph, n, neigOrdEdges);
+    graphRewireFillNotNeig(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+    graphEdgesPrint(graph,n);
+    graphRewirePrint(graph,n);
     fs = fopen("net.net","w");
     graphPrintToFile(graph, n, fs);
     fclose(fs);
     graphFree(graph,n);
   }
+
+  free(graph);
+
+  t = time(NULL)-t;
+  printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
+
+  /*for(int i = 0; i < n; i++){
+    for(int j = 0; j < n; j++) printf("%d ", vertexEdgesAssignNumber(i*n+j,n,neigOrdRewire));
+    printf("\n");
+  }*/
+
 
   // fs = fopen("net.txt","w");
   // graphPrintToFile(graph, n, fs);
