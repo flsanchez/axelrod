@@ -13,31 +13,36 @@ int main(){
 
   int n = 10;
   int f = 11;
-  int q = 10;
+  int q = 50;
   int qF = 2;
   int neigOrdEdges = 2;
   int neigOrdRewire = 2;
   int nRewire = 1;
   int nmbrOfRew = 0;
   int nEdgeRew = 0*n*n;
-  float phi = 0;
+  float phi = 0.1;
   int niter = 50E6;
   int paso = n*n;
   int frag,max;
   int end = 0;
+  int nStub = 1;
   FILE *fs;
   char name[100];
 
   srand(time(NULL));
 
-  agent *lattice = (agent*) malloc(n * n * sizeof(agent));
+  agent* lattice = (agent*) malloc(n * n * sizeof(agent));
   vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
 
-  latticeInit(lattice, n, f);
+  latticeInit(lattice, n, f, q, qF);
   latticeFill(lattice, n, q, qF);
+  latticeSetStub(lattice,n,nStub);
   graphInit(graph, n);
   graphEdgesFill(graph, n, neigOrdEdges);
   graphRewireFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+
+  /*latticePrintFeats(lattice,n);
+  latticePrintLastFeat(lattice,n);*/
 
   fs = fopen("netIni.net","w");
   graphPrintToFile(graph,n,fs);
@@ -55,11 +60,16 @@ int main(){
       if(stop == 1 && end == 0) end = i;
     }
 
-    if(i%(int)(1E5) == 0) printf("Paso %d\n", i);
+    if(i%(int)(1E6) == 0){
+      printf("Paso %d\n", i);
+      latticePrintLastFeat(lattice,n);
+    }
 
     i++;
 
   }
+  printf("Paso %d\n", i);
+  latticePrintLastFeat(lattice,n);
   frag = latticeLabel(graph, lattice, n);
   max = maxCluster(lattice, NULL, n, frag);
   t = time(NULL)-t;

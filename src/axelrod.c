@@ -9,25 +9,29 @@
 /* step() es la funcion encargada de realizar el paso tempora de axelrod, si
 hubo rewiring devuelve 1, si hubo imitacion devuelve 0 */
 
-int step(vertex* graph, agent *lattice, int n){
+int step(vertex* graph, agent *lattice, int n, float phi){
 
   int i, j, hij;
+  int k = 2; //threshold de interaccion
   i = getRand(n*n); //indice del activo
   while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
   j = pickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
 
   hij = commonTraits(lattice, i, j);
 
-  if(vertexRewireIsConnected(graph, i, j)){
+  // si la homofilia es mayor que el threshold
+  if(hij >= k){
+    if(vertexRewireIsConnected(graph, i, j)){
 
-    int k = pickPassiveNotNeig(graph, n, i);
-    int hik = commonTraits(lattice, i, k);
+      int k = pickPassiveNotNeig(graph, n, i);
+      int hik = commonTraits(lattice, i, k);
 
-    if(hij < hik) return socialInteraction(graph, i, j, k);
-    else opinionInteraction(lattice, i, j, hij);
+      if(hij < hik) return socialInteraction(graph, i, j, k);
+      else opinionInteraction(lattice, i, j, hij, phi);
 
+    }
+    else opinionInteraction(lattice, i, j, hij, phi);
   }
-  else opinionInteraction(lattice, i, j, hij);
 
   return 0;
 
@@ -93,7 +97,7 @@ int clusterSize(agent *lattice, int n, int frag, int *fragsz, int *ns){
 /* opinionInteraction() realiza el intercambio de opiniones entre los agentes
 i y j con homofilia hij */
 
-int opinionInteraction(agent* lattice, int i, int j, int hij){
+int opinionInteraction(agent* lattice, int i, int j, int hij, float phi){
 
   int uncomTrait, f;
   float prob;
@@ -113,7 +117,13 @@ int opinionInteraction(agent* lattice, int i, int j, int hij){
         if(lattice[i].feat[uncomIdx] != lattice[j].feat[uncomIdx]) cont++;
       }
 
-      lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+      /* si el feat elegido es el f-1 */
+      if(uncomIdx == f-1){
+        /* si el agente no es taliban y cumple la condicion del campo */
+        if(lattice[i].stub != 1 && ((float) rand() / (float) RAND_MAX) < (1-phi)){
+          lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+        }
+      }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
 
     }
 
@@ -138,12 +148,13 @@ respectivamente (si no hay, la interaccion es terminada) */
 
 int stopReached(vertex* graph, agent* lattice, int n){
   int h;
+  int k = 2; //threshold de la interaccion
+  int f = lattice[0].f;
+
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
       h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
-      if( h != lattice[idx].f && h != 0){
-        return 0;
-      }
+      if( !(h == f || h < k) ) return 0;
     }
   }
   return 1;
