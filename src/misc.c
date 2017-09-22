@@ -119,7 +119,7 @@ int patternFill(int** patterni, int** patternj, int n, int neigOrd){
 
 int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray,
                   int idx, int n){
-                    
+
   int i = idx/n; // componente i de idx
   int j = idx%n; // componente j de idx
   int iPattern; // guardo la componente i del patron
@@ -144,4 +144,10 @@ int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray,
     }
   }
   return nNeigArray;
+}
+
+int loadFromTxt(FILE* fs, int* array){
+  int i = 0, n = 0;
+  while( fscanf(fs, "%d ", &n) > 0 ) array[i++] = n;
+  return 0;
 }

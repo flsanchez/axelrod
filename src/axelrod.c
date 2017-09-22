@@ -119,9 +119,16 @@ int opinionInteraction(agent* lattice, int i, int j, int hij, float phi){
 
       /* si el feat elegido es el f-1 */
       if(uncomIdx == f-1){
-        /* si el agente no es taliban y cumple la condicion del campo */
-        if(lattice[i].stub != 1 && ((float) rand() / (float) RAND_MAX) < (1-phi)){
-          lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+        /* si el agente no es taliban */
+        if(lattice[i].stub != 1){
+          /* si hay una transicion vacunador -> no vacunador */
+          if(lattice[i].feat[f-1] == 0 && lattice[j].feat[f-1] == 1){
+            /* si se da la condicion del campo, transiciona */
+            prob = 1.0-phi;
+            if(((float) rand() / (float) RAND_MAX) < prob){
+              lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+            }
+          }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
         }
       }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
 
@@ -133,7 +140,7 @@ int opinionInteraction(agent* lattice, int i, int j, int hij, float phi){
 }
 
 /* socialInteraction() hace el rewire de i/j -> i/k, modificando
-el rewire de i, devuelve siempre 1 */
+  el rewire de i, devuelve siempre 1 */
 
 int socialInteraction(vertex* graph, int i, int j, int k){
   graphEdgesRm(graph, i, j); // desconecto la conexion entre i y j para los dos

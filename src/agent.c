@@ -128,6 +128,21 @@ int latticePrintLabels(agent *lattice, int n){
 
 }
 
+/* latticePrintStub() imprime en pantalla los talibanes */
+
+int latticePrintStub(agent* lattice, int n){
+  int idx;
+  for(int i=0; i<n; i++){
+    for(int j=0; j<n; j++){
+      idx = i*n+j;
+      if(lattice[idx].stub == 1) printf("* ");
+      else printf("0 ");
+    }
+    printf("\n");
+  }
+  return 0;
+}
+
 /* latticePrintToFile() guarda los valores de cada feat de cada agente.
   Si labelFlag es 1, imprime como ultima componente del vector de feats la
   etiqueta de cada agente */

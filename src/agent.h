@@ -22,6 +22,7 @@ int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray);
 int latticePrintFeats(agent *lattice, int n);
 int latticePrintFeatN(agent *lattice, int n, int featNIdx);
 int latticePrintLabels(agent *lattice, int n); //
+int latticePrintStub(agent* lattice, int n);
 int latticePrintToFile(agent* lattice, int n, FILE* fs, int labelFlag);
 int latticeFree(agent *lattice, int n); //
 int commonTraits(agent *lattice, int i, int j);

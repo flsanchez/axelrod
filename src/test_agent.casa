@@ -11,21 +11,21 @@ cantidad de pasos para llegar al stop por pantalla */
 
 int main(){
 
-  int n = 10;
+  int n = 50;
   int f = 11;
-  int q = 50;
+  int q = 90;
   int qF = 2;
   int neigOrdEdges = 2;
   int neigOrdRewire = 2;
   int nRewire = 1;
   int nmbrOfRew = 0;
   int nEdgeRew = 0*n*n;
-  float phi = 0.1;
+  float phi = 0.01;
   int niter = 50E6;
   int paso = n*n;
   int frag,max;
   int end = 0;
-  int nStub = 1;
+  int nStub = 25;
   FILE *fs;
   char name[100];
 
@@ -34,7 +34,7 @@ int main(){
   agent* lattice = (agent*) malloc(n * n * sizeof(agent));
   vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
 
-  latticeInit(lattice, n, f, q, qF);
+  latticeInit(lattice, n, f);
   latticeFill(lattice, n, q, qF);
   latticeSetStub(lattice,n,nStub);
   graphInit(graph, n);
@@ -48,6 +48,10 @@ int main(){
   graphPrintToFile(graph,n,fs);
   fclose(fs);
 
+  /*latticePrintFeatN(lattice,n,f-1);
+  printf("\n");
+  latticePrintStub(lattice,n);*/
+
   int i = 0;
   int stop = 0;
   int t = time(NULL);
@@ -60,16 +64,17 @@ int main(){
       if(stop == 1 && end == 0) end = i;
     }
 
-    if(i%(int)(1E6) == 0){
-      printf("Paso %d\n", i);
-      latticePrintLastFeat(lattice,n);
-    }
+    if(i%(int)1E6==0) printf("Paso %d\n", i);
 
     i++;
 
   }
   printf("Paso %d\n", i);
-  latticePrintLastFeat(lattice,n);
+
+  /*latticePrintFeatN(lattice,n,f-1);
+  printf("\n");
+  latticePrintStub(lattice,n);*/
+
   frag = latticeLabel(graph, lattice, n);
   max = maxCluster(lattice, NULL, n, frag);
   t = time(NULL)-t;

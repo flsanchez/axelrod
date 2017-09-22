@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "graph.h"
+#include "agent.h"
 #include "functions.h"
 
 /* minDist() devuelve, dada una lista con las distancias y si esta marcado o no
@@ -58,4 +59,26 @@ float avMinPathLen(vertex* graph, int n){
   }
   free(dist);
   return l/(n*n*(n*n-1));
+}
+
+/* nonVaccinatorCount() suma 1 en la posicion i de vacAcum si el agente i de
+  lattice es vacunador*/
+
+int nonVaccinatorCount(agent* lattice, int n, int* nonVacAcum){
+  int f;
+  for(int idx = 0; idx < n*n; idx++){
+    f = lattice[idx].f;
+    if(lattice[idx].feat[f-1] == 1) nonVacAcum[idx]++;
+  }
+  return 0;
+}
+
+int nonVaccinatorTotal(agent* lattice, int n){
+  int nonVacTot = 0;
+  int f;
+  for(int idx = 0; idx < n*n; idx++){
+    f = lattice[idx].f;
+    nonVacTot = nonVacTot + lattice[idx].feat[f-1];
+  }
+  return nonVacTot;
 }

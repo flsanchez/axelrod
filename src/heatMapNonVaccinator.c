@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "agent.h"
+#include "graph.h"
+#include "label.h"
+#include "axelrod.h"
+#include "functions.h"
+#include "misc.h"
+
+/* este main hace una corrida simple de un axelrod y entrega el Smax y la
+cantidad de pasos para llegar al stop por pantalla */
+
+int main(int argc, char *argv[]){
+
+  int n = 50;
+  int f = 11;
+  int q = 80;
+  int qF = 2;
+  int prom = 50;
+  int neigOrdEdges = 2;
+  int neigOrdRewire = 2;
+  int nRewire = 1;
+  int nEdgeRew = 0*n*n;
+  float phi = 0.2;
+  int* nonVacAcum = malloc(n*n*sizeof(int));
+  for(int i = 0; i < n*n; i++) nonVacAcum[i] = 0;
+  int paso = n*n;
+  int nStub = n*n*0.01;
+  FILE *fs;
+  char name[100];
+  int talRead = 0;
+
+  if(argc>4){
+    sscanf(argv[1], "%d", &q);
+    sscanf(argv[2], "%d", &prom);
+    sscanf(argv[3], "%f", &phi);
+    sscanf(argv[4], "%d", &talRead);
+  }
+
+  srand(time(NULL));
+
+  int i,stop,tLoop;
+
+  FILE* file;
+  int* idxArray = malloc(n*n*sizeof(int));
+
+  if(talRead == 0){
+    for(int i = 0; i<n*n; i++) idxArray[i] = i;
+    shuffleArray(idxArray, n*n);
+    file = fopen("nonVac.tal","w");
+    for(int i=0; i<n*n; i++) fprintf(file, "%d ", idxArray[i]);
+  }
+  else{
+    file = fopen("nonVac.tal","r");
+    loadFromTxt(file,idxArray);
+  }
+
+  fclose(file);
+
+  agent *lattice = (agent*) malloc(n * n * sizeof(agent));
+  vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+  int t = time(NULL);
+  for(int iter=0; iter<prom; iter++){
+
+    printf("q = %d ; paso = %d/%d ; campo = %.2f\n", q, iter+1,prom, phi);
+
+    latticeInit(lattice, n, f);
+    latticeFill(lattice, n, q, qF);
+    latticeSetStubFromArray(lattice,n,idxArray,nStub);
+
+    graphInit(graph, n);
+    graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+
+    i = 0;
+    stop = 0;
+    tLoop = time(NULL);
+    while(stop == 0){
+      step(graph,lattice,n,phi);
+      if(i%paso==0){
+        stop = stopReached(graph,lattice,n);
+      }
+      i++;
+    }
+
+    nonVaccinatorCount(lattice, n, nonVacAcum);
+
+    tLoop = time(NULL)-tLoop;
+    printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tLoop/3600, (tLoop/60)%60, tLoop%60);
+
+    latticeFree(lattice, n);
+    graphFree(graph, n);
+  }
+
+  /* guardo la data en filas */
+  sprintf(name,"nonVacAcum_q_%d_phi_%.2f.txt",q,phi);
+  fs = fopen(name,"w");
+  fprintf(fs, "# n q prom phi\n# %d %d %d %.2f\n", n, q, prom, phi);
+  for(int i = 0; i<n*n; i++) fprintf(fs, "%d ", nonVacAcum[i]);
+  fprintf(fs, "\n");
+
+  t = time(NULL)-t;
+  printf("Tiempo transcurrido Total: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
+
+  fclose(fs);
+  free(lattice);
+  free(graph);
+  free(nonVacAcum);
+  free(idxArray);
+
+  return 0;
+}
