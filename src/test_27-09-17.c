@@ -53,9 +53,6 @@ int main(int argc, char *argv[]){
   sprintf(name, "red_phi_%.2f.red",phi);
   fs2 = fopen(name,"w");
 
-  /*sprintf(name, "redCultural_phi_%.2f.red",phi);
-  fs3 = fopen(name,"w");*/
-
   int i = 0;
   int stop = 0;
   int actLinks = 0;
@@ -66,12 +63,9 @@ int main(int argc, char *argv[]){
 
     if(i%(5*paso)==0){
       //stop = stopReached(graph,lattice,n);
-      //if(stop == 1 && end == 0) end = i;
       actLinks = activeLinks(graph, lattice, n);
       fprintf(fs, "%d %d\n", nonVaccinatorTotal(lattice, n), actLinks);
       latticePrintFeatsToFile(lattice, n, fs2);
-      /*latticeLabelCultural(graph, lattice, n);
-      latticePrintLabelsToFile(lattice, n, fs3);*/
     }
 
     if(i%(int)1E6==0) printf("Paso %d; Active Links = %d\n", i, actLinks);
@@ -88,7 +82,6 @@ int main(int argc, char *argv[]){
 
   fclose(fs);
   fclose(fs2);
-  fclose(fs3);
   latticeFree(lattice, n);
   free(lattice);
   graphFree(graph, n);

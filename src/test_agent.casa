@@ -11,78 +11,54 @@ cantidad de pasos para llegar al stop por pantalla */
 
 int main(){
 
-  int n = 50;
+  int n = 6;
   int f = 11;
-  int q = 90;
+  int q = 80;
   int qF = 2;
   int neigOrdEdges = 2;
   int neigOrdRewire = 2;
   int nRewire = 1;
   int nmbrOfRew = 0;
   int nEdgeRew = 0*n*n;
-  float phi = 0.01;
+  float phi = 0.02;
   int niter = 50E6;
   int paso = n*n;
   int frag,max;
   int end = 0;
-  int nStub = 25;
+  int nStub = 1;
   FILE *fs;
   char name[100];
+  int iAg = 24;
+  int jAg = 25;
 
   srand(time(NULL));
 
   agent* lattice = (agent*) malloc(n * n * sizeof(agent));
   vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
 
+  int* idxList = malloc(sizeof(int));
+  idxList[0] = jAg;
+
   latticeInit(lattice, n, f);
   latticeFill(lattice, n, q, qF);
-  latticeSetStub(lattice,n,nStub);
+  latticeSetStubFromArray(lattice,n,idxList,nStub);
+  for(int i = 0; i<f-1; i++){
+    lattice[iAg].feat[i] = 2;
+    lattice[jAg].feat[i] = 2;
+  }
   graphInit(graph, n);
   graphEdgesFill(graph, n, neigOrdEdges);
   graphRewireFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
 
-  /*latticePrintFeats(lattice,n);
-  latticePrintLastFeat(lattice,n);*/
+  latticePrintFeatN(lattice,n,f-1);
 
-  fs = fopen("netIni.net","w");
-  graphPrintToFile(graph,n,fs);
-  fclose(fs);
+  int hij = commonTraits(lattice,iAg,jAg);
+  opinionInteraction(lattice,iAg,jAg,hij,phi);
 
-  /*latticePrintFeatN(lattice,n,f-1);
   printf("\n");
-  latticePrintStub(lattice,n);*/
+  latticePrintFeatN(lattice,n,f-1);
 
-  int i = 0;
-  int stop = 0;
-  int t = time(NULL);
-  while(stop == 0){
 
-    nmbrOfRew = nmbrOfRew + step(graph,lattice,n,phi);
-
-    if(i%paso==0){
-      stop = stopReached(graph,lattice,n);
-      if(stop == 1 && end == 0) end = i;
-    }
-
-    if(i%(int)1E6==0) printf("Paso %d\n", i);
-
-    i++;
-
-  }
-  printf("Paso %d\n", i);
-
-  /*latticePrintFeatN(lattice,n,f-1);
-  printf("\n");
-  latticePrintStub(lattice,n);*/
-
-  frag = latticeLabel(graph, lattice, n);
-  max = maxCluster(lattice, NULL, n, frag);
-  t = time(NULL)-t;
-  printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);
-
-  fs = fopen("netFin.net","w");
-  graphPrintToFile(graph,n,fs);
-  fclose(fs);
 
   latticeFree(lattice, n);
   free(lattice);

@@ -128,6 +128,15 @@ int latticePrintLabels(agent *lattice, int n){
 
 }
 
+/* latticePrintLabelsToFile() imprime en un archivo las etiquetas identificadoras de
+  cluster de cada agente */
+
+int latticePrintLabelsToFile(agent *lattice, int n, FILE *fs){
+  for(int idx = 0; idx<n*n; idx++) fprintf(fs, "%d ",lattice[idx].label);
+  fprintf(fs,"\n");
+  return 0;
+}
+
 /* latticePrintStub() imprime en pantalla los talibanes */
 
 int latticePrintStub(agent* lattice, int n){
@@ -143,20 +152,25 @@ int latticePrintStub(agent* lattice, int n){
   return 0;
 }
 
-/* latticePrintToFile() guarda los valores de cada feat de cada agente.
-  Si labelFlag es 1, imprime como ultima componente del vector de feats la
-  etiqueta de cada agente */
+/* latticePrintFeatsToFile() guarda los valores de cada feat de cada agente. */
 
-int latticePrintToFile(agent* lattice, int n, FILE* fs, int labelFlag){
+int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs){
   int f;
-  fprintf(fs, "# labelFlag\n");
-  fprintf(fs, "# %d\n", labelFlag);
   for(int i = 0; i < n*n; i++){
     f = lattice[i].f;
-    for(int fIdx = 0; fIdx < f; fIdx++) fprintf(fs, "%d ",lattice[i].feat[fIdx]);
-    if(labelFlag == 1) fprintf(fs, "%d ",lattice[i].label);
-    fprintf(fs, "\n");
+    for(int fIdx = 0; fIdx < f-1; fIdx++) fprintf(fs, "%d,",lattice[i].feat[fIdx]);
+    fprintf(fs, "%d ",lattice[i].feat[f-1]);
   }
+  return 0;
+}
+
+int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
+  int f;
+  for(int i = 0; i < n*n; i++){
+    f = lattice[i].f;
+    fprintf(fs, "%d ",lattice[i].feat[featNIdx]);
+  }
+  fprintf(fs,"\n");
   return 0;
 }
 
@@ -179,6 +193,22 @@ int commonTraits(agent *lattice, int i, int j){
   int res = 0;
 
   for(int idx = 0; idx < f; idx++){
+    if(lattice[i].feat[idx] == lattice[j].feat[idx]) res++;
+  }
+
+  return res;
+
+}
+
+/* commonTraits() cuenta cuantos features tienen en comun los agentes i y j,
+  devolviendo el resultado */
+
+int commonTraitsCultural(agent *lattice, int i, int j){
+
+  int f = lattice[i].f;
+  int res = 0;
+
+  for(int idx = 0; idx < f-1; idx++){
     if(lattice[i].feat[idx] == lattice[j].feat[idx]) res++;
   }
 

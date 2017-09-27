@@ -12,26 +12,24 @@ hubo rewiring devuelve 1, si hubo imitacion devuelve 0 */
 int step(vertex* graph, agent *lattice, int n, float phi){
 
   int i, j, hij;
-  int k = 2; //threshold de interaccion
+  int th = 2; //threshold de interaccion
   i = getRand(n*n); //indice del activo
   while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
   j = pickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
 
   hij = commonTraits(lattice, i, j);
 
-  // si la homofilia es mayor que el threshold
-  if(hij >= k){
-    if(vertexRewireIsConnected(graph, i, j)){
+  if(vertexRewireIsConnected(graph, i, j)){
 
-      int k = pickPassiveNotNeig(graph, n, i);
-      int hik = commonTraits(lattice, i, k);
+    int k = pickPassiveNotNeig(graph, n, i);
+    int hik = commonTraits(lattice, i, k);
 
-      if(hij < hik) return socialInteraction(graph, i, j, k);
-      else opinionInteraction(lattice, i, j, hij, phi);
+    if(hij < hik) return socialInteraction(graph, i, j, k);
+    else opinionInteraction(lattice, i, j, hij, th, phi);
 
-    }
-    else opinionInteraction(lattice, i, j, hij, phi);
   }
+  else opinionInteraction(lattice, i, j, hij, th, phi);
+
 
   return 0;
 
@@ -97,15 +95,19 @@ int clusterSize(agent *lattice, int n, int frag, int *fragsz, int *ns){
 /* opinionInteraction() realiza el intercambio de opiniones entre los agentes
 i y j con homofilia hij */
 
-int opinionInteraction(agent* lattice, int i, int j, int hij, float phi){
+int opinionInteraction(agent* lattice, int i, int j, int hij, int th, float phi){
 
   int uncomTrait, f;
   float prob;
+  float r;
   f = lattice[i].f;
 
-  prob = (float) hij / f;
+  if(hij >= th) prob = (float) hij / f;
+  else prob = 0;
 
-  if( ((float) rand() / (float) RAND_MAX) < prob){
+  r = ((float) rand() / (float) RAND_MAX);
+
+  if( r < prob ){
 
     if(hij != f){
 
@@ -125,7 +127,8 @@ int opinionInteraction(agent* lattice, int i, int j, int hij, float phi){
           if(lattice[i].feat[f-1] == 0 && lattice[j].feat[f-1] == 1){
             /* si se da la condicion del campo, transiciona */
             prob = 1.0-phi;
-            if(((float) rand() / (float) RAND_MAX) < prob){
+            r = ((float) rand() / (float) RAND_MAX);
+            if(r < prob){
               lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
             }
           }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
@@ -161,8 +164,23 @@ int stopReached(vertex* graph, agent* lattice, int n){
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
       h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
-      if( !(h == f || h < k) ) return 0;
+      if( h != f && h >= k ) return 0;
     }
   }
   return 1;
+}
+
+int activeLinks(vertex* graph, agent* lattice, int n){
+  int h;
+  int k = 2; //threshold de la interaccion
+  int f = lattice[0].f;
+  int actLinks = 0;
+
+  for(int idx = 0; idx < n*n; idx++){
+    for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
+      h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != f && h >= k ) actLinks++;
+    }
+  }
+  return actLinks/2;
 }

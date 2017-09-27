@@ -21,11 +21,14 @@ int latticeSetStub(agent* lattice, int n, int nStub);
 int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray);
 int latticePrintFeats(agent *lattice, int n);
 int latticePrintFeatN(agent *lattice, int n, int featNIdx);
-int latticePrintLabels(agent *lattice, int n); //
+int latticePrintLabels(agent *lattice, int n);
+int latticePrintLabelsToFile(agent *lattice, int n, FILE *fs);
 int latticePrintStub(agent* lattice, int n);
-int latticePrintToFile(agent* lattice, int n, FILE* fs, int labelFlag);
-int latticeFree(agent *lattice, int n); //
+int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs);
+int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs);
+int latticeFree(agent *lattice, int n);
 int commonTraits(agent *lattice, int i, int j);
+int commonTraitsCultural(agent *lattice, int i, int j);
 
 
 #endif

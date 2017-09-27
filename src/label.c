@@ -97,6 +97,53 @@ int latticeLabelFeatN(vertex* graph, agent* lattice, int n, int featNIdx){
   return frag;
 }
 
+int latticeLabelCultural(vertex* graph, agent* lattice, int n){
+
+  int j;
+  int f = lattice[0].f;
+  int frag = 2;
+  int* clase = malloc(sizeof(int)*n*n);
+  int* commNeig = malloc(sizeof(int)*n*n);
+  int nCommNeig;
+
+  clase[0] = 0;
+  clase[1] = 1;
+  for(int i = 2; i<n*n; i++) clase[i] = 0;
+  lattice[0].label = 1;
+  for(int i = 1; i<n*n; i++) lattice[i].label = 0;
+
+  for(int idx = 1; idx<n*n; idx++){
+    nCommNeig = 0;
+    for(int idxj = 0; idxj<graph[idx].nEdges; idxj++){
+      j = graph[idx].edges[idxj];
+      if(j<idx){
+        if(commonTraitsCultural(lattice, idx, j) == (f-1) ){
+          commNeig[nCommNeig] = j;
+          nCommNeig++;
+        }
+      }
+    }
+
+    if(nCommNeig == 0){
+      lattice[idx].label = frag;
+      clase[frag] = frag;
+      frag++;
+    }
+    else if(nCommNeig == 1){
+      j = commNeig[0];
+      lattice[idx].label = lattice[j].label;
+    }
+    else falseLabel(lattice, clase, commNeig, nCommNeig, idx);
+  }
+
+  fixLabel(lattice, n, clase);
+
+  free(clase);
+  free(commNeig);
+  return frag;
+}
+
+
 int falseLabel(agent *lattice, int *clase, int* commNeig, int nCommNeig, int idx){
 
   int* s = malloc(nCommNeig*sizeof(int));

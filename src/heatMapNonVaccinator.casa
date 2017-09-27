@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
   int neigOrdRewire = 2;
   int nRewire = 1;
   int nEdgeRew = 0*n*n;
-  float phi = 0.2;
+  float phi = 0.01;
   int* nonVacAcum = malloc(n*n*sizeof(int));
   for(int i = 0; i < n*n; i++) nonVacAcum[i] = 0;
   int paso = n*n;
@@ -30,6 +30,7 @@ int main(int argc, char *argv[]){
   FILE *fs;
   char name[100];
   int talRead = 0;
+  float masaNoVacProm = 0;
 
   if(argc>4){
     sscanf(argv[1], "%d", &q);
@@ -85,6 +86,7 @@ int main(int argc, char *argv[]){
 
     nonVaccinatorCount(lattice, n, nonVacAcum);
 
+    masaNoVacProm = masaNoVacProm + (float)nonVaccinatorTotal(lattice,n)/prom;
     tLoop = time(NULL)-tLoop;
     printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", tLoop/3600, (tLoop/60)%60, tLoop%60);
 
@@ -101,6 +103,7 @@ int main(int argc, char *argv[]){
 
   t = time(NULL)-t;
   printf("Tiempo transcurrido Total: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
+  printf("Total de no Vacunadores = %f \n", masaNoVacProm);
 
   fclose(fs);
   free(lattice);
