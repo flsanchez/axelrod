@@ -161,6 +161,7 @@ int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs){
     for(int fIdx = 0; fIdx < f-1; fIdx++) fprintf(fs, "%d,",lattice[i].feat[fIdx]);
     fprintf(fs, "%d ",lattice[i].feat[f-1]);
   }
+  fprintf(fs, "\n");
   return 0;
 }
 

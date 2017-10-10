@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
   int nStub = n*n*0.01;
   FILE* fs;
   FILE* fs2;
-  //FILE* fs3;
+  FILE* fs3;
   char name[100];
 
   if(argc>1){
@@ -53,11 +53,16 @@ int main(int argc, char *argv[]){
   sprintf(name, "red_phi_%.2f.red",phi);
   fs2 = fopen(name,"w");
 
+  sprintf(name, "redCultural_phi_%.2f.red",phi);
+  fs3 = fopen(name,"w");
+
   int i = 0;
   int stop = 0;
   int actLinks = 0;
   int t = time(NULL);
   while(/* stop == 0  && */i != niter){
+
+    if( i >= (int)(150E6) ) phi = 0;
 
     nmbrOfRew = nmbrOfRew + step(graph,lattice,n,phi);
 
@@ -65,10 +70,12 @@ int main(int argc, char *argv[]){
       //stop = stopReached(graph,lattice,n);
       actLinks = activeLinks(graph, lattice, n);
       fprintf(fs, "%d %d\n", nonVaccinatorTotal(lattice, n), actLinks);
-      latticePrintFeatsToFile(lattice, n, fs2);
+      latticePrintFeatNToFile(lattice, n, f-1, fs2);
+      latticeLabelCultural(graph,lattice,n);
+      latticePrintLabelsToFile(lattice,n,fs3);
     }
 
-    if(i%(int)1E6==0) printf("Paso %d; Active Links = %d\n", i, actLinks);
+    if(i%(int)1E6==0) printf("Paso %d; Active Links = %d; Phi = %f\n", i, actLinks, phi);
 
     i++;
 
@@ -82,6 +89,7 @@ int main(int argc, char *argv[]){
 
   fclose(fs);
   fclose(fs2);
+  fclose(fs3);
   latticeFree(lattice, n);
   free(lattice);
   graphFree(graph, n);

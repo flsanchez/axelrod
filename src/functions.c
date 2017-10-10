@@ -62,7 +62,7 @@ float avMinPathLen(vertex* graph, int n){
 }
 
 /* nonVaccinatorCount() suma 1 en la posicion i de vacAcum si el agente i de
-  lattice es vacunador*/
+  lattice es vacunador */
 
 int nonVaccinatorCount(agent* lattice, int n, int* nonVacAcum){
   int f;
@@ -72,6 +72,8 @@ int nonVaccinatorCount(agent* lattice, int n, int* nonVacAcum){
   }
   return 0;
 }
+
+/* nonVaccinatorTotal() simplemente cuenta la masa de no vacunadores */
 
 int nonVaccinatorTotal(agent* lattice, int n){
   int nonVacTot = 0;
