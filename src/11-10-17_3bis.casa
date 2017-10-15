@@ -4,6 +4,7 @@
 #include "agent.h"
 #include "graph.h"
 #include "label.h"
+#include "functions.h"
 #include "axelrod.h"
 
 /* para una lista de q's, y para un numero prom de repeticiones para cada q,
@@ -24,6 +25,7 @@ int main(int argc, char *argv[]){
   int* nmbrOfRew = malloc(prom*sizeof(int));
   int* nsAcum = malloc(n*n*sizeof(int));
   int* nsAcumLastFeat = malloc(n*n*sizeof(int));
+  int* massNonVacProm = malloc(prom*sizeof(int));
 
   int frag;
   int max;
@@ -88,19 +90,14 @@ int main(int argc, char *argv[]){
 
       graphInit(graph, n);
       graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
-
-      /*sprintf(name,"q_%d_%d_Ini.net",q,i);
-      fs = fopen(name,"w");
-      graphPrintToFile(graph,n,fs);
-      fclose(fs);*/
-
+      graphEdgesAddNRand(graph, n, nEdgesAdd);
       latticeFill(lattice, n, q, qF);
       latticeSetStub(lattice,n,nStub);
 
       stop = 0;
       k = 0;
       nmbrOfRew[i] = 0;
-      while(stop == 0 &&  k < niter ){
+      while(stop == 0 /*&&  k < niter*/ ){
         nmbrOfRew[i] = nmbrOfRew[i] + step(graph,lattice,n,phi);
         if(k%paso == 0) stop = stopReached(graph,lattice,n);
         k++;
@@ -115,12 +112,9 @@ int main(int argc, char *argv[]){
       max = maxCluster(lattice, nsAcumLastFeat, n, frag);
       SpromLastFeat[i] = max;
 
-      printf("Smax = %d; SmaxLastFeat = %d; Pasos = %d; Rewires = %d\n",Sprom[i],SpromLastFeat[i],k-1,nmbrOfRew[i]);
+      massNonVacProm[i] = nonVaccinatorTotal(lattice, n);
 
-      /*sprintf(name,"q_%d_%d_Fin.net",q,i);
-      fs = fopen(name,"w");
-      graphPrintToFile(graph,n,fs);
-      fclose(fs);*/
+      printf("Smax = %d; SmaxLastFeat = %d; Pasos = %d; MasaNoVac = %d\n",Sprom[i],SpromLastFeat[i],k-1,massNonVacProm[i]);
 
       graphFree(graph,n);
 
@@ -133,9 +127,9 @@ int main(int argc, char *argv[]){
     fs = fopen(name,"w");
     fprintf(fs,"# n f q\n# %d %d %d\n",n,f,q);
     for(int i = 0; i<prom; i++){
-      fprintf(fs,"%d %d %d %d\n", Sprom[i], SpromLastFeat[i], term[i],nmbrOfRew[i]);
+      fprintf(fs,"%d %d %d %d %d\n", Sprom[i], SpromLastFeat[i], massNonVacProm[i], term[i],nmbrOfRew[i]);
     }
-    fprintf(fs,"# Smax SmaxLastFeat pasos nmbrOfRew\n");
+    fprintf(fs,"# Smax SmaxLastFeat MasaNoVac pasos nmbrOfRew\n");
     fclose(fs);
 
     sprintf(name,"q_%d.frag",q);
@@ -169,6 +163,7 @@ int main(int argc, char *argv[]){
   free(SpromLastFeat);
   free(qVector);
   free(term);
+  free(massNonVacProm);
   return 0;
 
 }

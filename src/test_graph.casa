@@ -2,19 +2,20 @@
 #include <stdlib.h>
 #include <time.h>
 #include "graph.h"
+#include "agent.h"
 #include "functions.h"
 
 int main(){
 
   srand(time(NULL));
 
-  int n = 5;
+  int n = 50;
   int nRewire = 1;
   int t = time(NULL);
   int idx = 10;
   int neigOrdEdges = 2;
   int neigOrdRewire = 3;
-  int nEdgeRew = n*n;
+  int nEdgeRew = 0;
   char name[100];
   int cont;
   FILE *fs;
@@ -23,11 +24,14 @@ int main(){
   vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
   for(int i = 0; i<1; i++){
     graphInit(graph, n);
-    graphEdgesFill(graph, n, neigOrdEdges);
-    graphRewireFillNotNeig(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
-    graphEdgesPrint(graph,n);
-    graphRewirePrint(graph,n);
-    fs = fopen("net.net","w");
+    graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+    //graphEdgesPrint(graph,n);
+    //graphRewirePrint(graph,n);
+    fs = fopen("netIni.net","w");
+    graphPrintToFile(graph, n, fs);
+    fclose(fs);
+    graphEdgesAddNRand(graph, n, 10);
+    fs = fopen("netFin.net","w");
     graphPrintToFile(graph, n, fs);
     fclose(fs);
     graphFree(graph,n);

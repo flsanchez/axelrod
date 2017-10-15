@@ -15,13 +15,13 @@ int step(vertex* graph, agent *lattice, int n, float phi){
   int th = 2; //threshold de interaccion
   i = getRand(n*n); //indice del activo
   while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
-  j = pickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
+  j = graphPickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
 
   hij = commonTraits(lattice, i, j);
 
   if(vertexRewireIsConnected(graph, i, j)){
 
-    int k = pickPassiveNotNeig(graph, n, i);
+    int k = graphPickPassiveNotNeig(graph, n, i);
     int hik = commonTraits(lattice, i, k);
 
     if(hij < hik) return socialInteraction(graph, i, j, k);
@@ -33,24 +33,6 @@ int step(vertex* graph, agent *lattice, int n, float phi){
 
   return 0;
 
-}
-
-/* pickPassiveNeig() agarra un vecino al azar del agente i, usando la lista de
-conexiones */
-
-int pickPassiveNeig(vertex* graph, int i){
-  int idx = getRand(graph[i].nEdges);
-  return graph[i].edges[idx];
-}
-
-/* pickPassiveNotNeig() agarra un NO vecino al azar del agente i */
-
-int pickPassiveNotNeig(vertex* graph, int n, int i){
-  int idx = getRand(n*n);
-  while((vertexEdgeIsConnected(graph,i,idx) || idx == i)){
-    idx = getRand(n*n);
-  }
-  return idx;
 }
 
 /* maxCluster() devuelve el tamanio del cluster mas grande */

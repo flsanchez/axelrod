@@ -384,6 +384,20 @@ int graphRewireRm(vertex* graph, int src, int dest){
 
 }
 
+/* graphEdgesAddNRand() añade sobre la red una cantidad de links nRandEdges al
+  azar sobre la red entre no vecinos */
+
+int graphEdgesAddNRand(vertex* graph, int n, int nRandEdges){
+  int i = 0;
+  int j = 0;
+  for(int cont = 0; cont<nRandEdges; cont++){
+    i = getRand(n*n); //elijo un agente al azar
+    j = graphPickPassiveNotNeig(graph, n, i);  //elijo un no vecino del agente i azar
+    graphEdgesAdd(graph, i, j);
+  }
+  return 0;
+}
+
 /* graphEdgesPrint() imprime el vector de conexiones para cada uno de los
 vertices */
 
@@ -418,6 +432,24 @@ vertices */
 int graphRewirePrint(vertex* graph, int n){
   for(int i = 0; i<n*n; i++) vertexRewirePrint(graph,i);
   return 0;
+}
+
+/* graphPickPassiveNeig() agarra un vecino al azar del agente i, usando la lista de
+conexiones */
+
+int graphPickPassiveNeig(vertex* graph, int i){
+  int idx = getRand(graph[i].nEdges);
+  return graph[i].edges[idx];
+}
+
+/* graphPickPassiveNotNeig() agarra un NO vecino al azar del agente i */
+
+int graphPickPassiveNotNeig(vertex* graph, int n, int i){
+  int idx = getRand(n*n);
+  while((vertexEdgeIsConnected(graph,i,idx) || idx == i)){
+    idx = getRand(n*n);
+  }
+  return idx;
 }
 
 /* graphEdgesFree() libera todos los array de edges */

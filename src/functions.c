@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "graph.h"
 #include "agent.h"
+#include "graph.h"
 #include "functions.h"
 
 /* minDist() devuelve, dada una lista con las distancias y si esta marcado o no

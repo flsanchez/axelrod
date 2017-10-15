@@ -1,5 +1,5 @@
-#ifndef FUNCTIONS
-#define FUNCTIONS
+#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
 
 int minDist(int* dist, int* mark, int n);
 int minPathLen(vertex* graph, int* dist, int n, int src);

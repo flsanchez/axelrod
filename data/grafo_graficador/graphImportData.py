@@ -32,3 +32,14 @@ def loadGraphPositions(n):
 			pos[i*n+j] = [i*s,j*s]
 	
 	return pos
+
+def edgesResta(edgesIni,edgesFin):
+	edgesRestaV = []
+	for fin in edgesFin:
+		flag = 0
+		for ini in edgesIni:
+			if ini == fin:
+				flag = 1
+		if flag == 0:
+			edgesRestaV.append(fin)
+	return edgesRestaV
