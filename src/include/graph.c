@@ -149,7 +149,7 @@ vertice src */
 int vertexEdgesRm(vertex* graph, int src, int dest){
 
   int i = 0;
-  int swap, aux;
+  int aux;
   int idx = -1;
   //busco el indice de dest dentro de la lista de conexiones de graph[src] y
   //hago un swap entre dest y el ultimo elemento
@@ -193,7 +193,7 @@ src */
 int vertexRewireRm(vertex* graph, int src, int dest){
 
   int i = 0;
-  int swap, aux;
+  int aux;
   int idx = -1;
   //busco el indice de dest dentro de la lista de rewire de graph[src] y
   //hago un swap entre dest y el ultimo elemento

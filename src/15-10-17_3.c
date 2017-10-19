@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "agent.h"
-#include "graph.h"
-#include "label.h"
-#include "misc.h"
-#include "axelrod.h"
-#include "functions.h"
+#include "include/agent.h"
+#include "include/graph.h"
+#include "include/label.h"
+#include "include/misc.h"
+#include "include/axelrod.h"
+#include "include/functions.h"
 
 
 int main(int argc, char *argv[]){
@@ -24,7 +24,6 @@ int main(int argc, char *argv[]){
   int niter = 0.25E9;
   int paso = n*n;
   int frag,max;
-  int end = 0;
   int nStub = n*n*0.01;
   FILE* fs;
   FILE* fs2;
@@ -60,11 +59,10 @@ int main(int argc, char *argv[]){
   fs3 = fopen(name,"w");
 
   int i = 0;
-  int stop = 0;
   int actLinks = 1;
   int massNonVac;
   int t = time(NULL);
-  while(/*actLinks != 0  /*&&*/ i != niter){
+  while(/*actLinks != 0  &&*/ i != niter){
 
     nmbrOfRew = nmbrOfRew + step(graph,lattice,n,phi);
 

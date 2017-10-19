@@ -9,7 +9,7 @@
   el vertice, el indice del vertice que tiene la minima distancia */
 int minDist(int* dist, int* mark, int n){
   int minDistVal = INT_MAX;
-  int minIdx;
+  int minIdx = 0;
   for(int idx = 0; idx < n*n; idx++){
     if(dist[idx]<=minDistVal && mark[idx] == 0){
       minDistVal = dist[idx];

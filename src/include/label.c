@@ -54,7 +54,6 @@ int latticeLabel(vertex* graph, agent* lattice, int n){
 int latticeLabelFeatN(vertex* graph, agent* lattice, int n, int featNIdx){
 
   int j;
-  int f = lattice[0].f;
   int frag = 2;
   int* clase = malloc(sizeof(int)*n*n);
   int* commNeig = malloc(sizeof(int)*n*n);

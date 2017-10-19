@@ -3,11 +3,12 @@ CC = gcc
 
 LD = $(CC)
 
-SOURCE_C = $(wildcard *.c)
-OBJECTS_C = $(patsubst %.c, ../bin/%_c.o, $(SOURCE_C))
-
-CFLAGS = -std=gnu99
-EXECUTABLE = ../bin/axelrod.e
+VPATH = src/include:src
+SOURCE_C = $(wildcard src/*.c) $(wildcard src/include/*.c)
+OBJECTS_C = $(patsubst %.c, bin/%_c.o, $(notdir $(SOURCE_C)))
+OUTDIR = bin
+CFLAGS = -std=gnu99 -lm -O3 -Wall
+EXECUTABLE = $(OUTDIR)/axelrod.e
 
 default: help
 
@@ -26,11 +27,13 @@ executable: $(EXECUTABLE)
 
 all: objects executable
 
-../bin/%_c.o: %.c
+print-%  : ; @echo $* = $($*)
+
+$(OUTDIR)/%_c.o: %.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-%.e: $(OBJECTS_C)
-	$(LD) $^ -o $@ -lm -O3 -Wall
+$(OUTDIR)/%.e: $(OBJECTS_C)
+	$(LD) $(CFLAGS) $^ -o $@
 
 clean:
 	rm -rfv $(OBJECTS_C) $(EXECUTABLE)

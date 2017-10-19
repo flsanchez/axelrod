@@ -46,7 +46,7 @@ int isElemInArray(int* array, int n, int elem){
 
 int patternFill(int** patterni, int** patternj, int n, int neigOrd){
   int idxPattern;
-  int nPattern;
+  int nPattern = -1;
   if(neigOrd == 1){
     nPattern = 4;
     *patterni = malloc(nPattern*sizeof(int));

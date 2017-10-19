@@ -9,10 +9,8 @@
 int agentInit(agent *lattice, int idx, int f){
 
   lattice[idx].f = f;
-  //lattice[idx].q = q;
   lattice[idx].feat = malloc((lattice[idx].f) * sizeof(int));
   lattice[idx].label = 0;
-  //lattice[idx].qF = qF;
   lattice[idx].stub = 0; //por default, inicializan como vacunadores
   return 0;
 
@@ -25,7 +23,7 @@ int agentInit(agent *lattice, int idx, int f){
 int agentFill(int *feat, int f, int q, int qF){
 
   for(int i=0; i<f-1; i++) feat[i] = getRand(q);
-  feat[f-1] = getRand(qF)*0;
+  feat[f-1] = getRand(qF);
 
   return 0;
 }
@@ -104,7 +102,6 @@ int latticePrintFeats(agent *lattice, int n){
 /* latticePrintFeatN() imprime en pantalla solamente el valor del featNIdx */
 
 int latticePrintFeatN(agent *lattice, int n, int featNIdx){
-  int f = lattice[0].f;
   for(int i = 0; i<n; i++){
     for(int j = 0; j<n; j++) printf("%d ", lattice[i*n+j].feat[featNIdx]);
     printf("\n");
@@ -166,9 +163,7 @@ int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs){
 }
 
 int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
-  int f;
   for(int i = 0; i < n*n; i++){
-    f = lattice[i].f;
     fprintf(fs, "%d ",lattice[i].feat[featNIdx]);
   }
   fprintf(fs,"\n");
