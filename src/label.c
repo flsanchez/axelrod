@@ -97,6 +97,15 @@ int latticeLabelFeatN(vertex* graph, agent* lattice, int n, int featNIdx){
   return frag;
 }
 
+int latticeLabelVac(vertex* graph, agent* lattice, int n){
+  int f = lattice[0].f;
+  int frag = latticeLabelFeatN(graph, lattice, n, f-1);
+  for(int idx = 0; idx<n*n; idx++){
+    if(lattice[idx].feat[f-1] == 0) lattice[idx].label = 0;
+  }
+  return frag;
+}
+
 int latticeLabelCultural(vertex* graph, agent* lattice, int n){
 
   int j;

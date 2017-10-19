@@ -4,8 +4,8 @@
 #include "agent.h"
 #include "graph.h"
 #include "label.h"
-#include "functions.h"
 #include "axelrod.h"
+#include "functions.h"
 
 /* para una lista de q's, y para un numero prom de repeticiones para cada q,
 se ejecutan pasos temporales de axelrod hasta alcanzar la condicion de stop.
@@ -21,11 +21,12 @@ int main(int argc, char *argv[]){
   int niter = 300E6; /* condicion de escape, por si se queda trabado el
                         programa por algun motivo desconocido */
   int* Sprom = malloc(prom*sizeof(int));
-  int* SpromLastFeat = malloc(prom*sizeof(int));
+  int* Scult = malloc(prom*sizeof(int));
+  int* Svac = malloc(prom*sizeof(int));
   int* nmbrOfRew = malloc(prom*sizeof(int));
   int* nsAcum = malloc(n*n*sizeof(int));
-  int* nsAcumLastFeat = malloc(n*n*sizeof(int));
-  int* massNonVacProm = malloc(prom*sizeof(int));
+  int* nsAcumVac = malloc(n*n*sizeof(int));
+  int* nsAcumCult = malloc(n*n*sizeof(int));
 
   int frag;
   int max;
@@ -36,18 +37,18 @@ int main(int argc, char *argv[]){
   int* term = malloc(prom*sizeof(int));
   FILE *fs;
   char name[100];
-  int qlen = 20;
+  int qlen = 10;
   int *qVector = malloc(qlen*sizeof(int));
   int q;
   int qF = 2;
   int m = 13;
-  int b = 0;
+  int b = 87;
   float phi = 0;
   int nStub = n*n*0.01;
   int nEdgesAdd = 1000;
 
   if(argc>4){
-    sscanf(argv[1], "%d", &nEdgeRew);
+    sscanf(argv[1], "%d", &nEdgesAdd);
     sscanf(argv[2], "%d", &m);
     sscanf(argv[3], "%d", &prom);
     sscanf(argv[4], "%f", &phi);
@@ -79,7 +80,8 @@ int main(int argc, char *argv[]){
 
     for(int k=0; k<n*n; k++){
       nsAcum[k] = 0;
-      nsAcumLastFeat[k] = 0;
+      nsAcumCult[k] = 0;
+      nsAcumVac[k] = 0;
     }
 
     for(int i = 0; i<prom; i++){
@@ -97,7 +99,7 @@ int main(int argc, char *argv[]){
       stop = 0;
       k = 0;
       nmbrOfRew[i] = 0;
-      while(stop == 0 /*&&  k < niter*/ ){
+      while(stop == 0 &&  k < niter ){
         nmbrOfRew[i] = nmbrOfRew[i] + step(graph,lattice,n,phi);
         if(k%paso == 0) stop = stopReached(graph,lattice,n);
         k++;
@@ -108,14 +110,15 @@ int main(int argc, char *argv[]){
       max = maxCluster(lattice, nsAcum, n, frag);
       Sprom[i] = max;
 
-      frag = latticeLabelFeatN(graph, lattice, n, f-1);
-      max = maxCluster(lattice, nsAcumLastFeat, n, frag);
-      SpromLastFeat[i] = max;
+      frag = latticeLabelCultural(graph,lattice,n);
+      max = maxCluster(lattice, nsAcumCult, n, frag);
+      Scult[i] = max;
 
-      massNonVacProm[i] = nonVaccinatorTotal(lattice, n);
+      frag = latticeLabelVac(graph,lattice,n);
+      max = maxCluster(lattice, nsAcumVac, n, frag);
+      Svac[i] = max;
 
-      printf("Smax = %d; SmaxLastFeat = %d; Pasos = %d; MasaNoVac = %d\n",Sprom[i],SpromLastFeat[i],k-1,massNonVacProm[i]);
-
+      printf("Smax = %d; SmaxCult = %d; SmaxVac = %d; Pasos = %d; Rewires = %d\n",Sprom[i],Scult[i],Svac[i],k-1,nmbrOfRew[i]);
       graphFree(graph,n);
 
       tLoop = time(NULL)-tLoop;
@@ -127,29 +130,19 @@ int main(int argc, char *argv[]){
     fs = fopen(name,"w");
     fprintf(fs,"# n f q\n# %d %d %d\n",n,f,q);
     for(int i = 0; i<prom; i++){
-      fprintf(fs,"%d %d %d %d %d\n", Sprom[i], SpromLastFeat[i], massNonVacProm[i], term[i],nmbrOfRew[i]);
+      fprintf(fs,"%d %d %d\n", Sprom[i], Scult[i],Svac[i]);
     }
-    fprintf(fs,"# Smax SmaxLastFeat MasaNoVac pasos nmbrOfRew\n");
+    fprintf(fs,"# Smax SmaxCultural SmaxVacunacion\n");
     fclose(fs);
 
     sprintf(name,"q_%d.frag",q);
     fs = fopen(name,"w");
-    fprintf(fs,"# n f q\n# %d %d %d\n# tamaño_de_fragmento frecuencia\n"
+    fprintf(fs,"# n f q\n# %d %d %d\n# tamaño_de_fragmento frecuenciaTotal frecuenciaCultural frecuenciaVacunacion\n"
             ,n,f,q);
     for(int i = 0; i<n*n; i++){
-      fprintf(fs,"%d %d\n", i+1, nsAcum[i]);
+      fprintf(fs,"%d %d %d %d\n", i+1, nsAcum[i], nsAcumCult[i], nsAcumVac[i]);
     }
     fclose(fs);
-
-    sprintf(name,"q_%d_LastFeat.frag",q);
-    fs = fopen(name,"w");
-    fprintf(fs,"# n f q\n# %d %d %d\n# tamaño_de_fragmento frecuencia\n"
-            ,n,f,q);
-    for(int i = 0; i<n*n; i++){
-      fprintf(fs,"%d %d\n", i+1, nsAcumLastFeat[i]);
-    }
-    fclose(fs);
-
   }
   tTotal = time(NULL) - tTotal;
   printf("Tiempo transcurrido total: %d:%d:%d\n", tTotal/3600, (tTotal/60)%60, tTotal%60);
@@ -158,12 +151,14 @@ int main(int argc, char *argv[]){
   free(lattice);
   free(graph);
   free(nsAcum);
+  free(nsAcumVac);
+  free(nsAcumCult);
   free(nmbrOfRew);
   free(Sprom);
-  free(SpromLastFeat);
+  free(Svac);
+  free(Scult);
   free(qVector);
   free(term);
-  free(massNonVacProm);
   return 0;
 
 }

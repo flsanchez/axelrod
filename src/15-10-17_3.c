@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
 
   int n = 50;
   int f = 11;
-  int q = 80;
+  int q = 180;
   int qF = 2;
   int neigOrdEdges = 2;
   int neigOrdRewire = 2;
@@ -30,10 +30,12 @@ int main(int argc, char *argv[]){
   FILE* fs2;
   FILE* fs3;
   char name[100];
-  int nEdgesAdd = 1000;
+  int nEdgesAdd = 100;
 
-  if(argc>1){
-    sscanf(argv[1], "%f", &phi);
+  if(argc>3){
+    sscanf(argv[1], "%d", &nEdgesAdd);
+    sscanf(argv[2], "%f", &phi);
+    sscanf(argv[3], "%d", &q);
   }
 
   srand(time(NULL));
@@ -48,13 +50,13 @@ int main(int argc, char *argv[]){
   graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
   graphEdgesAddNRand(graph, n, nEdgesAdd);
 
-  sprintf(name, "noVac_vs_paso_phi_%.2f.txt",phi);
+  sprintf(name, "noVac_vs_paso_q_%d_phi_%.2f.txt",q,phi);
   fs = fopen(name,"w");
 
-  sprintf(name, "red_phi_%.2f.red",phi);
+  sprintf(name, "red_q_%d_phi_%.2f.red",q,phi);
   fs2 = fopen(name,"w");
 
-  sprintf(name, "redCultural_phi_%.2f.red",phi);
+  sprintf(name, "redCultural_q_%d_phi_%.2f.red",q,phi);
   fs3 = fopen(name,"w");
 
   int i = 0;
@@ -77,7 +79,7 @@ int main(int argc, char *argv[]){
       fprintf(fs, "%d %d %d\n", massNonVac, actLinks, max);
     }
 
-    if(i%(int)1E6==0) printf("Paso %d; Active Links = %d; nonVacc = %d; Smax = %d; Phi = %f\n", i, actLinks, massNonVac, max, phi);
+    if(i%(int)1E6==0) printf("Paso %d; Active Links = %d; nonVacc = %d; Smax = %d; Phi = %f; q = %d\n", i, actLinks, massNonVac, max, phi,q);
 
     i++;
 
