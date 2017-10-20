@@ -149,7 +149,8 @@ int latticePrintStub(agent* lattice, int n){
   return 0;
 }
 
-/* latticePrintFeatsToFile() guarda los valores de cada feat de cada agente. */
+/* latticePrintFeatsToFile() guarda en un archivo
+  los valores de cada feat de cada agente. */
 
 int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs){
   int f;
@@ -162,12 +163,174 @@ int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs){
   return 0;
 }
 
+/* latticePrintFeatNToFile() guarda los valores del feat Nesimo de cada agente
+  en un archivo. */
+
 int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
   for(int i = 0; i < n*n; i++){
     fprintf(fs, "%d ",lattice[i].feat[featNIdx]);
   }
   fprintf(fs,"\n");
   return 0;
+}
+
+/* latticeSave() guarda en un archivo el estado completo de la red de agentes */
+
+int latticeSave(agent *lattice, int n, FILE* fs){
+  int f;
+  //imprimo el numero de agentes por fila o columna
+  fprintf(fs, "N %d\n", n);
+
+  //imprimo el f
+  fprintf(fs, "f ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].f);
+  fprintf(fs, "%d\n", lattice[n*n-1].f);
+
+  //imprimo el q
+  fprintf(fs, "q ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].q);
+  fprintf(fs, "%d\n", lattice[n*n-1].q);
+
+  //imprimo el qF
+  fprintf(fs, "qF ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].qF);
+  fprintf(fs, "%d\n", lattice[n*n-1].qF);
+
+  //imprimo el label
+  fprintf(fs, "label ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].label);
+  fprintf(fs, "%d\n", lattice[n*n-1].label);
+
+  //imprimo la stubborness
+  fprintf(fs, "stub ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].stub);
+  fprintf(fs, "%d\n", lattice[n*n-1].stub);
+
+  //imprimo el vector de features
+  fprintf(fs, "feat ");
+  for(int i = 0; i<n*n-1; i++){
+    f = lattice[i].f;
+    for(int idxF = 0; idxF<f-1; idxF++){
+      fprintf(fs, "%d,", lattice[i].feat[idxF]);
+    }
+    fprintf(fs, "%d ", lattice[i].feat[f-1]);
+  }
+  f = lattice[n*n-1].f;
+  for(int idxF = 0; idxF<f-1; idxF++){
+    fprintf(fs, "%d,", lattice[n*n-1].feat[idxF]);
+  }
+  fprintf(fs, "%d\n", lattice[n*n-1].feat[f-1]);
+
+  return 0;
+}
+
+/* latticeLoad() lee la data de una red guardada con la funcion latticeSave() */
+
+int latticeLoad(agent** lattice, FILE* fs){
+  int st = 1; //guardo el status del scanf
+  int n; //aca voy a guardar el numero de filas o columnas
+
+  st = fscanf(fs, "N %d\n", &n); //leo el numero de filas o cols
+
+  /* con este n ya puedo hacer el malloc de la red, y lo hago sobre una auxiliar
+    por las dudas */
+  agent* auxLatt = (agent*) malloc(n*n*sizeof(agent));
+
+  /* voy a leer las f */
+  st = fscanf(fs, "f ");
+  int f;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &f);
+    agentInit(auxLatt, idx, f);
+  }
+  st = fscanf(fs, "%d\n", &f);
+  agentInit(auxLatt, n*n-1, f);
+
+  /* voy a leer los q */
+  st = fscanf(fs, "q ");
+  int q;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &q);
+    auxLatt[idx].q = q;
+  }
+  st = fscanf(fs, "%d\n", &q);
+  auxLatt[n*n-1].q = q;
+
+  /* voy a leer los qF */
+  st = fscanf(fs, "qF ");
+  int qF;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &qF);
+    auxLatt[idx].qF = qF;
+  }
+  st = fscanf(fs, "%d ", &qF);
+  auxLatt[n*n-1].qF = qF;
+
+  /* voy a leer los label */
+  st = fscanf(fs, "label ");
+  int label;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &label);
+    auxLatt[idx].label = label;
+  }
+  st = fscanf(fs, "%d\n", &label);
+  auxLatt[n*n-1].label = label;
+
+  /* voy a leer la stubborness */
+  st = fscanf(fs, "stub ");
+  int stub;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &stub);
+    auxLatt[idx].stub = stub;
+  }
+  st = fscanf(fs, "%d\n", &stub);
+  auxLatt[n*n-1].stub = stub;
+
+  /* voy a leer los feats */
+  st = fscanf(fs, "feat ");
+  int featN;
+  for(int idx = 0; idx<n*n-1; idx++){
+    f = auxLatt[idx].f;
+    for(int idxF = 0; idxF<f-1; idxF++){
+      st = fscanf(fs, "%d,", &featN);
+      auxLatt[idx].feat[idxF] = featN;
+    }
+    st = fscanf(fs, "%d ", &featN);
+    auxLatt[idx].feat[f-1] = featN;
+  }
+  f = auxLatt[n*n-1].f;
+  for(int idxF = 0; idxF<f-1; idxF++){
+    st = fscanf(fs, "%d,", &featN);
+    auxLatt[n*n-1].feat[idxF] = featN;
+  }
+  st = fscanf(fs, "%d\n", &featN);
+  auxLatt[n*n-1].feat[f-1] = featN;
+
+  if(st == 0) st = 1;
+
+  * lattice = auxLatt;
+  return n;
+}
+
+/* latticeCompare() compara 2 redes de agentes a ver si son iguales en el
+  sentido de una comparacion entre todos los elementos que componen la
+  estructura del agente */
+
+int latticeCompare(agent* lattice1, agent* lattice2, int n){
+  for(int idx = 0; idx<n*n; idx++){
+    if(lattice1[idx].f != lattice2[idx].f) return 0;
+    if(lattice1[idx].q != lattice2[idx].q) return 0;
+    if(lattice1[idx].qF != lattice2[idx].qF) return 0;
+    if(lattice1[idx].label != lattice2[idx].label) return 0;
+    if(lattice1[idx].stub != lattice2[idx].stub) return 0;
+  }
+  for(int idx = 0; idx<n*n; idx++){
+    int f = lattice1[idx].f;
+    for(int idxF = 0; idxF<f; idxF++){
+      if(lattice1[idx].feat[idxF] != lattice2[idx].feat[idxF]) return 0;
+    }
+  }
+  return 1;
 }
 
 /* latticeFree() libera las alocaciones de memoria hechas dentro

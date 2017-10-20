@@ -1,67 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "agent.h"
-#include "graph.h"
-#include "label.h"
-#include "axelrod.h"
+#include "include/agent.h"
+#include "include/graph.h"
+#include "include/label.h"
+#include "include/axelrod.h"
 
 /* este main hace una corrida simple de un axelrod y entrega el Smax y la
 cantidad de pasos para llegar al stop por pantalla */
 
 int main(){
 
-  int n = 6;
+  int n = 50;
   int f = 11;
   int q = 80;
   int qF = 2;
   int neigOrdEdges = 2;
   int neigOrdRewire = 2;
   int nRewire = 1;
-  int nmbrOfRew = 0;
   int nEdgeRew = 0*n*n;
-  float phi = 0.02;
-  int niter = 50E6;
-  int paso = n*n;
-  int frag,max;
-  int end = 0;
   int nStub = 1;
   FILE *fs;
-  char name[100];
-  int iAg = 24;
-  int jAg = 25;
 
   srand(time(NULL));
 
   agent* lattice = (agent*) malloc(n * n * sizeof(agent));
+  agent* lattice2;
   vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
 
   int* idxList = malloc(sizeof(int));
-  idxList[0] = jAg;
+  idxList[0] = 3;
 
   latticeInit(lattice, n, f);
   latticeFill(lattice, n, q, qF);
   latticeSetStubFromArray(lattice,n,idxList,nStub);
-  for(int i = 0; i<f-1; i++){
-    lattice[iAg].feat[i] = 2;
-    lattice[jAg].feat[i] = 2;
-  }
   graphInit(graph, n);
-  graphEdgesFill(graph, n, neigOrdEdges);
-  graphRewireFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+  graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
 
-  latticePrintFeatN(lattice,n,f-1);
+  fs = fopen("test.lat","w");
+  latticeSave(lattice, n, fs);
+  fclose(fs);
+  fs = fopen("test.lat","r");
+  int N = latticeLoad(&lattice2, fs);
+  fclose(fs);
+  fs = fopen("test2.lat","w");
+  latticeSave(lattice2, n, fs);
+  fclose(fs);
 
-  int hij = commonTraits(lattice,iAg,jAg);
-  opinionInteraction(lattice,iAg,jAg,hij,phi);
-
-  printf("\n");
-  latticePrintFeatN(lattice,n,f-1);
-
-
+  printf("Las redes son %d\n", latticeCompare(lattice, lattice2, n));
+  printf("N = %d\n", N);
 
   latticeFree(lattice, n);
   free(lattice);
+  latticeFree(lattice2, n);
+  free(lattice2);
   graphFree(graph, n);
   free(graph);
 
