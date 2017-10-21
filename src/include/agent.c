@@ -176,7 +176,7 @@ int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
 
 /* latticeSave() guarda en un archivo el estado completo de la red de agentes */
 
-int latticeSave(agent *lattice, int n, FILE* fs){
+int latticeSaveToFile(agent *lattice, int n, FILE* fs){
   int f;
   //imprimo el numero de agentes por fila o columna
   fprintf(fs, "N %d\n", n);
@@ -226,7 +226,7 @@ int latticeSave(agent *lattice, int n, FILE* fs){
 
 /* latticeLoad() lee la data de una red guardada con la funcion latticeSave() */
 
-int latticeLoad(agent** lattice, FILE* fs){
+int latticeLoadFromFile(agent** lattice, FILE* fs){
   int st = 1; //guardo el status del scanf
   int n; //aca voy a guardar el numero de filas o columnas
 

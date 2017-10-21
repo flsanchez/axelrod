@@ -14,7 +14,6 @@ int vertexEdgesInit(vertex* graph, int idx, int nEdges){
   return 0;
 }
 
-
 /* vertexRewireInit() inicializa los edges del vertice idx y aloca la memoria
 correspondiente */
 
@@ -406,8 +405,35 @@ int graphEdgesPrint(vertex* graph, int n){
   return 0;
 }
 
-/* graphPrintToFile() imprime la lista de adyacencias a un archivo */
 
+/* graphRewirePrint() imprime el vector de rewire para cada uno de los
+vertices */
+
+int graphRewirePrint(vertex* graph, int n){
+  for(int i = 0; i<n*n; i++) vertexRewirePrint(graph,i);
+  return 0;
+}
+
+/* graphPickPassiveNeig() agarra un vecino al azar del agente i, usando la lista
+ de conexiones */
+
+int graphPickPassiveNeig(vertex* graph, int i){
+  int idx = getRand(graph[i].nEdges);
+  return graph[i].edges[idx];
+}
+
+/* graphPickPassiveNotNeig() agarra un NO vecino al azar del agente i */
+
+int graphPickPassiveNotNeig(vertex* graph, int n, int i){
+  int idx = getRand(n*n);
+  while((vertexEdgeIsConnected(graph,i,idx) || idx == i)){
+    idx = getRand(n*n);
+  }
+  return idx;
+}
+
+/* graphPrintToFile() imprime la lista de adyacencias y rewire a un archivo */
+/*
 int graphPrintToFile(vertex* graph, int n, FILE *fs){
 
   int nEdges,nRewire;
@@ -425,31 +451,155 @@ int graphPrintToFile(vertex* graph, int n, FILE *fs){
 
   return 0;
 }
+*/
 
-/* graphRewirePrint() imprime el vector de rewire para cada uno de los
-vertices */
+int graphSaveToFile(vertex* graph, int n, FILE* fs){
+  int nEdges;
+  int nRewire;
+  //imprimo el numero de vertices por fila o columna
+  fprintf(fs, "N %d\n", n);
 
-int graphRewirePrint(vertex* graph, int n){
-  for(int i = 0; i<n*n; i++) vertexRewirePrint(graph,i);
-  return 0;
-}
+  //imprimo el numero de edges para cada vertice
+  fprintf(fs, "nEdges ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", graph[i].nEdges);
+  fprintf(fs, "%d\n", graph[n*n-1].nEdges);
 
-/* graphPickPassiveNeig() agarra un vecino al azar del agente i, usando la lista de
-conexiones */
-
-int graphPickPassiveNeig(vertex* graph, int i){
-  int idx = getRand(graph[i].nEdges);
-  return graph[i].edges[idx];
-}
-
-/* graphPickPassiveNotNeig() agarra un NO vecino al azar del agente i */
-
-int graphPickPassiveNotNeig(vertex* graph, int n, int i){
-  int idx = getRand(n*n);
-  while((vertexEdgeIsConnected(graph,i,idx) || idx == i)){
-    idx = getRand(n*n);
+  //imprimo el vector de edges
+  fprintf(fs, "edges ");
+  for(int i = 0; i<n*n-1; i++){
+    nEdges = graph[i].nEdges;
+    for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
+      fprintf(fs, "%d,", graph[i].edges[idxEdges]);
+    }
+    fprintf(fs, "%d ", graph[i].edges[nEdges-1]);
   }
-  return idx;
+  nEdges = graph[n*n-1].nEdges;
+  for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
+    fprintf(fs, "%d,", graph[n*n-1].edges[idxEdges]);
+  }
+  fprintf(fs, "%d\n", graph[n*n-1].edges[nEdges-1]);
+
+  //imprimo el numero de rewire para cada vertice
+  fprintf(fs, "nRewire ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", graph[i].nRewire);
+  fprintf(fs, "%d\n", graph[n*n-1].nRewire);
+
+  //imprimo el vector de rewire
+  fprintf(fs, "rewire ");
+  for(int i = 0; i<n*n-1; i++){
+    nRewire = graph[i].nRewire;
+    for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
+      fprintf(fs, "%d,", graph[i].rewire[idxRewire]);
+    }
+    fprintf(fs, "%d ", graph[i].rewire[nRewire-1]);
+  }
+  nRewire = graph[n*n-1].nRewire;
+  for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
+    fprintf(fs, "%d,", graph[n*n-1].rewire[idxRewire]);
+  }
+  fprintf(fs, "%d\n", graph[n*n-1].rewire[nRewire-1]);
+
+  return 0;
+
+}
+
+int graphLoadFromFile(vertex** graph, FILE* fs){
+  int st = 1; //guardo el status del scanf
+  int n; //aca voy a guardar el numero de filas o columnas
+  int nEdges,nRewire;
+
+  st = fscanf(fs, "N %d\n", &n); //leo el numero de filas o cols
+
+  /* con este n ya puedo hacer el malloc del graph, y lo hago sobre uno auxiliar
+    por las dudas */
+  vertex* auxGraph = (vertex*) malloc(n*n*sizeof(vertex));
+
+  /* voy a leer los nEdges de cada vertice y asigno los espacios
+   correspondientes */
+  st = fscanf(fs, "nEdges ");
+  for(int i = 0; i<n*n-1; i++){
+    st = fscanf(fs, "%d ", &nEdges);
+    vertexEdgesInit(auxGraph, i, nEdges);
+  }
+  st = fscanf(fs, "%d\n", &nEdges);
+  vertexEdgesInit(auxGraph, n*n-1, nEdges);
+
+  /* voy a leer los edges */
+  st = fscanf(fs, "edges ");
+  int edgeVal;
+  for(int idx = 0; idx<n*n-1; idx++){
+    nEdges = auxGraph[idx].nEdges;
+    for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
+      st = fscanf(fs, "%d,", &edgeVal);
+      auxGraph[idx].edges[idxEdges] = edgeVal;
+    }
+    st = fscanf(fs, "%d ", &edgeVal);
+    auxGraph[idx].edges[nEdges-1] = edgeVal;
+  }
+  nEdges = auxGraph[n*n-1].nEdges;
+  for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
+    st = fscanf(fs, "%d,", &edgeVal);
+    auxGraph[n*n-1].edges[idxEdges] = edgeVal;
+  }
+  st = fscanf(fs, "%d ", &edgeVal);
+  auxGraph[n*n-1].edges[nEdges-1] = edgeVal;
+
+  /* voy a leer los nRewire de cada vertice y asigno los espacios
+   correspondientes */
+  st = fscanf(fs, "nRewire ");
+  for(int i = 0; i<n*n-1; i++){
+    st = fscanf(fs, "%d ", &nRewire);
+    vertexRewireInit(auxGraph, i, nRewire);
+  }
+  st = fscanf(fs, "%d\n", &nRewire);
+  vertexRewireInit(auxGraph, n*n-1, nRewire);
+
+  /* voy a leer los rewire */
+  st = fscanf(fs, "rewire ");
+  int rewireVal;
+  for(int idx = 0; idx<n*n-1; idx++){
+    nRewire = auxGraph[idx].nRewire;
+    for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
+      st = fscanf(fs, "%d,", &rewireVal);
+      auxGraph[idx].rewire[idxRewire] = rewireVal;
+    }
+    st = fscanf(fs, "%d ", &rewireVal);
+    auxGraph[idx].rewire[nRewire-1] = rewireVal;
+  }
+  nRewire = auxGraph[n*n-1].nRewire;
+  for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
+    st = fscanf(fs, "%d,", &rewireVal);
+    auxGraph[n*n-1].rewire[idxRewire] = rewireVal;
+  }
+  st = fscanf(fs, "%d ", &rewireVal);
+  auxGraph[n*n-1].rewire[nRewire-1] = rewireVal;
+
+  if(st == 1) st = 0;
+
+  * graph = auxGraph;
+  return n;
+}
+
+int graphCompare(vertex* graph1, vertex* graph2, int n){
+  for(int idx = 0; idx<n*n; idx++){
+    if(graph1[idx].nEdges != graph2[idx].nEdges) return 0;
+    if(graph1[idx].nRewire != graph2[idx].nRewire) return 0;
+  }
+  for(int idx = 0; idx<n*n; idx++){
+    int nEdges = graph1[idx].nEdges;
+    for(int idxEdges = 0; idxEdges<nEdges; idxEdges++){
+      if(graph1[idx].edges[idxEdges] != graph2[idx].edges[idxEdges]) return 0;
+    }
+  }
+  for(int idx = 0; idx<n*n; idx++){
+    int nRewire = graph1[idx].nRewire;
+    for(int idxRewire = 0; idxRewire<nRewire; idxRewire++){
+      if(graph1[idx].rewire[idxRewire] != graph2[idx].rewire[idxRewire]){
+        return 0;
+      }
+    }
+  }
+  return 1;
 }
 
 /* graphEdgesFree() libera todos los array de edges */
