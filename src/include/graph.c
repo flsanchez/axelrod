@@ -432,26 +432,7 @@ int graphPickPassiveNotNeig(vertex* graph, int n, int i){
   return idx;
 }
 
-/* graphPrintToFile() imprime la lista de adyacencias y rewire a un archivo */
-/*
-int graphPrintToFile(vertex* graph, int n, FILE *fs){
-
-  int nEdges,nRewire;
-  fprintf(fs, "# n %d\n",n);
-  for(int idx = 0; idx<n*n; idx++){
-    nEdges = graph[idx].nEdges;
-    for(int j=0; j<nEdges; j++) fprintf(fs, "%d,%d ", idx,graph[idx].edges[j]);
-  }
-  fprintf(fs, "\n");
-  for(int idx = 0; idx<n*n; idx++){
-    nRewire = graph[idx].nRewire;
-    for(int j=0; j<nRewire; j++) fprintf(fs, "%d,%d ", idx,graph[idx].rewire[j]);
-  }
-  fprintf(fs, "\n");
-
-  return 0;
-}
-*/
+/* graphSaveToFile() guarda el graph en un archivo */
 
 int graphSaveToFile(vertex* graph, int n, FILE* fs){
   int nEdges;
@@ -502,6 +483,8 @@ int graphSaveToFile(vertex* graph, int n, FILE* fs){
   return 0;
 
 }
+
+/* graphLoadFromFile() lee el graph desde un archivo */
 
 int graphLoadFromFile(vertex** graph, FILE* fs){
   int st = 1; //guardo el status del scanf
@@ -579,6 +562,8 @@ int graphLoadFromFile(vertex** graph, FILE* fs){
   * graph = auxGraph;
   return n;
 }
+
+/* graphCompare() compara dos graph, devuelve 1 si son iguales */
 
 int graphCompare(vertex* graph1, vertex* graph2, int n){
   for(int idx = 0; idx<n*n; idx++){
