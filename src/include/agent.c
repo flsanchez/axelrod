@@ -87,7 +87,7 @@ int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray){
   for(int i = 0; i < nArray; i++){
     idx = idxList[i];
     lattice[idx].stub = 1;
-    lattice[idx].feat[f-1] = 1;
+    lattice[idx].feat[f-1] = 0;
   }
   return 0;
 }
@@ -171,6 +171,25 @@ int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
     fprintf(fs, "%d ",lattice[i].feat[featNIdx]);
   }
   fprintf(fs,"\n");
+  return 0;
+}
+
+int latticeTransformVaccToBinary(agent* lattice, int n, float phi){
+  int f, q;
+  float r, prob;
+  for(int idx = 0; idx < n*n; idx++){
+    f = lattice[idx].f;
+    q = lattice[idx].q;
+    prob = ((float)(lattice[idx].feat[f-1]))/(q-1);
+    r = ((float) rand() / (float) RAND_MAX);
+    //si el agente no es taliban
+    if(lattice[idx].stub == 0){
+      //pongo el ultimo feat a 1 con probabilidad prob
+      if(r<prob) lattice[idx].feat[f-1] = 1;
+      else lattice[idx].feat[f-1] = 0;
+    }
+    else lattice[idx].feat[f-1] = 0;
+  }
   return 0;
 }
 

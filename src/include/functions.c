@@ -68,7 +68,7 @@ int nonVaccinatorCount(agent* lattice, int n, int* nonVacAcum){
   int f;
   for(int idx = 0; idx < n*n; idx++){
     f = lattice[idx].f;
-    if(lattice[idx].feat[f-1] == 1) nonVacAcum[idx]++;
+    if(lattice[idx].feat[f-1] == 0) nonVacAcum[idx]++;
   }
   return 0;
 }
@@ -80,7 +80,7 @@ int nonVaccinatorTotal(agent* lattice, int n){
   int f;
   for(int idx = 0; idx < n*n; idx++){
     f = lattice[idx].f;
-    nonVacTot = nonVacTot + lattice[idx].feat[f-1];
+    if(lattice[idx].feat[f-1] == 0) nonVacTot++;
   }
   return nonVacTot;
 }

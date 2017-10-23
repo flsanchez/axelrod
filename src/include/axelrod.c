@@ -12,7 +12,7 @@ hubo rewiring devuelve 1, si hubo imitacion devuelve 0 */
 int step(vertex* graph, agent *lattice, int n, float phi){
 
   int i, j, hij;
-  int th = 2; //threshold de interaccion
+  int th = 1; //threshold de interaccion
   i = getRand(n*n); //indice del activo
   while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
   j = graphPickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
@@ -104,17 +104,19 @@ int opinionInteraction(agent* lattice, int i, int j, int hij, int th, float phi)
       /* si el feat elegido es el f-1 */
       if(uncomIdx == f-1){
         /* si el agente no es taliban */
-        if(lattice[i].stub != 1){
-          /* si hay una transicion vacunador -> no vacunador */
-          if(lattice[i].feat[f-1] == 0 && lattice[j].feat[f-1] == 1){
-            /* si se da la condicion del campo, transiciona */
-            prob = 1.0-phi;
-            r = ((float) rand() / (float) RAND_MAX);
-            if(r < prob){
-              lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
-            }
-          }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
-        }
+        if(lattice[i].stub == 1) return 0;
+        else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+        // {
+        //   /* si hay una transicion vacunador -> no vacunador */
+        //   if(lattice[i].feat[f-1] == 0 && lattice[j].feat[f-1] == 1){
+        //     /* si se da la condicion del campo, transiciona */
+        //     prob = 1.0-phi;
+        //     r = ((float) rand() / (float) RAND_MAX);
+        //     if(r < prob){
+        //       lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+        //     }
+        //   }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+        // }
       }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
 
     }
@@ -140,13 +142,13 @@ respectivamente (si no hay, la interaccion es terminada) */
 
 int stopReached(vertex* graph, agent* lattice, int n){
   int h;
-  int k = 2; //threshold de la interaccion
+  int th = 1; //threshold de la interaccion
   int f = lattice[0].f;
 
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
       h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
-      if( h != f && h >= k ) return 0;
+      if( h != f && h >= th ) return 0;
     }
   }
   return 1;
@@ -154,14 +156,14 @@ int stopReached(vertex* graph, agent* lattice, int n){
 
 int activeLinks(vertex* graph, agent* lattice, int n){
   int h;
-  int k = 2; //threshold de la interaccion
+  int th = 1; //threshold de la interaccion
   int f = lattice[0].f;
   int actLinks = 0;
 
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
       h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
-      if( h != f && h >= k ) actLinks++;
+      if( h != f && h >= th ) actLinks++;
     }
   }
   return actLinks/2;

@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "agent.h"
-#include "graph.h"
-#include "label.h"
-#include "axelrod.h"
+#include "include/agent.h"
+#include "include/graph.h"
+#include "include/label.h"
+#include "include/axelrod.h"
+#include "include/functions.h"
+#include "include/misc.h"
 
 /* para una lista de q's, y para un numero prom de repeticiones para cada q,
 se ejecutan pasos temporales de axelrod hasta alcanzar la condicion de stop.
@@ -17,8 +19,9 @@ int main(int argc, char *argv[]){
   int n = 50;
   int f = 11;
   int prom = 50;
-  int niter = 300E6; /* condicion de escape, por si se queda trabado el
-                        programa por algun motivo desconocido */
+  /* condicion de escape, por si se queda trabado el
+  programa por algun motivo desconocido */
+  //int niter = 300E6;
   int* Sprom = malloc(prom*sizeof(int));
   int* SpromLastFeat = malloc(prom*sizeof(int));
   int* nmbrOfRew = malloc(prom*sizeof(int));
@@ -34,15 +37,15 @@ int main(int argc, char *argv[]){
   int* term = malloc(prom*sizeof(int));
   FILE *fs;
   char name[100];
-  int qlen = 20;
+  int qlen = 10;
   int *qVector = malloc(qlen*sizeof(int));
   int q;
-  int qF = 2;
+  int qF;
   int m = 13;
-  int b = 0;
+  int b = 96;
   float phi = 0;
   int nStub = n*n*0.01;
-  int nEdgesAdd = 1000;
+  int nEdgesAdd = 100;
 
   if(argc>4){
     sscanf(argv[1], "%d", &nEdgeRew);
@@ -74,6 +77,7 @@ int main(int argc, char *argv[]){
   for(int j = 0; j<qlen; j++){
 
     q = qVector[j];
+    qF = q;
 
     for(int k=0; k<n*n; k++){
       nsAcum[k] = 0;
@@ -88,11 +92,7 @@ int main(int argc, char *argv[]){
 
       graphInit(graph, n);
       graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
-
-      /*sprintf(name,"q_%d_%d_Ini.net",q,i);
-      fs = fopen(name,"w");
-      graphPrintToFile(graph,n,fs);
-      fclose(fs);*/
+      graphEdgesAddNRand(graph, n, nEdgesAdd);
 
       latticeFill(lattice, n, q, qF);
       latticeSetStub(lattice,n,nStub);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
       stop = 0;
       k = 0;
       nmbrOfRew[i] = 0;
-      while(stop == 0 &&  k < niter ){
+      while(stop == 0 /*&&  k < niter*/ ){
         nmbrOfRew[i] = nmbrOfRew[i] + step(graph,lattice,n,phi);
         if(k%paso == 0) stop = stopReached(graph,lattice,n);
         k++;
@@ -116,11 +116,6 @@ int main(int argc, char *argv[]){
       SpromLastFeat[i] = max;
 
       printf("Smax = %d; SmaxLastFeat = %d; Pasos = %d; Rewires = %d\n",Sprom[i],SpromLastFeat[i],k-1,nmbrOfRew[i]);
-
-      /*sprintf(name,"q_%d_%d_Fin.net",q,i);
-      fs = fopen(name,"w");
-      graphPrintToFile(graph,n,fs);
-      fclose(fs);*/
 
       graphFree(graph,n);
 
