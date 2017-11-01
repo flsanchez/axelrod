@@ -1,0 +1,116 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "include/agent.h"
+#include "include/graph.h"
+#include "include/label.h"
+#include "include/misc.h"
+#include "include/axelrod.h"
+#include "include/functions.h"
+
+
+int main(int argc, char *argv[]){
+
+  int n = 50;
+  int f = 11;
+  int q = 116;
+
+  int neigOrdEdges = 2;
+  int neigOrdRewire = 2;
+  int nRewire = 1;
+  int nmbrOfRew = 0;
+  int nEdgeRew = 0*n*n;
+  float phi = 0.05;
+  int niter = 0.3E9;
+  int paso = n*n;
+  int frag,max;
+  int nStub = n*n*0.01;
+  FILE* fs;
+  FILE* fs2;
+  FILE* fs3;
+  FILE* fs4;
+  char name[100];
+  int nEdgesAdd = 100;
+
+  if(argc>3){
+    sscanf(argv[1], "%d", &nEdgesAdd);
+    sscanf(argv[2], "%f", &phi);
+    sscanf(argv[3], "%d", &q);
+  }
+  int qF = q;
+
+  srand(time(NULL));
+
+  agent* lattice = (agent*) malloc(n * n * sizeof(agent));
+  vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+
+  latticeInit(lattice, n, f);
+  latticeFill(lattice, n, q, qF);
+  latticeSetStub(lattice,n,nStub);
+  graphInit(graph, n);
+  graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+  graphEdgesAddNRand(graph, n, nEdgesAdd);
+
+  sprintf(name, "noVac_vs_paso_q_%d_phi_%f.txt",q,phi);
+  fs = fopen(name,"w");
+
+  sprintf(name, "red_q_%d_phi_%f.red",q,phi);
+  fs2 = fopen(name,"w");
+
+  sprintf(name, "redCultural_q_%d_phi_%f.red",q,phi);
+  fs3 = fopen(name,"w");
+
+  sprintf(name, "distFrag_q_%d_phi_%f.frag",q,phi);
+  fs4 = fopen(name,"w");
+
+  int* ns = malloc(sizeof(int)*n*n);
+  for(int i = 0; i < n*n; i++) ns[i] = 0;
+
+  int i = 0;
+  int actLinks = 0;
+  int massNonVac;
+  int t = time(NULL);
+  while(i != niter){
+
+    nmbrOfRew = nmbrOfRew + step(graph,lattice,n,phi);
+
+    if(i%(5*paso)==0){
+      actLinks = activeLinks(graph, lattice, n); //links activos
+      massNonVac = nonVaccinatorTotal(lattice,n); //no vacunadores
+      latticePrintFeatNToFile(lattice, n, f-1, fs2); //guardo el estado del
+                                                     //feat de vac
+      frag = latticeLabelCultural(graph,lattice,n); //labeleo la parte cultural
+      max = maxCluster(lattice, NULL, n, frag);     //hago la dist de fragmentos
+      latticePrintLabelsToFile(lattice,n,fs3);      //grabo los labels
+      for(int j = 0; j < n*n; j++) ns[j] = 0;
+      frag = latticeLabelVac(graph,lattice,n); //label defragmentos de no vac
+      max = maxCluster(lattice, ns, n, frag);
+      for(int j = 0; j<n*n; j++) fprintf(fs4, "%d ", ns[j]); //dist de frag
+      fprintf(fs4, "\n");
+      fprintf(fs, "%d %d %d\n", massNonVac, actLinks, max);
+    }
+
+    if(i%(int)1E6==0){
+      printf("Paso %d; Active Links = %d; nonVacc = %d; Smax = %d; Phi = %f; q = %d\n", i, actLinks, massNonVac, max, phi,q);
+    }
+    i++;
+
+  }
+  printf("Paso %d\n", i);
+
+  frag = latticeLabel(graph, lattice, n);
+  max = maxCluster(lattice, NULL, n, frag);
+  t = time(NULL)-t;
+  printf("Smax = %d; t = %d; pasos = %d\n",max,t,i-1);
+
+  fclose(fs);
+  fclose(fs2);
+  fclose(fs3);
+  fclose(fs4);
+  latticeFree(lattice, n);
+  free(lattice);
+  graphFree(graph, n);
+  free(graph);
+
+  return 0;
+}

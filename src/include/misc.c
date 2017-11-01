@@ -7,7 +7,7 @@
 
 int getRand(int max){
   int res = max;
-  while(res == max){
+  while(res == max && max != 0){
     res = (int) (max * ((float) rand() / (float) RAND_MAX));
   }
   return res;

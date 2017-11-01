@@ -4,9 +4,9 @@ CC = gcc
 LD = $(CC)
 
 VPATH = src/include:src
-SOURCE_C = $(wildcard src/*.c) $(wildcard src/include/*.c)
-OBJECTS_C = $(patsubst %.c, bin/%_c.o, $(notdir $(SOURCE_C)))
 OUTDIR = bin
+SOURCE_C = $(wildcard src/*.c) $(wildcard src/include/*.c)
+OBJECTS_C = $(patsubst %.c, $(OUTDIR)/%_c.o, $(notdir $(SOURCE_C)))
 CFLAGS = -std=gnu99 -lm -O3 -Wall
 EXECUTABLE = $(OUTDIR)/axelrod.e
 
@@ -36,4 +36,4 @@ $(OUTDIR)/%.e: $(OBJECTS_C)
 	$(LD) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -rfv $(OBJECTS_C) $(EXECUTABLE)
+	rm -rfv $(OBJECTS_C) $(EXECUTABLE) 

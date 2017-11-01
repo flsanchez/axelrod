@@ -24,6 +24,15 @@ def latticeGetLabels(name):
 		labels = [ int(label) for label in data]
 	return labels
 
+def latticeGetQ(name):
+	with open(name) as f:
+		for i in range(0,2):
+			f.readline()
+		data = f.readline()
+		data = data.rstrip("\n").lstrip("q ").split(" ")
+		qs = [ int(q) for q in data]
+	return qs
+
 def latticeFixLabels(labels):
 	n = len(labels)
 	labelsExist = [ 0 for i in range(0,n) ]
@@ -71,7 +80,25 @@ def latticeFeatN(agents,feat):
 	featn = np.array([agent[feat] for agent in agents])
 	return featn
 
-def latticeShowLabels(name,show):
+def latticeShowFeatN(name,show,save,feat):
+	agents = latticeGetAgents(name)
+	vacFeat = latticeFeatN(agents,feat)
+	qs = latticeGetQ(name)
+	n = int(len(vacFeat)**0.5)
+	z = 2/3.0*np.array(vacFeat,dtype='float64')/(np.max(qs)-1) + 1.0/3
+	z = z.reshape((n,n))
+	cMap = 'hot'
+	plt.figure()
+	plt.imshow(z,interpolation='nearest',
+						cmap = cMap, origin='upper', vmin=0, vmax=1)
+	#plt.colorbar()
+	if save == 1:
+		plt.savefig("colorMap_feat{0}.png".format(feat))
+	if show == 1:
+		plt.show()
+
+
+def latticeShowLabels(name,show,save):
 	labels = np.array(latticeGetLabels(name))
 	n = int(len(labels)**0.5)
 	z = labels.reshape((n,n))
@@ -80,10 +107,12 @@ def latticeShowLabels(name,show):
 	plt.imshow(z,interpolation='nearest',
 						cmap = cMap, origin='upper', vmin=np.min(z), vmax=np.max(z))
 	plt.colorbar()
+	if save == 1:
+		plt.savefig("colorMap_labels.png")
 	if show == 1:
 		plt.show()
 
-def latticeShowFeatNEqualsTo(name,show,feat,eqt):
+def latticeShowFeatNEqualsTo(name,show,save,feat,eqt):
 	agents = latticeGetAgents(name)
 	feat = 10
 	vacFeat = latticeFeatN(agents,feat)
@@ -93,16 +122,20 @@ def latticeShowFeatNEqualsTo(name,show,feat,eqt):
 		if vacFeat[i] == eqt:
 			z[i] = 1
 	z = np.array(z)
+	print np.sum(z)
 	z = z.reshape((n,n))
 	cMap = 'seismic'
 	plt.figure()
 	plt.imshow(z,interpolation='nearest',
 						cmap = cMap, origin='upper', vmin=np.min(z), vmax=np.max(z))
 	plt.colorbar()
+	plt.title("# No Vacunadores = {0}".format(np.sum(z)))
+	if save == 1:
+		plt.savefig("colorMap_feat{0}_eqt{1}.png".format(feat,eqt))
 	if show == 1:
 		plt.show()
 
-def latticeShowStub(name,show):
+def latticeShowStub(name,show,save):
 	stubs = np.array(latticeGetStubs(name))
 	n = int(len(stubs)**0.5)
 	z = stubs.reshape((n,n))
@@ -111,6 +144,9 @@ def latticeShowStub(name,show):
 	plt.imshow(z,interpolation='nearest',
 						cmap = cMap, origin='upper', vmin=np.min(z), vmax=np.max(z))
 	plt.colorbar()
+	plt.title("# Talibanes = {0}".format(np.sum(z)))
+	if save == 1:
+		plt.savefig("colorMap_stub.png")
 	if show == 1:
 		plt.show()
 	

@@ -174,7 +174,7 @@ int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
   return 0;
 }
 
-int latticeTransformVaccToBinary(agent* lattice, int n, float phi){
+int latticeTransformVaccToBinary(agent* lattice, int n){
   int f, q;
   float r, prob;
   for(int idx = 0; idx < n*n; idx++){

@@ -26,7 +26,7 @@ int latticePrintLabelsToFile(agent *lattice, int n, FILE *fs);
 int latticePrintStub(agent* lattice, int n);
 int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs);
 int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs);
-int latticeTransformVaccToBinary(agent* lattice, int n, float phi);
+int latticeTransformVaccToBinary(agent* lattice, int n);
 int latticeSaveToFile(agent* lattice, int n, FILE* fs);
 int latticeLoadFromFile(agent** lattice, FILE* fs);
 int latticeCompare(agent* lattice1, agent* lattice2, int n);

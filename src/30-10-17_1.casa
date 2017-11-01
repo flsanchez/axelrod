@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "include/agent.h"
+#include "include/graph.h"
+#include "include/label.h"
+#include "include/axelrod.h"
+#include "include/functions.h"
+#include "include/misc.h"
+
+
+/* este main hace una corrida simple de un axelrod y entrega el Smax y la
+cantidad de pasos para llegar al stop por pantalla */
+
+int main(int argc, char *argv[]){
+  parameter* param = (parameter*) malloc(sizeof(parameter));
+  int n = 50;
+  param->n = n;
+  param->f = 11;
+  param->phi = 0;
+  param->q = 116;
+  int prom = 1000;
+  char mode = 'a';
+  param->neigOrdEdges = 2;
+  param->neigOrdRewire = 2;
+  param->nRewire = 1;
+  param->nEdgeRew = 0*n*n;
+  param->nEdgesAdd = 100;
+  param->nStub = n*n*0.01;
+  if(argc > 4){
+    sscanf(argv[1], "%d", &param->q);
+    sscanf(argv[2], "%f", &param->phi);
+    sscanf(argv[3], "%d", &prom);
+    sscanf(argv[4], "%c", &mode);
+  }
+  param->qF = param->q;
+
+  srand(time(NULL));
+
+  FILE* fs;
+  // este modo hace un singleAxelrod()
+  if(mode == 'a'){
+    agent* lattice = (agent*) malloc(n * n * sizeof(agent));
+    vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+    axelrodInit(param, lattice, graph);
+
+    fs = fopen("stateIni.gra","w");
+    graphSaveToFile(graph,n,fs);
+    fclose(fs);
+    fs = fopen("stateIni.lat","w");
+    latticeSaveToFile(lattice,n,fs);
+    fclose(fs);
+
+    axelrodSingleRun(param, lattice, graph, 1);
+
+    fs = fopen("stateFin.gra","w");
+    graphSaveToFile(graph,n,fs);
+    fclose(fs);
+    fs = fopen("stateFin.lat","w");
+    latticeSaveToFile(lattice,n,fs);
+    fclose(fs);
+
+    latticeFree(lattice, n);
+    free(lattice);
+    graphFree(graph, n);
+    free(graph);
+  }
+  // este modo hace una cantidad prom de promedios sobre la red cargada
+  if(mode == 'b'){
+
+    FILE *fs1 = NULL;
+    FILE *fs2 = NULL;
+    int* nsAcumVacc = malloc(n*n*sizeof(int));
+
+    fs1 = fopen("data.txt","w");
+    fprintf(fs1, "# nonVacTot\n");
+
+    fs2 = fopen("frag_dist.frag","w");
+    fprintf(fs2, "# distribucion de fragmentos\n");
+
+    for(int i = 0; i < prom; i++){
+      agent* lattice;
+      vertex* graph;
+      int frag,max;
+
+      fs = fopen("stateFin.gra","r");
+      n = graphLoadFromFile(&graph,fs);
+      fclose(fs);
+      fs = fopen("stateFin.lat","r");
+      latticeLoadFromFile(&lattice,fs);
+      fclose(fs);
+      //transformo el ultimo feat a binario
+      latticeTransformVaccToBinary(lattice, n);
+      frag = latticeLabelVac(graph, lattice, n);
+      for(int i = 0; i < n*n; i++) nsAcumVacc[i] = 0;
+      max = maxCluster(lattice, nsAcumVacc, n, frag);
+      if(i%100 == 0) printf("Paso %d; max = %d\n", i,max);
+      for(int i = 0; i < n*n; i++) fprintf(fs2, "%d ", nsAcumVacc[i]);
+      fprintf(fs2, "\n");
+
+      fprintf(fs1, "%d\n", nonVaccinatorTotal(lattice, n));
+
+      latticeFree(lattice, n);
+      free(lattice);
+      graphFree(graph, n);
+      free(graph);
+    }
+    fclose(fs1);
+    fclose(fs2);
+    free(nsAcumVacc);
+  }
+
+  return 0;
+}

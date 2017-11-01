@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "include/agent.h"
+#include "include/graph.h"
+#include "include/label.h"
+#include "include/axelrod.h"
+#include "include/functions.h"
+#include "include/misc.h"
+
+int main(){
+  parameter* param = (parameter*) malloc(sizeof(parameter));
+  int n = 50;
+  param->n = n;
+  param->f = 11;
+  param->phi = 0;
+  param->q = 108;
+  int prom = 1000;
+  char mode = 'a';
+  param->neigOrdEdges = 2;
+  param->neigOrdRewire = 2;
+  param->nRewire = 1;
+  param->nEdgeRew = 0*n*n;
+  param->nEdgesAdd = 100;
+  param->nStub = n*n*0.01;
+
+  return 0;
+}
