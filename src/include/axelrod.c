@@ -17,7 +17,7 @@ int step(vertex* graph, agent *lattice, int n, float phi){
 
   float r = ((float) rand() / (float) RAND_MAX);
   // con probabilidad phi interactuo con el campo
-  if(r < phi) fieldInteraction(lattice, i);
+  if(r < phi) return fieldInteraction(lattice, i);
   // sino interactua con el campo, hago el proceso de axelrod convencional
   else{
     while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
@@ -143,7 +143,7 @@ int fieldInteraction(agent* lattice, int i){
   int qInt = lattice[i].q - lattice[i].feat[f-1];
   // si es taliban entonces 1-lattice[i].stub = 0 y el agenta queda igual
   lattice[i].feat[f-1] = lattice[i].feat[f-1] + (1-lattice[i].stub)*getRand(qInt);
-  return 0;
+  return 1;
 }
 
 /* stopReached() devuelve 0 o 1 si hay o no transiciones disponibles
