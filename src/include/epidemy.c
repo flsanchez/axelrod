@@ -18,5 +18,5 @@ int populationInit(epidemy* population, int n, int nComp){
 }
 
 int populationInitSEIR(epidemy* population, int n){
-  
+  return 0;
 }

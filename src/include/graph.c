@@ -503,66 +503,49 @@ int graphLoadFromFile(vertex** graph, FILE* fs){
   /* con este n ya puedo hacer el malloc del graph, y lo hago sobre uno auxiliar
     por las dudas */
   vertex* auxGraph = (vertex*) malloc(n*n*sizeof(vertex));
+  graphInit(auxGraph,n);
 
   /* voy a leer los nEdges de cada vertice y asigno los espacios
    correspondientes */
   st = fscanf(fs, "nEdges ");
-  for(int i = 0; i<n*n-1; i++){
+  int nEdgesTot = 0;
+  for(int i = 0; i<n*n; i++){
     st = fscanf(fs, "%d ", &nEdges);
-    vertexEdgesInit(auxGraph, i, nEdges);
+    nEdgesTot = nEdgesTot + nEdges;
+    //vertexEdgesInit(auxGraph, i, nEdges);
   }
-  st = fscanf(fs, "%d\n", &nEdges);
-  vertexEdgesInit(auxGraph, n*n-1, nEdges);
+  st = fscanf(fs, "\n");
+  //vertexEdgesInit(auxGraph, n*n-1, nEdges);
 
   /* voy a leer los edges */
   st = fscanf(fs, "edges ");
-  int edgeVal;
-  for(int idx = 0; idx<n*n-1; idx++){
-    nEdges = auxGraph[idx].nEdges;
-    for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
-      st = fscanf(fs, "%d,", &edgeVal);
-      auxGraph[idx].edges[idxEdges] = edgeVal;
-    }
-    st = fscanf(fs, "%d ", &edgeVal);
-    auxGraph[idx].edges[nEdges-1] = edgeVal;
+  int i,j;
+  for(int idx = 0; idx<nEdgesTot; idx++){
+    st = fscanf(fs, "%d,%d ", &i,&j);
+    graphEdgesAdd(auxGraph,i,j);
   }
-  nEdges = auxGraph[n*n-1].nEdges;
-  for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
-    st = fscanf(fs, "%d,", &edgeVal);
-    auxGraph[n*n-1].edges[idxEdges] = edgeVal;
-  }
-  st = fscanf(fs, "%d ", &edgeVal);
-  auxGraph[n*n-1].edges[nEdges-1] = edgeVal;
+  st = fscanf(fs, "\n");
 
   /* voy a leer los nRewire de cada vertice y asigno los espacios
    correspondientes */
   st = fscanf(fs, "nRewire ");
-  for(int i = 0; i<n*n-1; i++){
+  int nRewireTot = 0;
+  for(int i = 0; i<n*n; i++){
     st = fscanf(fs, "%d ", &nRewire);
-    vertexRewireInit(auxGraph, i, nRewire);
+    nRewireTot = nRewireTot + nRewire;
+    //vertexRewireInit(auxGraph, i, nRewire);
   }
-  st = fscanf(fs, "%d\n", &nRewire);
-  vertexRewireInit(auxGraph, n*n-1, nRewire);
-
+  st = fscanf(fs, "\n");
+  //vertexRewireInit(auxGraph, n*n-1, nRewire);
+  //printf("%d\n",nRewireTot);
   /* voy a leer los rewire */
   st = fscanf(fs, "rewire ");
-  int rewireVal;
-  for(int idx = 0; idx<n*n-1; idx++){
-    nRewire = auxGraph[idx].nRewire;
-    for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
-      st = fscanf(fs, "%d,", &rewireVal);
-      auxGraph[idx].rewire[idxRewire] = rewireVal;
-    }
-    st = fscanf(fs, "%d ", &rewireVal);
-    auxGraph[idx].rewire[nRewire-1] = rewireVal;
+  for(int idx = 0; idx<nRewireTot; idx++){
+    st = fscanf(fs, "%d,%d ", &i,&j);
+    //printf("%d %d\n", i,j);
+    graphRewireAdd(auxGraph,i,j);
   }
-  nRewire = auxGraph[n*n-1].nRewire;
-  for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
-    st = fscanf(fs, "%d,", &rewireVal);
-    auxGraph[n*n-1].rewire[idxRewire] = rewireVal;
-  }
-  st = fscanf(fs, "%d ", &rewireVal);
-  auxGraph[n*n-1].rewire[nRewire-1] = rewireVal;
+  st = fscanf(fs, "\n");
 
   if(st == 1) st = 0;
 
@@ -579,16 +562,18 @@ int graphCompare(vertex* graph1, vertex* graph2, int n){
   }
   for(int idx = 0; idx<n*n; idx++){
     int nEdges = graph1[idx].nEdges;
+    int elem;
     for(int idxEdges = 0; idxEdges<nEdges; idxEdges++){
-      if(graph1[idx].edges[idxEdges] != graph2[idx].edges[idxEdges]) return 0;
+      elem = graph1[idx].edges[idxEdges];
+      if( ! isElemInArray(graph2[idx].edges, nEdges, elem) ) return 0;
     }
   }
   for(int idx = 0; idx<n*n; idx++){
     int nRewire = graph1[idx].nRewire;
+    int elem;
     for(int idxRewire = 0; idxRewire<nRewire; idxRewire++){
-      if(graph1[idx].rewire[idxRewire] != graph2[idx].rewire[idxRewire]){
-        return 0;
-      }
+      elem = graph1[idx].rewire[idxRewire];
+      if( ! isElemInArray(graph2[idx].rewire, nRewire, elem) ) return 0;
     }
   }
   return 1;

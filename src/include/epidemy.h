@@ -9,3 +9,5 @@ typedef struct epidemy
 
 int epidemyInit(epidemy* population, int idx, int nComp);
 int populationInit(epidemy* population, int n, int nComp);
+
+#endif
