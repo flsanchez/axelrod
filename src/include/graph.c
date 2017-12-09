@@ -85,7 +85,7 @@ int vertexEdgesPrint(vertex* graph, int idx){
   int nEdges = graph[idx].nEdges;
   printf("Vertex N. %d:\nEdges: [ ",idx);
   for(int i = 0; i<nEdges; i++) printf("%d ", graph[idx].edges[i]);
-  printf("]\n");
+  printf("]; nEdges = %d\n", nEdges);
   return 0;
 
 }
@@ -317,6 +317,8 @@ int graphRewireFill(vertex* graph, int n, int nEdgeRew, int nRewire,
   return 0;
 }
 
+// graphFill() compacta el llenado de Edges y Rewire en una sola funcion
+
 int graphFill(vertex* graph, int n, int nEdgeRew, int nRewire,
               int neigOrdEdges, int neigOrdRewire)
 {
@@ -397,6 +399,21 @@ int graphEdgesAddNRand(vertex* graph, int n, int nRandEdges){
   return 0;
 }
 
+/* graphRewireAddNRand() añade sobre la red una cantidad de links de rewire
+  nRandRewire al azar sobre la red entre no vecinos */
+
+int graphRewireAddNRand(vertex* graph, int n, int nRandRewire){
+  int i = 0;
+  int j = 0;
+  for(int cont = 0; cont<nRandRewire; cont++){
+    i = getRand(n*n); //elijo un agente al azar
+    j = graphPickPassiveNotNeig(graph, n, i);  //elijo un no vecino del agente i azar
+    graphEdgesAdd(graph, i, j);
+    graphRewireAdd(graph, i, j);
+  }
+  return 0;
+}
+
 /* graphEdgesPrint() imprime el vector de conexiones para cada uno de los
 vertices */
 
@@ -442,43 +459,33 @@ int graphSaveToFile(vertex* graph, int n, FILE* fs){
 
   //imprimo el numero de edges para cada vertice
   fprintf(fs, "nEdges ");
-  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", graph[i].nEdges);
-  fprintf(fs, "%d\n", graph[n*n-1].nEdges);
+  for(int i = 0; i<n*n; i++) fprintf(fs, "%d ", graph[i].nEdges);
+  fprintf(fs, " \n");
 
   //imprimo el vector de edges
   fprintf(fs, "edges ");
-  for(int i = 0; i<n*n-1; i++){
+  for(int i = 0; i<n*n; i++){
     nEdges = graph[i].nEdges;
-    for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
-      fprintf(fs, "%d,", graph[i].edges[idxEdges]);
+    for(int idxEdges = 0; idxEdges<nEdges; idxEdges++){
+      fprintf(fs, "%d,%d ", i,graph[i].edges[idxEdges]);
     }
-    fprintf(fs, "%d ", graph[i].edges[nEdges-1]);
   }
-  nEdges = graph[n*n-1].nEdges;
-  for(int idxEdges = 0; idxEdges<nEdges-1; idxEdges++){
-    fprintf(fs, "%d,", graph[n*n-1].edges[idxEdges]);
-  }
-  fprintf(fs, "%d\n", graph[n*n-1].edges[nEdges-1]);
+  fprintf(fs,"\n");
 
   //imprimo el numero de rewire para cada vertice
   fprintf(fs, "nRewire ");
-  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", graph[i].nRewire);
-  fprintf(fs, "%d\n", graph[n*n-1].nRewire);
+  for(int i = 0; i<n*n; i++) fprintf(fs, "%d ", graph[i].nRewire);
+  fprintf(fs, "\n");
 
   //imprimo el vector de rewire
   fprintf(fs, "rewire ");
-  for(int i = 0; i<n*n-1; i++){
+  for(int i = 0; i<n*n; i++){
     nRewire = graph[i].nRewire;
-    for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
-      fprintf(fs, "%d,", graph[i].rewire[idxRewire]);
+    for(int idxRewire = 0; idxRewire<nRewire; idxRewire++){
+      fprintf(fs, "%d,%d ", i, graph[i].rewire[idxRewire]);
     }
-    fprintf(fs, "%d ", graph[i].rewire[nRewire-1]);
   }
-  nRewire = graph[n*n-1].nRewire;
-  for(int idxRewire = 0; idxRewire<nRewire-1; idxRewire++){
-    fprintf(fs, "%d,", graph[n*n-1].rewire[idxRewire]);
-  }
-  fprintf(fs, "%d\n", graph[n*n-1].rewire[nRewire-1]);
+  fprintf(fs,"\n");
 
   return 0;
 

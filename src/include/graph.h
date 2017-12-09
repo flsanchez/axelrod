@@ -39,6 +39,7 @@ int graphEdgesRm(vertex* graph, int src, int dest);
 int graphRewireAdd(vertex* graph, int src, int dest);
 int graphRewireRm(vertex* graph, int src, int dest);
 int graphEdgesAddNRand(vertex* graph, int n, int nRandEdges);
+int graphRewireAddNRand(vertex* graph, int n, int nRandRewire);
 int graphEdgesPrint(vertex* graph, int n);
 int graphRewirePrint(vertex* graph, int n);
 int graphPickPassiveNeig(vertex* graph, int i);

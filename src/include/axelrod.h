@@ -15,6 +15,7 @@ typedef struct parameter
   int nRewire;
   int nEdgeRew;
   int nEdgesAdd;
+  int nRewireAdd;
   // axelrod
   float phi;
 } parameter;
@@ -27,8 +28,10 @@ int socialInteraction(vertex* graph, int i, int j, int k);
 int fieldInteraction(agent* lattice, int i);
 int stopReached(vertex* graph, agent* lattice, int n);
 int activeLinks(vertex* graph, agent* lattice, int n);
-
-int axelrodInit(parameter* param, agent* lattice, vertex* graph);
+int activeLinksCultural(vertex* graph, agent* lattice, int n);
+int interactionij(vertex* graph, agent* lattice, int n, int* i, int* j);
+int axelrodInit(parameter* param, agent* lattice, vertex* graph, int v);
+int axelrodInitStubFromArray(parameter* param, agent* lattice, vertex* graph, int* idxArray);
 int axelrodSingleRun(parameter* param, agent* lattice, vertex* graph, int v);
 
 #endif

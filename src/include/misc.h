@@ -9,5 +9,4 @@ int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray,
                   int idx, int n);
 int loadFromTxt(FILE* fs, int* array);
 
-
 #endif

@@ -23,12 +23,12 @@ int step(vertex* graph, agent *lattice, int n, float phi){
     while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
     j = graphPickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
 
-    hij = commonTraits(lattice, i, j);
+    hij = commonTraitsCultural(lattice, i, j); //calculo la homofilia
 
     if(vertexRewireIsConnected(graph, i, j)){
 
       int k = graphPickPassiveNotNeig(graph, n, i);
-      int hik = commonTraits(lattice, i, k);
+      int hik = commonTraitsCultural(lattice, i, k);
 
       if(hij < hik) return socialInteraction(graph, i, j, k);
       else opinionInteraction(lattice, i, j, hij, th, phi);
@@ -91,12 +91,14 @@ int opinionInteraction(agent* lattice, int i, int j, int hij, int th, float phi)
   float r;
   f = lattice[i].f;
 
-  if(hij >= th) prob = (float) hij / f;
+  if(hij >= th) prob = (float) hij / (f-1); // hij de la parte cultural
   else prob = 0;
 
   r = ((float) rand() / (float) RAND_MAX);
 
   if( r < prob ){
+
+    hij = hij + (int)(lattice[i].feat[f-1] == lattice[j].feat[f-1]);
 
     if(hij != f){
 
@@ -156,8 +158,8 @@ int stopReached(vertex* graph, agent* lattice, int n){
 
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
-      h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
-      if( h != f && h >= th ) return 0;
+      h = commonTraitsCultural(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != (f-1) && h >= th ) return 0;
     }
   }
   return 1;
@@ -180,9 +182,42 @@ int activeLinks(vertex* graph, agent* lattice, int n){
   return actLinks/2;
 }
 
+int activeLinksCultural(vertex* graph, agent* lattice, int n){
+  int h;
+  int th = 1; //threshold de la interaccion
+  int f = lattice[0].f-1;
+  int actLinks = 0;
+
+  for(int idx = 0; idx < n*n; idx++){
+    for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
+      h = commonTraitsCultural(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != f && h >= th ) actLinks++;
+    }
+  }
+  return actLinks/2;
+}
+
+int interactionij(vertex* graph, agent* lattice, int n, int* i, int* j){
+  int h;
+  int th = 1; //threshold de la interaccion
+  int f = lattice[0].f;
+
+  for(int idx = 0; idx < n*n; idx++){
+    for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
+      h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != f && h >= th ){
+        *i = idx;
+        *j = graph[idx].edges[edgesIdx];
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
 /* initAxelrod() inicializa el axelrod con los parametros dados en param */
 
-int axelrodInit(parameter* param, agent* lattice, vertex* graph){
+int axelrodInit(parameter* param, agent* lattice, vertex* graph, int v){
   int n = param->n;
   int f = param->f;
   int q = param->q;
@@ -193,6 +228,14 @@ int axelrodInit(parameter* param, agent* lattice, vertex* graph){
   int nRewire = param->nRewire;
   int nEdgeRew = param->nEdgeRew;
   int nEdgesAdd = param->nEdgesAdd;
+  int nRewireAdd = param->nRewireAdd;
+
+  if(v == 1){
+    printf("Parametros de inicializacion:\n");
+    printf("n = %d; f = %d; q = %d; qF = %d; nStub = %d\n",n,f,q,qF,nStub);
+    printf("neigOrdEdges = %d; neigOrdRewire = %d; nRewire = %d\n",neigOrdEdges,neigOrdRewire,nRewire);
+    printf("nEdgeRew = %d; nEdgesAdd = %d; nRewireAdd = %d\n",nEdgeRew,nEdgesAdd,nRewireAdd);
+  }
 
   latticeInit(lattice, n, f);
   latticeFill(lattice, n, q, qF);
@@ -201,11 +244,40 @@ int axelrodInit(parameter* param, agent* lattice, vertex* graph){
   graphInit(graph, n);
   graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
   graphEdgesAddNRand(graph, n, nEdgesAdd);
+  graphRewireAddNRand(graph, n, nRewireAdd);
 
   return 0;
 }
 
-/* singleAxelrod() toma los parametros y realiza una corrida de axelrod.
+/* axelrodInitStubFromArray() inicializa el axelrod con los parametros dados
+  en param con los talibanes dados en el array */
+
+int axelrodInitStubFromArray(parameter* param, agent* lattice, vertex* graph, int* idxArray){
+  int n = param->n;
+  int f = param->f;
+  int q = param->q;
+  int qF = param->qF;
+  int nStub = param->nStub;
+  int neigOrdEdges = param->neigOrdEdges;
+  int neigOrdRewire = param->neigOrdRewire;
+  int nRewire = param->nRewire;
+  int nEdgeRew = param->nEdgeRew;
+  int nEdgesAdd = param->nEdgesAdd;
+  int nRewireAdd = param->nRewireAdd;
+
+  latticeInit(lattice, n, f);
+  latticeFill(lattice, n, q, qF);
+  latticeSetStubFromArray(lattice, n, idxArray, nStub);
+
+  graphInit(graph, n);
+  graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+  graphEdgesAddNRand(graph, n, nEdgesAdd);
+  graphRewireAddNRand(graph, n, nRewireAdd);
+
+  return 0;
+}
+
+/* axelrodSingleRun() toma los parametros y realiza una corrida de axelrod.
   Si el flag de verbose es 1, ademas arroja informacion acerca de los pasos
   y los links activos */
 

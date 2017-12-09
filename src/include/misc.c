@@ -16,7 +16,7 @@ int getRand(int max){
 
 /* shuffleArray() mezcla los elementos del array */
 
-int shuffleArray(int* shuffled,int n){
+int shuffleArray(int* shuffled, int n){
   int* res = (int*) malloc(sizeof(int)*n);
   for(int i = 0; i<n;i++) res[i] = shuffled[i];
   int idx,aux;
