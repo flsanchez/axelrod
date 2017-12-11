@@ -12,6 +12,7 @@ int agentInit(agent *lattice, int idx, int f){
   lattice[idx].feat = malloc((lattice[idx].f) * sizeof(int));
   lattice[idx].label = 0;
   lattice[idx].stub = 0; //por default, inicializan como vacunadores
+  lattice[idx].vacc = 1;  // idem
   return 0;
 
 }
@@ -210,10 +211,10 @@ int latticeTransformVaccToBinary(agent* lattice, int n){
     //si el agente no es taliban
     if(lattice[idx].stub == 0){
       //pongo el ultimo feat a 1 con probabilidad prob
-      if(r<prob) lattice[idx].feat[f-1] = 1;
-      else lattice[idx].feat[f-1] = 0;
+      if(r<prob) lattice[idx].vacc = 1;
+      else lattice[idx].vacc = 0;
     }
-    else lattice[idx].feat[f-1] = 0;
+    else lattice[idx].vacc = 0;
   }
   return 0;
 }
@@ -265,6 +266,11 @@ int latticeSaveToFile(agent *lattice, int n, FILE* fs){
   }
   fprintf(fs, "%d\n", lattice[n*n-1].feat[f-1]);
 
+  // grabo la vacc
+  fprintf(fs, "vacc ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].vacc);
+  fprintf(fs, "%d\n", lattice[n*n-1].vacc);
+
   return 0;
 }
 
@@ -307,7 +313,7 @@ int latticeLoadFromFile(agent** lattice, FILE* fs){
     st = fscanf(fs, "%d ", &qF);
     auxLatt[idx].qF = qF;
   }
-  st = fscanf(fs, "%d ", &qF);
+  st = fscanf(fs, "%d\n", &qF);
   auxLatt[n*n-1].qF = qF;
 
   /* voy a leer los label */
@@ -349,6 +355,16 @@ int latticeLoadFromFile(agent** lattice, FILE* fs){
   }
   st = fscanf(fs, "%d\n", &featN);
   auxLatt[n*n-1].feat[f-1] = featN;
+
+  /* voy a leer los vacc */
+  st = fscanf(fs, "vacc ");
+  int vacc;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &vacc);
+    auxLatt[idx].vacc = vacc;
+  }
+  st = fscanf(fs, "%d\n", &vacc);
+  auxLatt[n*n-1].vacc = vacc;
 
   if(st == 0) st = 1;
 

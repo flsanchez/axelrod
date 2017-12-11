@@ -65,10 +65,8 @@ float avMinPathLen(vertex* graph, int n){
   lattice es vacunador */
 
 int nonVaccinatorCount(agent* lattice, int n, int* nonVacAcum){
-  int f;
   for(int idx = 0; idx < n*n; idx++){
-    f = lattice[idx].f;
-    if(lattice[idx].feat[f-1] == 0) nonVacAcum[idx]++;
+    if(lattice[idx].vacc == 0) nonVacAcum[idx]++;
   }
   return 0;
 }
@@ -77,10 +75,8 @@ int nonVaccinatorCount(agent* lattice, int n, int* nonVacAcum){
 
 int nonVaccinatorTotal(agent* lattice, int n){
   int nonVacTot = 0;
-  int f;
   for(int idx = 0; idx < n*n; idx++){
-    f = lattice[idx].f;
-    if(lattice[idx].feat[f-1] == 0) nonVacTot++;
+    if(lattice[idx].vacc == 0) nonVacTot++;
   }
   return nonVacTot;
 }

@@ -51,10 +51,9 @@ int populationInitSEIR(epidemy* population, int n){
 // de su opinion de vacunacion previamente sorteada (mucho muy importante)
 
 int populationFillSEIRVacc(epidemy* population, agent* lattice, int n){
-  int f, nComp = 4;
+  int nComp = 4;
   for(int idx = 0; idx < n*n; idx++){
-    f = lattice[idx].f;
-    if(lattice[idx].feat[f-1] == 0){
+    if(lattice[idx].vacc == 0){
       population[idx].comp[0] = 1;
       for(int i = 1; i < nComp; i++) population[idx].comp[i] = 0;
     }
@@ -76,12 +75,12 @@ int populationSEIRInfect(epidemy* population, vertex* graph,
   int frag = latticeLabelVac(graph, lattice, n); // labeleo
   // obtengo la etiqueta del cluster mas grande
   int labelClusMax = latticeLabelMax(lattice, n, frag);
-  printf("LabelMax %d\n", labelClusMax);
 
   // obtengo la lista con los integrantes del cluster mas grande
   int* maxClusterList;
   int nMaxClusterList = latticeClusterNList(lattice, n, labelClusMax,
                                         &maxClusterList);
+  //printf("LabelMax %d; nMaxClusterList %d; maxCluster %d\n", labelClusMax, nMaxClusterList, maxCluster(lattice,NULL,n,frag));
   // mezclo el array
   shuffleArray(maxClusterList, nMaxClusterList);
   // chequeo que sea posible la asignacion, si algo salio mal, devuelvo -1
@@ -147,6 +146,7 @@ int stepSEIR(epidemy* population, vertex* graph, int n, float nuS, float nuE,
 {
   int whichComp; // aca va en que compartimiento esta cada agente
   float prob,r;
+  int dInf = 0;
   // para cada agente
   for(int idx = 0; idx < n*n; idx++){
     // busco en que compartimiento esta el agente
@@ -154,26 +154,69 @@ int stepSEIR(epidemy* population, vertex* graph, int n, float nuS, float nuE,
     while(population[idx].comp[whichComp] == 0) whichComp++;
     // calculo las probabilidades para cada estado
     prob = 0;
+    r = (float)rand()/RAND_MAX; // tiro la moneda
     // si es susceptible
     if(whichComp == 0){
       float aux = 1;
       int z = epidemyCompNNeig(population, graph, idx, 2); // vecinos infectados
       for(int i = 0; i < z; i++) aux = aux*(1-dt*nuS);
       prob = 1-aux;
+      // con probabilidad prob promuevo de un susceptible a expuesto
+      if(r<prob){
+        population[idx].comp[whichComp] = 0;
+        population[idx].comp[whichComp + 1] = 1;
+      }
     }
     // si es expuesto
-    else if(whichComp == 1) prob = nuE*dt;
+    else if(whichComp == 1){
+      prob = nuE*dt;
+      // con probabilidad prob promuevo de un expuesto a infectado
+      if(r<prob){
+        population[idx].comp[whichComp] = 0;
+        population[idx].comp[whichComp + 1] = 1;
+        dInf++; // incremento en 1 el diferencial de infectados
+      }
+    }
     // si es infectado
-    else if(whichComp == 2) prob = nuI*dt;
-    // con probabilidad prob promuevo de un estado a otro
-    // notar que si whichComp == 3 (refractario) -> prob = 0
-    r = (float)rand()/RAND_MAX; // tiro la moneda
-    if(r<prob){
-      population[idx].comp[whichComp] = 0;
-      population[idx].comp[whichComp + 1] = 1;
+    else if(whichComp == 2){
+      prob = nuI*dt;
+      // con probabilidad prob promuevo de un infectado a refractario
+      if(r<prob){
+        population[idx].comp[whichComp] = 0;
+        population[idx].comp[whichComp + 1] = 1;
+      }
     }
   }
-  return 0;
+  return dInf;
+}
+
+// populationSEIRFull() hace una corrida entera del modelo epidemiologico,
+// devolviendo el numero de infectados durante toda la corrida
+
+int populationSEIRFull(vertex* graph, vertex* graphEpi, agent* lattice, int n,
+                        int nInf, float nuS, float nuE, float nuI, float dt)
+{
+  // sorteo
+  latticeTransformVaccToBinary(lattice, n);
+  // inicializo las cosas para la epidemia
+  epidemy* population = malloc(sizeof(epidemy)*n*n);
+  populationInitSEIR(population, n);
+  populationFillSEIRVacc(population, lattice, n);
+  populationSEIRInfect(population, graph, lattice, n, nInf);
+  // hago el avance temporal
+  int stop = 0;
+  int i = 0;
+  int infTotal = 1;
+  while(stop == 0){
+    //populationSaveToFile(fs, population, n);
+    infTotal = infTotal + stepSEIR(population, graphEpi, n, nuS, nuE, nuI, dt);
+    stop = stopReachedSEIR(population, n);
+    i++;
+  }
+  //populationSaveToFile(fs, population, n);
+  populationFree(population, n);
+  free(population);
+  return infTotal;
 }
 
 int stopReachedSEIR(epidemy* population, int n){

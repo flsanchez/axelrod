@@ -10,6 +10,7 @@ typedef struct agent
   int qF;     //numero de traits del feat f
   int stub;   /* etiqueta de taliban ( 0 si proVacunador,
               1 si antiVacunador(taliban) ) */
+  int vacc;   // 0 si no vacunador, 1 si vacunador
 } agent;
 
 int agentInit(agent *lattice, int idx, int f);
