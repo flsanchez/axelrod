@@ -84,3 +84,44 @@ int nonVaccinatorTotal(agent* lattice, int n){
   }
   return nonVacTot;
 }
+
+// sqDistij() calcula la distancia cuadrada entre dos agentes i,j de la red
+int sqDistij(int i, int j, int n){
+  int dist, ix,iy, jx,jy;
+  ix = i%n;
+  iy = i/n;
+  jx = j%n;
+  jy = j/n;
+  dist = (ix-jx)*(ix-jx) + (iy-jy)*(iy-jy);
+  return dist;
+}
+
+/* cutDistantLinks() corta los links de distancia mayor que la distancia cuadra-
+  da dist2 para cada agente en el grapho */
+
+int cutDistantLinks(vertex* graph, int n, int dist2){
+  int nEdges, nRewire, idxAux;
+  for(int idx = 0; idx < n*n; idx++){
+    nEdges = graph[idx].nEdges;
+    nRewire = graph[idx].nRewire;
+    // si hay links de rewire, me fijo de cortar estos primero
+    if(nRewire > 0){
+      for(int idxRew = 0; idxRew < nRewire; idxRew++){
+        idxAux = graph[idx].rewire[idxRew]; //indice del vecino
+        // si la distancia es mayor, corto el link, tanto rewire como normal
+        if(sqDistij(idx,idxAux,n)>dist2){
+          graphRewireRm(graph, idx, idxAux);
+          graphEdgesRm(graph, idx, idxAux);
+        }
+      }
+    }
+    else{ // si no es hay links de rewire
+      for(int idxEdges = 0; idxEdges < nEdges; idxEdges++){
+        idxAux = graph[idx].edges[idxEdges]; //indice del vecino
+        // si la distancia es mayor, corto el link
+        if(sqDistij(idx,idxAux,n)>dist2) graphEdgesRm(graph, idx, idxAux);
+      }
+    }
+  }
+  return 0;
+}

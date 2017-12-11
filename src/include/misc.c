@@ -146,6 +146,8 @@ int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray,
   return nNeigArray;
 }
 
+// loadFromTxt() se encarga de leer un archivo en filas a un vector previamente
+// definido
 int loadFromTxt(FILE* fs, int* array){
   int i = 0, n = 0;
   while( fscanf(fs, "%d ", &n) > 0 ) array[i++] = n;

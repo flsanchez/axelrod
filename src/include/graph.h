@@ -46,6 +46,7 @@ int graphPickPassiveNeig(vertex* graph, int i);
 int graphPickPassiveNotNeig(vertex* graph, int n, int i);
 int graphSaveToFile(vertex* graph, int n, FILE* fs);
 int graphLoadFromFile(vertex** graph, FILE* fs);
+int graphCopy(vertex* graphSrc, int n, vertex** graphDest);
 int graphCompare(vertex* graph1, vertex* graph2, int n);
 int graphEdgesFree(vertex* graph, int n);
 int graphRewireFree(vertex* graph, int n);

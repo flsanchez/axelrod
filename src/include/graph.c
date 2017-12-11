@@ -553,6 +553,29 @@ int graphLoadFromFile(vertex** graph, FILE* fs){
   return n;
 }
 
+/* graphCopy() se encarga de copiar el graphSrc en el graphDest */
+
+int graphCopy(vertex* graphSrc, int n, vertex** graphDest ){
+  int nEdges, nRewire;
+  // hago el malloc para el graph que voy a devolver
+  vertex* auxGraph = malloc(n*n*sizeof(vertex));
+  // asigno la memoria para los edges y los rewire para cada agente
+  // y copio las listas
+  for(int idx = 0; idx < n*n; idx++){
+    nEdges = graphSrc[idx].nEdges;
+    nRewire = graphSrc[idx].nRewire;
+    vertexEdgesInit(auxGraph, idx, nEdges);
+    vertexRewireInit(auxGraph, idx, nRewire);
+    for(int idxEdges = 0; idxEdges < nEdges; idxEdges++){
+      auxGraph[idx].edges[idxEdges] = graphSrc[idx].edges[idxEdges];
+    }
+    for(int idxRewire = 0; idxRewire < nRewire; idxRewire++){
+      auxGraph[idx].rewire[idxRewire] = graphSrc[idx].rewire[idxRewire];
+    }
+  }
+  * graphDest = auxGraph;
+  return 0;
+}
 /* graphCompare() compara dos graph, devuelve 1 si son iguales */
 
 int graphCompare(vertex* graph1, vertex* graph2, int n){
