@@ -3,6 +3,7 @@
 #include <time.h>
 #include "agent.h"
 #include "graph.h"
+#include "axelrod.h"
 #include "label.h"
 
 int latticeLabel(vertex* graph, agent* lattice, int n){
@@ -96,6 +97,8 @@ int latticeLabelFeatN(vertex* graph, agent* lattice, int n, int featNIdx){
   return frag;
 }
 
+// latticeLabelVac() identifica clusters de noVacunadores
+
 int latticeLabelVac(vertex* graph, agent* lattice, int n){
   int f = lattice[0].f;
   int frag = latticeLabelFeatN(graph, lattice, n, f-1);
@@ -151,6 +154,34 @@ int latticeLabelCultural(vertex* graph, agent* lattice, int n){
   return frag;
 }
 
+int latticeLabelMax(agent *lattice, int n, int frag){
+
+  //fragsz[i] contiene el tamaño del cluster de etiqueta i
+  int *fragsz = malloc(frag*sizeof(int));
+  //ns[i] contiene cuantos clusters de tamaño i-1 se encontraron en la red
+  int *ns = malloc(n*n*sizeof(int));
+
+  for(int i = 0; i<frag; i++) fragsz[i] = 0;
+  for(int i = 0; i<n*n; i++) ns[i] = 0;
+
+  clusterSize(lattice, n, frag, fragsz, ns);
+
+  int mayor = 0;
+  int labelMayor = 0;
+
+  for(int i = 1; i<frag; i++){
+    if(fragsz[i]>mayor){
+      mayor = fragsz[i];
+      labelMayor = i;
+    }
+  }
+
+  free(fragsz);
+  free(ns);
+
+  return labelMayor;
+
+}
 
 int falseLabel(agent *lattice, int *clase, int* commNeig, int nCommNeig, int idx){
 

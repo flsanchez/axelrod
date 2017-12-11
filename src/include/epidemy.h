@@ -8,14 +8,20 @@ typedef struct epidemy
 } epidemy;
 
 int epidemyInit(epidemy* population, int idx, int nComp);
-int epidemyNCompNeig(epidemy* population, vertex* graph, int idx, int iComp);
+int epidemyCompNNeig(epidemy* population, vertex* graph, int idx, int iComp);
 int populationInit(epidemy* population, int n, int nComp);
 int populationInitSEIR(epidemy* population, int n);
-int populationNCompTotal(epidemy* population, int n, int iComp);
-int populationNCompNeig(epidemy* population, vertex* graph, int* infArray,
+int populationFillSEIRVacc(epidemy* population, agent* lattice, int n);
+int populationSEIRInfect(epidemy* population, vertex* graph,
+                          agent* lattice, int n, int nInf);
+int populationFillRand(epidemy* population, int n, int nComp);
+int populationCompNTotal(epidemy* population, int n, int iComp);
+int populationCompNNeig(epidemy* population, vertex* graph, int* infArray,
                         int n, int iComp);
+int populationSaveToFile(FILE* fs, epidemy* population, int n);
 int stepSEIR(epidemy* population, vertex* graph, int n, float nuS, float nuE,
               float nuI, float dt);
 int stopReachedSEIR(epidemy* population, int n);
+int populationFree(epidemy* population, int n);
 
 #endif

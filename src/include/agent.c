@@ -92,6 +92,31 @@ int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray){
   return 0;
 }
 
+/* latticeClusterNList() devuelve una lista con los indices de los integrantes
+  del cluster con etiqueta lableClusN, previamente deben estar labeleados
+  para que ande */
+
+int latticeClusterNList(agent* lattice, int n, int labelClusN, int** clusterArray){
+  int nArray = 0;
+  // cuento cuantos en la red hay con la etiqueta labelClusN
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].label == labelClusN) nArray++;
+  }
+  // asigno la memoria para el vector
+  int* clusterNList = malloc(sizeof(int)*nArray);
+  int idxCluster = 0;
+  // lleno clusterNList con las posiciones de la red correspondientes
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].label == labelClusN){
+      clusterNList[idxCluster] = idx;
+      idxCluster++;
+    }
+  }
+  *clusterArray = clusterNList;
+  return nArray;
+}
+
+
 /* latticePrintFeats() imprime en pantalla todos los feats para cada agente */
 
 int latticePrintFeats(agent *lattice, int n){
