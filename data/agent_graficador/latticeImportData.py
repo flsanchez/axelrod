@@ -59,6 +59,15 @@ def latticeGetStubs(name):
 		stubs = [ int(stub) for stub in data]
 	return stubs
 
+def latticeGetStubs(name):
+	with open(name) as f:
+		for i in range(0,7):
+			f.readline()
+		data = f.readline()
+		data = data.rstrip("\n").lstrip("vacc ").split(" ")
+		vaccs = [ int(vacc) for vacc in data]
+	return vaccs
+
 def latticeBaseQ(agents, q):
 	baseQ = np.zeros(len(agents))
 	qList = np.array([q**i for i in range(len(agents[0])-1)])
@@ -149,4 +158,3 @@ def latticeShowStub(name,show,save):
 		plt.savefig("colorMap_stub.png")
 	if show == 1:
 		plt.show()
-	

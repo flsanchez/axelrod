@@ -20,7 +20,9 @@ int latticeInit(agent *lattice, int n, int f);
 int latticeFill(agent *lattice, int n, int q, int qF);
 int latticeSetStub(agent* lattice, int n, int nStub);
 int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray);
-int latticeClusterNList(agent* lattice, int n, int labelClusN, int** clusterArray);
+int latticeClusterNList(agent* lattice, int n, int labelClusN,
+                        int** clusterArray);
+int latticeSetNonVacc(agent* lattice, int n, int nonVacc, int nStub);
 int latticePrintFeats(agent *lattice, int n);
 int latticePrintFeatN(agent *lattice, int n, int featNIdx);
 int latticePrintLabels(agent *lattice, int n);

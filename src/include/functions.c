@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <math.h>
 #include "agent.h"
 #include "graph.h"
 #include "functions.h"
@@ -120,4 +121,19 @@ int cutDistantLinks(vertex* graph, int n, int dist2){
     }
   }
   return 0;
+}
+
+float meanCalc(int* vector, int n){
+  float res = 0;
+  for(int idx = 0; idx < n; idx++) res = res + vector[idx];
+  return res/n;
+}
+
+float stDevCalc(int* vector, int n, float* mean){
+  float res = 0;
+  *mean = meanCalc(vector,n);
+  for(int idx = 0; idx < n; idx++){
+    res = res + (vector[idx]-*mean)*(vector[idx]-*mean);
+  }
+  return sqrt(res/n);
 }

@@ -12,8 +12,11 @@ int epidemyCompNNeig(epidemy* population, vertex* graph, int idx, int iComp);
 int populationInit(epidemy* population, int n, int nComp);
 int populationInitSEIR(epidemy* population, int n);
 int populationFillSEIRVacc(epidemy* population, agent* lattice, int n);
-int populationSEIRInfect(epidemy* population, vertex* graph,
-                          agent* lattice, int n, int nInf);
+// int populationFillSEIRFromNumber(epidemy* population, int n, int massNonVac);
+// int populationFillSEIRFromList(epidemy* population, int n, int massNonVac, int* idxArray, int nStub);
+int populationSEIRInfectMaxCluster(epidemy* population, vertex* graph,
+                                  agent* lattice, int n, int nInf);
+int populationSEIRInfectAtRand(epidemy* population,agent* lattice, int n, int nInf);
 int populationFillRand(epidemy* population, int n, int nComp);
 int populationCompNTotal(epidemy* population, int n, int iComp);
 int populationCompNNeig(epidemy* population, vertex* graph, int* infArray,
@@ -21,7 +24,13 @@ int populationCompNNeig(epidemy* population, vertex* graph, int* infArray,
 int populationSaveToFile(FILE* fs, epidemy* population, int n);
 int stepSEIR(epidemy* population, vertex* graph, int n, float nuS, float nuE,
               float nuI, float dt);
-int populationSEIRFull(vertex* graph, vertex* graphEpi, agent* lattice, int n,
+int populationSEIRFullMaxCluster(vertex* graph, vertex* graphEpi, agent* lattice, int n,
+                                int nInf, float nuS, float nuE, float nuI, float dt);
+/*int populationSEIRFullPerco(vertex* graph, vertex* graphEpi, agent* lattice,
+                            int n, int nInf, float nuS, float nuE, float nuI,
+                            float dt, float massNonVac);*/
+
+int populationSEIRFullAtRand(vertex* graphEpi, agent* lattice, int n,
                         int nInf, float nuS, float nuE, float nuI, float dt);
 int stopReachedSEIR(epidemy* population, int n);
 int populationFree(epidemy* population, int n);

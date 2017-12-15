@@ -7,7 +7,7 @@ VPATH = src/include:src
 OUTDIR = bin
 SOURCE_C = $(wildcard src/*.c) $(wildcard src/include/*.c)
 OBJECTS_C = $(patsubst %.c, $(OUTDIR)/%_c.o, $(notdir $(SOURCE_C)))
-CFLAGS = -std=gnu99 -lm -O3 -Wall
+CFLAGS = -std=gnu99 -O3 -Wall
 EXECUTABLE = $(OUTDIR)/axelrod.e
 
 default: help
@@ -30,10 +30,10 @@ all: objects executable
 print-%  : ; @echo $* = $($*)
 
 $(OUTDIR)/%_c.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c $^ -o $@ -lm
 
 $(OUTDIR)/%.e: $(OBJECTS_C)
-	$(LD) $(CFLAGS) $^ -o $@
+	$(LD) $(CFLAGS) $^ -o $@ -lm
 
 clean:
 	rm -rfv $(OBJECTS_C) $(EXECUTABLE) 

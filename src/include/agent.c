@@ -89,6 +89,7 @@ int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray){
     idx = idxList[i];
     lattice[idx].stub = 1;
     lattice[idx].feat[f-1] = 0;
+    lattice[idx].vacc = 0;
   }
   return 0;
 }
@@ -115,6 +116,41 @@ int latticeClusterNList(agent* lattice, int n, int labelClusN, int** clusterArra
   }
   *clusterArray = clusterNList;
   return nArray;
+}
+
+// latticeSetNonVacc() setea como no vacunadores una cantidad nonVacc al azar,
+// pero dentro de estos nonVacc se encuentran los nStub, o sea, setteo al azar
+// una cantidad de agentes nonVacc-nStub
+
+int latticeSetNonVacc(agent* lattice, int n, int nonVacc, int nStub){
+  int nonVaccToSet = nonVacc-nStub; // la cantidad de noVacunadores neta a settear
+  int* auxList = malloc(n*n*sizeof(int));
+  // array con indices
+  for(int idx = 0; idx < n*n; idx++) auxList[idx] = idx;
+  shuffleArray(auxList,n*n); // mezclo el array
+  int countNonVacc = 0; // contador de no vacunadores no talibanes
+  int idxList = 0; // indice para recorrer auxList
+  int idx;
+  /*int talC = 0;
+  for(int idx = 0; idx < n*n; idx++) talC = talC + (int)lattice[idx].stub;
+  printf("TalC = %d\n", talC);*/
+  // asigno como no vacunadores una cantidad de agentes nonVaccToSet
+  while(countNonVacc < nonVaccToSet){
+    idx = auxList[idxList];
+    // si el agente no es taliban, sumo 1 a la cuenta
+    if(lattice[idx].stub != 1) countNonVacc++;
+    lattice[idx].vacc = 0;
+    idxList++;
+  }
+  // asigno el resto de los agentes que sobran como vacunadores, salvo que sean
+  // talibanes, en cuyo caso los pongo como no vacunadores
+  for(int i = idxList; i < n*n; i++){
+    idx = auxList[i];
+    if(lattice[idx].stub != 1) lattice[idx].vacc = 1;
+    else lattice[idx].vacc = 0;
+  }
+  free(auxList);
+  return 0;
 }
 
 
