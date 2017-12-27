@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "include/graph.h"
+#include "include/agent.h"
+#include "include/axelrod.h"
+#include "include/misc.h"
+#include "include/epidemy.h"
+#include "include/functions.h"
+#include "include/label.h"
+
+int main(){
+
+
+  parameter* param = (parameter*) malloc(sizeof(parameter));
+  int n = 50;
+  param->n = n;
+  param->f = 11;
+  param->phi = 0.001;
+  param->q = 90;
+  param->neigOrdEdges = 2;
+  param->neigOrdRewire = 2;
+  param->nRewire = 1;
+  param->nEdgeRew = 0;
+  param->nEdgesAdd = 0;
+  param->nRewireAdd = 100;
+  param->nStub = n*n*0.01;
+  param->qF = param->q;
+  int dist2 = 2;
+  char name[100];
+  int t = time(NULL);
+  int nInf = 1;
+
+  srand(time(NULL));
+
+  // inicializo lo necesario para axelrod
+  agent* lattice = (agent*) malloc(n * n * sizeof(agent));
+  vertex* graph = (vertex*) malloc(n * n * sizeof(vertex));
+  axelrodInit(param, lattice, graph,1);
+
+  FILE* fs1;
+  // hago axelrod
+  printf("Axelrod...\n");
+  axelrodSingleRun(param, lattice, graph, 0);
+  printf("OK!\n");
+  latticeLabelVac(graph, lattice, n);
+  fs1 = fopen("before.lat","w");
+  latticeSaveToFile(lattice,n,fs1);
+  fclose(fs1);
+  // sorteo
+  latticeTransformVaccToBinary(lattice, n);
+
+  // copio el grapho y corto los links de largo rango en la copia
+  vertex* graphEpi;
+  graphCopy(graph, n, &graphEpi);
+  cutDistantLinks(graphEpi,n,dist2);
+
+  // inicializo las cosas para la epidemia
+  epidemy* population = malloc(sizeof(epidemy)*n*n);
+  populationInitSEIR(population, n);
+  populationFillSEIRVacc(population, lattice, n);
+  populationSEIRInfect(population, graph, lattice, n, nInf);
+  fs1 = fopen("after.lat","w");
+  latticeSaveToFile(lattice,n,fs1);
+  fclose(fs1);
+
+  /*
+  // meto un infectado en la red
+  for(int i = 0; i < n*n; i++){
+    //int whichComp = getRand(nComp);
+    population[i].comp[0] = 1;
+  }
+  int infIdx = getRand(n*n);
+  population[infIdx].comp[2] = 1;
+  population[infIdx].comp[0] = 0;
+  */
+
+  // abro el archivo
+  FILE* fs;
+  sprintf(name, "test_epidemy.epi");
+  fs = fopen(name, "w");
+
+  // hago el avance temporal
+  int stop = 0;
+  int i = 0;
+  float nuS = 2.8/8;
+  float nuE = 1.0/8;
+  float nuI = 1.0/8;
+  float dt = 0.5;
+
+  while(stop == 0){
+    populationSaveToFile(fs, population, n);
+    stepSEIR(population, graphEpi, n, nuS, nuE, nuI, dt);
+    stop = stopReachedSEIR(population, n);
+    i++;
+  }
+  populationSaveToFile(fs, population, n);
+  printf("Paso %d; S = %d E = %d I = %d R = %d \n", i, populationCompNTotal(population, n, 0),populationCompNTotal(population, n, 1),populationCompNTotal(population, n, 2),populationCompNTotal(population, n, 3));
+
+  //libero las cosas
+
+  graphFree(graph,n);
+  graphFree(graphEpi,n);
+  latticeFree(lattice,n);
+  populationFree(population, n);
+
+  free(graph);
+  free(graphEpi);
+  free(lattice);
+  free(population);
+  fclose(fs);
+
+  t = time(NULL)-t;
+  printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);
+}

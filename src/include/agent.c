@@ -12,6 +12,7 @@ int agentInit(agent *lattice, int idx, int f){
   lattice[idx].feat = malloc((lattice[idx].f) * sizeof(int));
   lattice[idx].label = 0;
   lattice[idx].stub = 0; //por default, inicializan como vacunadores
+  lattice[idx].vacc = 1;  // idem
   return 0;
 
 }
@@ -87,10 +88,71 @@ int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray){
   for(int i = 0; i < nArray; i++){
     idx = idxList[i];
     lattice[idx].stub = 1;
-    lattice[idx].feat[f-1] = 1;
+    lattice[idx].feat[f-1] = 0;
+    lattice[idx].vacc = 0;
   }
   return 0;
 }
+
+/* latticeClusterNList() devuelve una lista con los indices de los integrantes
+  del cluster con etiqueta lableClusN, previamente deben estar labeleados
+  para que ande */
+
+int latticeClusterNList(agent* lattice, int n, int labelClusN, int** clusterArray){
+  int nArray = 0;
+  // cuento cuantos en la red hay con la etiqueta labelClusN
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].label == labelClusN) nArray++;
+  }
+  // asigno la memoria para el vector
+  int* clusterNList = malloc(sizeof(int)*nArray);
+  int idxCluster = 0;
+  // lleno clusterNList con las posiciones de la red correspondientes
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].label == labelClusN){
+      clusterNList[idxCluster] = idx;
+      idxCluster++;
+    }
+  }
+  *clusterArray = clusterNList;
+  return nArray;
+}
+
+// latticeSetNonVacc() setea como no vacunadores una cantidad nonVacc al azar,
+// pero dentro de estos nonVacc se encuentran los nStub, o sea, setteo al azar
+// una cantidad de agentes nonVacc-nStub
+
+int latticeSetNonVacc(agent* lattice, int n, int nonVacc, int nStub){
+  int nonVaccToSet = nonVacc-nStub; // la cantidad de noVacunadores neta a settear
+  int* auxList = malloc(n*n*sizeof(int));
+  // array con indices
+  for(int idx = 0; idx < n*n; idx++) auxList[idx] = idx;
+  shuffleArray(auxList,n*n); // mezclo el array
+  int countNonVacc = 0; // contador de no vacunadores no talibanes
+  int idxList = 0; // indice para recorrer auxList
+  int idx;
+  /*int talC = 0;
+  for(int idx = 0; idx < n*n; idx++) talC = talC + (int)lattice[idx].stub;
+  printf("TalC = %d\n", talC);*/
+  // asigno como no vacunadores una cantidad de agentes nonVaccToSet
+  while(countNonVacc < nonVaccToSet){
+    idx = auxList[idxList];
+    // si el agente no es taliban, sumo 1 a la cuenta
+    if(lattice[idx].stub != 1) countNonVacc++;
+    lattice[idx].vacc = 0;
+    idxList++;
+  }
+  // asigno el resto de los agentes que sobran como vacunadores, salvo que sean
+  // talibanes, en cuyo caso los pongo como no vacunadores
+  for(int i = idxList; i < n*n; i++){
+    idx = auxList[i];
+    if(lattice[idx].stub != 1) lattice[idx].vacc = 1;
+    else lattice[idx].vacc = 0;
+  }
+  free(auxList);
+  return 0;
+}
+
 
 /* latticePrintFeats() imprime en pantalla todos los feats para cada agente */
 
@@ -174,6 +236,25 @@ int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
   return 0;
 }
 
+int latticeTransformVaccToBinary(agent* lattice, int n){
+  int f, q;
+  float r, prob;
+  for(int idx = 0; idx < n*n; idx++){
+    f = lattice[idx].f;
+    q = lattice[idx].q;
+    prob = ((float)(lattice[idx].feat[f-1]))/(q-1);
+    r = ((float) rand() / (float) RAND_MAX);
+    //si el agente no es taliban
+    if(lattice[idx].stub == 0){
+      //pongo el ultimo feat a 1 con probabilidad prob
+      if(r<prob) lattice[idx].vacc = 1;
+      else lattice[idx].vacc = 0;
+    }
+    else lattice[idx].vacc = 0;
+  }
+  return 0;
+}
+
 /* latticeSave() guarda en un archivo el estado completo de la red de agentes */
 
 int latticeSaveToFile(agent *lattice, int n, FILE* fs){
@@ -221,6 +302,11 @@ int latticeSaveToFile(agent *lattice, int n, FILE* fs){
   }
   fprintf(fs, "%d\n", lattice[n*n-1].feat[f-1]);
 
+  // grabo la vacc
+  fprintf(fs, "vacc ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].vacc);
+  fprintf(fs, "%d\n", lattice[n*n-1].vacc);
+
   return 0;
 }
 
@@ -263,7 +349,7 @@ int latticeLoadFromFile(agent** lattice, FILE* fs){
     st = fscanf(fs, "%d ", &qF);
     auxLatt[idx].qF = qF;
   }
-  st = fscanf(fs, "%d ", &qF);
+  st = fscanf(fs, "%d\n", &qF);
   auxLatt[n*n-1].qF = qF;
 
   /* voy a leer los label */
@@ -305,6 +391,16 @@ int latticeLoadFromFile(agent** lattice, FILE* fs){
   }
   st = fscanf(fs, "%d\n", &featN);
   auxLatt[n*n-1].feat[f-1] = featN;
+
+  /* voy a leer los vacc */
+  st = fscanf(fs, "vacc ");
+  int vacc;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &vacc);
+    auxLatt[idx].vacc = vacc;
+  }
+  st = fscanf(fs, "%d\n", &vacc);
+  auxLatt[n*n-1].vacc = vacc;
 
   if(st == 0) st = 1;
 

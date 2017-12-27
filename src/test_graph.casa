@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "graph.h"
-#include "agent.h"
-#include "functions.h"
+#include "include/graph.h"
+#include "include/agent.h"
+#include "include/functions.h"
 
 int main(){
 
   srand(time(NULL));
 
-  int n = 50;
-  int nRewire = 1;
+  int n = 4;
+  int nRewire = 5;
   int t = time(NULL);
   int idx = 10;
   int neigOrdEdges = 2;
-  int neigOrdRewire = 3;
+  int neigOrdRewire = 2;
   int nEdgeRew = 0;
   char name[100];
   int cont;
@@ -22,22 +22,35 @@ int main(){
 
 
   vertex* graph = (vertex*) malloc(n*n*sizeof(vertex));
+  vertex* graph2;
   for(int i = 0; i<1; i++){
     graphInit(graph, n);
     graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
-    //graphEdgesPrint(graph,n);
-    //graphRewirePrint(graph,n);
-    fs = fopen("netIni.net","w");
-    graphPrintToFile(graph, n, fs);
+    graphRewireAddNRand(graph, n, 1);
+    graphEdgesAddNRand(graph, n, 1);
+    fs = fopen("net1.net","w");
+    graphSaveToFile(graph, n, fs);
     fclose(fs);
-    graphEdgesAddNRand(graph, n, 10);
-    fs = fopen("netFin.net","w");
-    graphPrintToFile(graph, n, fs);
+    /*fs = fopen("net1.net","r");
+    graphLoadFromFile(&graph2, fs);*/
+    /*graphEdgesAdd(graph,0,14);
+    graphEdgesPrint(graph,n);
+    graphEdgesPrint(graph2,n);*/
+    //graphRewirePrint(graph2,n);
+    //fclose(fs);
+    graphCopy(graph, n, &graph2);
+    printf("%d\n",graphCompare(graph,graph2,n));
+    cutDistantLinks(graph2,n,1);
+    printf("%d\n",graphCompare(graph,graph2,n));
+    fs = fopen("net2.net","w");
+    graphSaveToFile(graph2, n, fs);
     fclose(fs);
+    graphFree(graph2,n);
     graphFree(graph,n);
   }
-
   free(graph);
+  free(graph2);
+
 
   t = time(NULL)-t;
   printf("Tiempo transcurrido en el Loop: %d:%d:%d\n", t/3600, (t/60)%60, t%60);

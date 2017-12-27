@@ -12,24 +12,30 @@ hubo rewiring devuelve 1, si hubo imitacion devuelve 0 */
 int step(vertex* graph, agent *lattice, int n, float phi){
 
   int i, j, hij;
-  int th = 2; //threshold de interaccion
+  int th = 1; //threshold de interaccion
   i = getRand(n*n); //indice del activo
-  while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
-  j = graphPickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
 
-  hij = commonTraits(lattice, i, j);
+  float r = ((float) rand() / (float) RAND_MAX);
+  // con probabilidad phi interactuo con el campo
+  if(r < phi) return fieldInteraction(lattice, i);
+  // sino interactua con el campo, hago el proceso de axelrod convencional
+  else{
+    while(graph[i].nEdges == 0) i = getRand(n*n); //elijo un agente CON vecinos
+    j = graphPickPassiveNeig(graph, i); //indice del pasivo(vecino al azar)
 
-  if(vertexRewireIsConnected(graph, i, j)){
+    hij = commonTraitsCultural(lattice, i, j); //calculo la homofilia
 
-    int k = graphPickPassiveNotNeig(graph, n, i);
-    int hik = commonTraits(lattice, i, k);
+    if(vertexRewireIsConnected(graph, i, j)){
 
-    if(hij < hik) return socialInteraction(graph, i, j, k);
+      int k = graphPickPassiveNotNeig(graph, n, i);
+      int hik = commonTraitsCultural(lattice, i, k);
+
+      if(hij < hik) return socialInteraction(graph, i, j, k);
+      else opinionInteraction(lattice, i, j, hij, th, phi);
+
+    }
     else opinionInteraction(lattice, i, j, hij, th, phi);
-
   }
-  else opinionInteraction(lattice, i, j, hij, th, phi);
-
 
   return 0;
 
@@ -56,6 +62,7 @@ int maxCluster(agent *lattice, int* nsAcum, int n, int frag){
   for(int i = 1; i<frag; i++) if(fragsz[i]>mayor) mayor = fragsz[i];
 
   free(fragsz);
+  free(ns);
 
   return mayor;
 
@@ -84,12 +91,14 @@ int opinionInteraction(agent* lattice, int i, int j, int hij, int th, float phi)
   float r;
   f = lattice[i].f;
 
-  if(hij >= th) prob = (float) hij / f;
+  if(hij >= th) prob = (float) hij / (f-1); // hij de la parte cultural
   else prob = 0;
 
   r = ((float) rand() / (float) RAND_MAX);
 
   if( r < prob ){
+
+    hij = hij + (int)(lattice[i].feat[f-1] == lattice[j].feat[f-1]);
 
     if(hij != f){
 
@@ -103,18 +112,11 @@ int opinionInteraction(agent* lattice, int i, int j, int hij, int th, float phi)
 
       /* si el feat elegido es el f-1 */
       if(uncomIdx == f-1){
-        /* si el agente no es taliban */
-        if(lattice[i].stub != 1){
-          /* si hay una transicion vacunador -> no vacunador */
-          if(lattice[i].feat[f-1] == 0 && lattice[j].feat[f-1] == 1){
-            /* si se da la condicion del campo, transiciona */
-            prob = 1.0-phi;
-            r = ((float) rand() / (float) RAND_MAX);
-            if(r < prob){
-              lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
-            }
-          }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
-        }
+        /* si el agente es taliban */
+        if(lattice[i].stub == 1) return 0;
+        /* sino hace la imitacion */
+        else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
+
       }else lattice[i].feat[uncomIdx] = lattice[j].feat[uncomIdx];
 
     }
@@ -135,34 +137,172 @@ int socialInteraction(vertex* graph, int i, int j, int k){
   return 1;
 }
 
+/* fieldInteraction() hace la interaccion con el campo */
+
+int fieldInteraction(agent* lattice, int i){
+  int f = lattice[i].f;
+  // qInt guarda el q maximo que se va a sortear
+  int qInt = lattice[i].q - lattice[i].feat[f-1];
+  // si es taliban entonces 1-lattice[i].stub = 0 y el agenta queda igual
+  lattice[i].feat[f-1] = lattice[i].feat[f-1] + (1-lattice[i].stub)*getRand(qInt);
+  return 1;
+}
+
 /* stopReached() devuelve 0 o 1 si hay o no transiciones disponibles
 respectivamente (si no hay, la interaccion es terminada) */
 
 int stopReached(vertex* graph, agent* lattice, int n){
   int h;
-  int k = 2; //threshold de la interaccion
+  int th = 1; //threshold de la interaccion
   int f = lattice[0].f;
 
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
-      h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
-      if( h != f && h >= k ) return 0;
+      h = commonTraitsCultural(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != (f-1) && h >= th ) return 0;
     }
   }
   return 1;
 }
 
+/* activeLinks() devuelve la cantidad de links activos */
+
 int activeLinks(vertex* graph, agent* lattice, int n){
   int h;
-  int k = 2; //threshold de la interaccion
+  int th = 1; //threshold de la interaccion
   int f = lattice[0].f;
   int actLinks = 0;
 
   for(int idx = 0; idx < n*n; idx++){
     for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
       h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
-      if( h != f && h >= k ) actLinks++;
+      if( h != f && h >= th ) actLinks++;
     }
   }
   return actLinks/2;
+}
+
+int activeLinksCultural(vertex* graph, agent* lattice, int n){
+  int h;
+  int th = 1; //threshold de la interaccion
+  int f = lattice[0].f-1;
+  int actLinks = 0;
+
+  for(int idx = 0; idx < n*n; idx++){
+    for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
+      h = commonTraitsCultural(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != f && h >= th ) actLinks++;
+    }
+  }
+  return actLinks/2;
+}
+
+int interactionij(vertex* graph, agent* lattice, int n, int* i, int* j){
+  int h;
+  int th = 1; //threshold de la interaccion
+  int f = lattice[0].f;
+
+  for(int idx = 0; idx < n*n; idx++){
+    for(int edgesIdx = 0; edgesIdx<graph[idx].nEdges; edgesIdx++){
+      h = commonTraits(lattice,idx,graph[idx].edges[edgesIdx]);
+      if( h != f && h >= th ){
+        *i = idx;
+        *j = graph[idx].edges[edgesIdx];
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
+/* initAxelrod() inicializa el axelrod con los parametros dados en param */
+
+int axelrodInit(parameter* param, agent* lattice, vertex* graph, int v){
+  int n = param->n;
+  int f = param->f;
+  int q = param->q;
+  int qF = param->qF;
+  int nStub = param->nStub;
+  int neigOrdEdges = param->neigOrdEdges;
+  int neigOrdRewire = param->neigOrdRewire;
+  int nRewire = param->nRewire;
+  int nEdgeRew = param->nEdgeRew;
+  int nEdgesAdd = param->nEdgesAdd;
+  int nRewireAdd = param->nRewireAdd;
+
+  if(v == 1){
+    printf("Parametros de inicializacion:\n");
+    printf("n = %d; f = %d; q = %d; qF = %d; nStub = %d\n",n,f,q,qF,nStub);
+    printf("neigOrdEdges = %d; neigOrdRewire = %d; nRewire = %d\n",neigOrdEdges,neigOrdRewire,nRewire);
+    printf("nEdgeRew = %d; nEdgesAdd = %d; nRewireAdd = %d\n",nEdgeRew,nEdgesAdd,nRewireAdd);
+  }
+
+  latticeInit(lattice, n, f);
+  latticeFill(lattice, n, q, qF);
+  latticeSetStub(lattice, n, nStub);
+
+  graphInit(graph, n);
+  graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+  graphEdgesAddNRand(graph, n, nEdgesAdd);
+  graphRewireAddNRand(graph, n, nRewireAdd);
+
+  return 0;
+}
+
+/* axelrodInitStubFromArray() inicializa el axelrod con los parametros dados
+  en param con los talibanes dados en el array */
+
+int axelrodInitStubFromArray(parameter* param, agent* lattice, vertex* graph, int* idxArray){
+  int n = param->n;
+  int f = param->f;
+  int q = param->q;
+  int qF = param->qF;
+  int nStub = param->nStub;
+  int neigOrdEdges = param->neigOrdEdges;
+  int neigOrdRewire = param->neigOrdRewire;
+  int nRewire = param->nRewire;
+  int nEdgeRew = param->nEdgeRew;
+  int nEdgesAdd = param->nEdgesAdd;
+  int nRewireAdd = param->nRewireAdd;
+
+  latticeInit(lattice, n, f);
+  latticeFill(lattice, n, q, qF);
+  latticeSetStubFromArray(lattice, n, idxArray, nStub);
+
+  graphInit(graph, n);
+  graphFill(graph, n, nEdgeRew, nRewire, neigOrdEdges, neigOrdRewire);
+  graphEdgesAddNRand(graph, n, nEdgesAdd);
+  graphRewireAddNRand(graph, n, nRewireAdd);
+
+  return 0;
+}
+
+/* axelrodSingleRun() toma los parametros y realiza una corrida de axelrod.
+  Si el flag de verbose es 1, ademas arroja informacion acerca de los pasos
+  y los links activos */
+
+int axelrodSingleRun(parameter* param, agent* lattice, vertex* graph, int v){
+  int n = param->n;
+  float phi = param->phi;
+  int paso = n*n;
+  int t = time(NULL);
+
+  int i = 0;
+  int stop = 0;
+  while(stop == 0){
+    step(graph,lattice,n,phi);
+    if(i%paso==0) stop = stopReached(graph,lattice,n);
+    if(i%(int)(1E6) == 0 && v == 1){
+      printf("Paso %d, Links = %d\n", i, activeLinks(graph,lattice,n));
+    }
+    i++;
+  }
+
+  if(v == 1){
+    printf("Paso %d, Links = %d\n", i, activeLinks(graph,lattice,n));
+  }
+  t = time(NULL) - t;
+  printf("t = %d\n", t);
+
+  return 0;
 }

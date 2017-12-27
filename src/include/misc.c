@@ -7,7 +7,7 @@
 
 int getRand(int max){
   int res = max;
-  while(res == max){
+  while(res == max && max != 0){
     res = (int) (max * ((float) rand() / (float) RAND_MAX));
   }
   return res;
@@ -16,7 +16,7 @@ int getRand(int max){
 
 /* shuffleArray() mezcla los elementos del array */
 
-int shuffleArray(int* shuffled,int n){
+int shuffleArray(int* shuffled, int n){
   int* res = (int*) malloc(sizeof(int)*n);
   for(int i = 0; i<n;i++) res[i] = shuffled[i];
   int idx,aux;
@@ -146,6 +146,8 @@ int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray,
   return nNeigArray;
 }
 
+// loadFromTxt() se encarga de leer un archivo en filas a un vector previamente
+// definido
 int loadFromTxt(FILE* fs, int* array){
   int i = 0, n = 0;
   while( fscanf(fs, "%d ", &n) > 0 ) array[i++] = n;
