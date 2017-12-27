@@ -195,7 +195,7 @@ int latticeLabelCultural(vertex* graph, agent* lattice, int n){
   return frag;
 }
 
-int latticeLabelMax(agent *lattice, int n, int frag){
+int latticeLabelMax(agent *lattice, int n, int frag, int* Smax){
 
   //fragsz[i] contiene el tamaño del cluster de etiqueta i
   int *fragsz = malloc(frag*sizeof(int));
@@ -220,8 +220,22 @@ int latticeLabelMax(agent *lattice, int n, int frag){
   free(fragsz);
   free(ns);
 
+  *Smax = mayor;
   return labelMayor;
 
+}
+
+int latticeGetMaxClusterList(vertex* graph, agent* lattice, int n, int** maxClusterList){
+  int nMaxClusterList;
+  // labeleo los clusters y hallo el mas grande, y una lista con sus integrantes
+  int frag = latticeLabelVac(graph, lattice, n); // labeleo los noVacunadores
+  //printf("Frag = %d\n",frag );
+  // obtengo la etiqueta del cluster mas grande
+  int labelClusMax = latticeLabelMax(lattice, n, frag, &nMaxClusterList);
+  //printf("labelMax = %d\n",labelClusMax );
+  //printf("nMax = %d\n", nMaxClusterList);
+  latticeClusterNList(lattice, n, labelClusMax, maxClusterList);
+  return nMaxClusterList;
 }
 
 int falseLabel(agent *lattice, int *clase, int* commNeig, int nCommNeig, int idx){

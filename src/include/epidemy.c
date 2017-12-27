@@ -10,11 +10,12 @@
 #include "epidemy.h"
 
 // epidemyInit() inicializa el tipo epidemia, con un vector de compartimientos
-// de largo nComp y cada uno de los compartimientos a 0
+// de largo nComp y cada uno de los compartimientos a 0, salvo el removido a 1
 
 int epidemyInit(epidemy* population, int idx, int nComp){
   population[idx].comp = malloc(nComp*sizeof(int));
-  for(int i = 0; i < nComp; i++) population[idx].comp[i] = 0;
+  for(int i = 0; i < nComp-1; i++) population[idx].comp[i] = 0;
+  population[idx].comp[nComp-1] = 1; // pongo en removidos
   return 0;
 }
 
@@ -51,65 +52,25 @@ int populationInitSEIR(epidemy* population, int n){
 // populationFillSEIRVacc() pone los agentes en susceptible o refractario
 // de su opinion de vacunacion previamente sorteada (mucho muy importante)
 
-int populationFillSEIRVacc(epidemy* population, agent* lattice, int n,
-                          int* notRemoved)
+int populationFillSEIRVacc(epidemy* population, int* notRemoved, int lenNotRem)
 {
   int nComp = 4;
   int idxNotRemoved = 0;
-  for(int idx = 0; idx < n*n; idx++){
-    if(lattice[idx].vacc == 0){
-      population[idx].comp[0] = 1;
-      notRemoved[idxNotRemoved] = idx;
-      idxNotRemoved++;
-      for(int i = 1; i < nComp; i++) population[idx].comp[i] = 0;
-    }
-    else{
-      population[idx].comp[3] = 1;
-      for(int i = 1; i < nComp; i++) population[idx].comp[i-1] = 0;
-    }
+  for(int idx = 0; idx < lenNotRem; idx++){
+    idxNotRemoved = notRemoved[idx];
+    population[idxNotRemoved].comp[0] = 1;
+    for(int i = 1; i < nComp; i++) population[idxNotRemoved].comp[i] = 0;
   }
   return 0;
 }
 
-// populationSEIRInfectMaxCluster() infecta una cantidad de agentes sobre el
-// cluster mas grande. Si el cluster mas grande es mas chico que la cantidad de
-// infectados que quiero, devuelvo -1
+// populationSEIRInfectFromList() infecta los agentes desde la lista
 
-int populationSEIRInfectMaxCluster(epidemy* population, vertex* graph,
-                          agent* lattice, int n, int nInf)
-{
-  int frag = latticeLabelVac(graph, lattice, n); // labeleo los noVacunadores
-  // obtengo la etiqueta del cluster mas grande
-  int labelClusMax = latticeLabelMax(lattice, n, frag);
-
-  // obtengo la lista con los integrantes del cluster mas grande
-  int* maxClusterList;
-  int nMaxClusterList = latticeClusterNList(lattice, n, labelClusMax,
-                                        &maxClusterList);
-  // mezclo el array
-  shuffleArray(maxClusterList, nMaxClusterList);
-  // chequeo que sea posible la asignacion, si algo salio mal, devuelvo -1
-  if(nMaxClusterList < nInf) return -1;
-  // asigno los infectados
-  for(int idxInf = 0; idxInf < nInf; idxInf++){
-    int i = maxClusterList[idxInf];
-    // promuevo el agente i a infectado
-    population[i].comp[2] = 1;
-    population[i].comp[0] = 0;
-    population[i].comp[1] = 0;
-    population[i].comp[3] = 0;
-  }
-  free(maxClusterList);
-  return 0;
-}
-
-// populationSEIRInfectAtRand() infecta una cantidad de agentes sobre toda la red
-
-int populationSEIRInfectAtRand(epidemy* population,agent* lattice, int n,
-                                int nInf, int* notRemoved, int massNonVacc)
+int populationSEIRInfectFromList(epidemy* population, int n, int nInf,
+                                  int* notRemoved, int lenNotRem)
 {
   // mezclo el array
-  shuffleArray(notRemoved, massNonVacc);
+  shuffleArray(notRemoved, lenNotRem);
   // infecto una cantidad nInf
   for(int idxInf = 0; idxInf < nInf; idxInf++){
     int i = notRemoved[idxInf];
@@ -223,105 +184,42 @@ int stepSEIR(epidemy* population, vertex* graph, int n, float nuS, float nuE,
     }
     idx = notRemoved[idxExp];
   }
-  if(*lenNotRem != newLen) *lenNotRem = newLen;/*{
-    *lenNotRem = newLen;
-    *notRemoved = realloc(*notRemoved, newLen);
-  }*/
+  if(*lenNotRem != newLen) *lenNotRem = newLen;
   return dInf;
 }
 
-int populationSEIRFullMaxCluster(vertex* graphEpi, int n, int* notRemoved,
-                      int massNonVacc, int* maxClusterList, int Smax,
-                      int nInf, float nuS, float nuE, float nuI, float dt)
+int SEIRFull(vertex* graphEpi, int n, int* notRemoved, int massNonVacc,
+            int* infectedList, int lenInf,
+            int nInf, float nuS, float nuE, float nuI, float dt)
 {
-  int lenNotRem = massNonVacc;
   // inicializo las cosas para la epidemia
   epidemy* population = malloc(sizeof(epidemy)*n*n);
-  //int* notRemoved = malloc(sizeof(int)*lenNotRem);
+  // copio el tamaño del vector de no removidos
+  int lenNotRem = massNonVacc;
+  // copio la lista de no removidos
+  int* notRemovedCp = malloc(lenNotRem*sizeof(int));
+  for(int i = 0; i < lenNotRem; i++) notRemovedCp[i] = notRemoved[i];
+  // inicializo el tipo population
   populationInitSEIR(population, n);
-  populationFillSEIRVacc(population, lattice, n, notRemoved);
-  populationSEIRAtRand(population, graph, lattice, n, nInf, maxClusterList, Smax);
+  // lleno la red con los no vacunados desde la lista not removed
+  populationFillSEIRVacc(population, notRemoved, lenNotRem);
+  // infecto desde la lista infectedList
+  populationSEIRInfectFromList(population, n, nInf, infectedList, lenInf);
   // hago el avance temporal
   int stop = 0;
   int i = 0;
   int infTotal = nInf;
   while(stop == 0){
-    infTotal = infTotal + stepSEIR(population, graphEpi, n, nuS, nuE, nuI, dt, notRemoved, &lenNotRem);
+    infTotal = infTotal + stepSEIR(population, graphEpi, n, nuS, nuE, nuI, dt,
+                                    notRemovedCp, &lenNotRem);
     stop = stopReachedSEIR(population, n);
     i++;
   }
   populationFree(population, n);
   free(population);
-  free(notRemoved);
+  free(notRemovedCp);
   return infTotal;
 }
-
-/*
-// populationSEIRFullMaxCluster() hace una corrida entera del modelo
-// epidemiologico infectando el cluster mas grande de no vacunadores,
-// devolviendo el numero de infectados durante toda la corrida. El graph se
-// usa para determinar los clusters para tirar el infectado, mientras que el
-// graphEpi se usa para determinar la red de contagio
-
-int populationSEIRFullMaxCluster(vertex* graph, vertex* graphEpi, agent* lattice, int n,
-                        int nInf, float nuS, float nuE, float nuI, float dt, int massNonVacc,
-                        int* maxClusterList, int Smax)
-{
-  int lenNotRem = massNonVacc;
-  // inicializo las cosas para la epidemia
-  epidemy* population = malloc(sizeof(epidemy)*n*n);
-  int* notRemoved = malloc(sizeof(int)*lenNotRem);
-  populationInitSEIR(population, n);
-  populationFillSEIRVacc(population, lattice, n, notRemoved);
-  populationSEIRAtRand(population, graph, lattice, n, nInf, maxClusterList, Smax);
-  // hago el avance temporal
-  int stop = 0;
-  int i = 0;
-  int infTotal = nInf;
-  while(stop == 0){
-    infTotal = infTotal + stepSEIR(population, graphEpi, n, nuS, nuE, nuI, dt, notRemoved, &lenNotRem);
-    stop = stopReachedSEIR(population, n);
-    i++;
-  }
-  populationFree(population, n);
-  free(population);
-  free(notRemoved);
-  return infTotal;
-}
-
-// populationSEIRFullMaxCluster() hace una corrida entera del modelo
-// epidemiologico infectando el cluster mas grande de no vacunadores,
-// devolviendo el numero de infectados durante toda la corrida
-
-int populationSEIRFullAtRand(vertex* graphEpi, agent* lattice, int n,
-                        int nInf, float nuS, float nuE, float nuI, float dt,
-                        int massNonVacc)
-{
-  int lenNotRem = massNonVacc;
-  // inicializo las cosas para la epidemia
-  epidemy* population = malloc(sizeof(epidemy)*n*n);
-  // aca voy a
-  int* notRemoved = malloc(sizeof(int)*lenNotRem);
-  populationInitSEIR(population, n);
-  populationFillSEIRVacc(population, lattice, n, notRemoved);
-  populationSEIRInfectAtRand(population, lattice, n, nInf, notRemoved, lenNotRem);
-  // hago el avance temporal
-  int stop = 0;
-  int i = 0;
-  int infTotal = nInf;
-  while(stop == 0){
-    infTotal = infTotal + stepSEIR(population, graphEpi, n, nuS, nuE, nuI, dt, notRemoved, &lenNotRem);
-    stop = stopReachedSEIR(population, n);
-    i++;
-  }
-  printf("len = %d\n", lenNotRem);
-  printf("Susc = %d\n", populationCompNTotal(population,n,0));
-  populationFree(population, n);
-  free(population);
-  free(notRemoved);
-  return infTotal;
-}
-*/
 
 int stopReachedSEIR(epidemy* population, int n){
   int E,I;

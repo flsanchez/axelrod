@@ -82,7 +82,24 @@ int nonVaccinatorTotal(agent* lattice, int n){
   return nonVacTot;
 }
 
+/* nonVaccinatorList() devuelve la cantidad de no vacunados y en una lista que
+  se pasa como argumento se llena las posiciones de los no vacunadores */
+
+int nonVaccinatorList(agent* lattice, int n, int** nonVaccList){
+  int nonVacTot = nonVaccinatorTotal(lattice,n);
+  int nonVacIdx = 0;
+  *nonVaccList = malloc(nonVacTot*sizeof(int));
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].vacc == 0){
+      (*nonVaccList)[nonVacIdx] = idx;
+      nonVacIdx++;
+    }
+  }
+  return nonVacTot;
+}
+
 // sqDistij() calcula la distancia cuadrada entre dos agentes i,j de la red
+
 int sqDistij(int i, int j, int n){
   int dist, ix,iy, jx,jy;
   ix = i%n;
@@ -123,11 +140,16 @@ int cutDistantLinks(vertex* graph, int n, int dist2){
   return 0;
 }
 
+/* meanCalc() calcula el valor medio de un vector */
+
 float meanCalc(int* vector, int n){
   float res = 0;
   for(int idx = 0; idx < n; idx++) res = res + vector[idx];
   return res/n;
 }
+
+/* stDevCalc() calcula y devuelve el desvio estandar de un vector y el valor
+  medio por referencia */
 
 float stDevCalc(int* vector, int n, float* mean){
   float res = 0;

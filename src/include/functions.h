@@ -10,6 +10,7 @@ int clustCoeff(vertex* graph, int n);
 
 int nonVaccinatorCount(agent* lattice, int n, int* nonVacAcum);
 int nonVaccinatorTotal(agent* lattice, int n);
+int nonVaccinatorList(agent* lattice, int n, int** nonVaccList);
 
 int sqDistij(int i, int j, int n);
 int cutDistantLinks(vertex* graph, int n, int dist2);
