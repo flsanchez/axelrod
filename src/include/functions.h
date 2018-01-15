@@ -14,6 +14,9 @@ int nonVaccinatorList(agent* lattice, int n, int** nonVaccList);
 
 int sqDistij(int i, int j, int n);
 int cutDistantLinks(vertex* graph, int n, int dist2);
+int NofDistantLinks(vertex* graph, int n, int dist2);
+int listDistantLinks(vertex* graph, int n, int dist2, int** src, int** dest);
+int cutNDistantLinks(vertex* graph, int n, int dist2, int nLinks);
 
 float meanCalc(int* vector, int n);
 float stDevCalc(int* vector, int n, float* mean);

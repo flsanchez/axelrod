@@ -32,6 +32,37 @@ int shuffleArray(int* shuffled, int n){
   return 0;
 }
 
+/* shuffleArrays() mezcla los elementos de 2 arrays de manera sincronica */
+
+int shuffleArrays(int* shuffled1, int* shuffled2, int n){
+  int* res1 = malloc(sizeof(int)*n);
+  int* res2 = malloc(sizeof(int)*n);
+  for(int i = 0; i<n;i++){
+    res1[i] = shuffled1[i];
+    res2[i] = shuffled2[i];
+  }
+  int idx,aux;
+  for(int i = 0; i<n; i++){
+    // obtengo el indice random
+    idx = getRand(n-i);
+    // hago la copia para el primer array
+    shuffled1[i] = res1[idx];
+    aux = res1[idx];
+    res1[idx] = res1[n-i-1];
+    res1[n-i-1] = aux;
+    res1 = (int*) realloc(res1,sizeof(int)*(n-i-1));
+    // hago la copia para el segundo array, con el mismo indice
+    shuffled2[i] = res2[idx];
+    aux = res2[idx];
+    res2[idx] = res2[n-i-1];
+    res2[n-i-1] = aux;
+    res2 = (int*) realloc(res2,sizeof(int)*(n-i-1));
+  }
+  free(res1);
+  free(res2);
+  return 0;
+}
+
 /* isElemInArray() devuelve 1 si elem esta en el array y 0 sino */
 
 int isElemInArray(int* array, int n, int elem){
