@@ -115,31 +115,35 @@ int sqDistij(int i, int j, int n){
   da dist2 para cada agente en el grapho, y devuelve cuantos links corto */
 
 int cutDistantLinks(vertex* graph, int n, int dist2){
-  int nEdges, nRewire, idxAux;
+  int nRewire, idxAux;
   int cont = 0;
   for(int idx = 0; idx < n*n; idx++){
-    nEdges = graph[idx].nEdges;
     nRewire = graph[idx].nRewire;
     // si hay links de rewire, me fijo de cortar estos primero
     if(nRewire > 0){
-      for(int idxRew = 0; idxRew < graph[idx].nRewire; idxRew++){
+      int idxRew = 0;
+      while(idxRew < graph[idx].nRewire){
         idxAux = graph[idx].rewire[idxRew]; //indice del vecino
         // si la distancia es mayor, corto el link, tanto rewire como normal
+        // y no incremento idxRew
         if(sqDistij(idx,idxAux,n)>dist2){
           graphRewireRm(graph, idx, idxAux);
           graphEdgesRm(graph, idx, idxAux);
           cont++;
         }
+        else idxRew++;
       }
     }
-    else{ // si no es hay links de rewire
-      for(int idxEdges = 0; idxEdges < nEdges; idxEdges++){
+    else{ // si no hay links de rewire
+      int idxEdges = 0;
+      while(idxEdges < graph[idx].nEdges){
         idxAux = graph[idx].edges[idxEdges]; //indice del vecino
         // si la distancia es mayor, corto el link
         if(sqDistij(idx,idxAux,n)>dist2){
           graphEdgesRm(graph, idx, idxAux);
           cont++;
         }
+        else idxEdges++;
       }
     }
   }
@@ -172,16 +176,17 @@ int listDistantLinks(vertex* graph, int n, int dist2, int** src, int** dest){
   vertex* graphAux;
   graphCopy(graph, n, &graphAux);
   // hago lo mismo que cutDistantLinks, pero ademas grabo
-  int nEdges, nRewire, idxAux;
+  int nRewire, idxAux;
   int cont = 0;
   for(int idx = 0; idx < n*n; idx++){
-    nEdges = graphAux[idx].nEdges;
     nRewire = graphAux[idx].nRewire;
     // si hay links de rewire, me fijo de cortar estos primero
     if(nRewire > 0){
-      for(int idxRew = 0; idxRew < graphAux[idx].nRewire; idxRew++){
+      int idxRew = 0;
+      while(idxRew < graphAux[idx].nRewire){
         idxAux = graphAux[idx].rewire[idxRew]; //indice del vecino
         // si la distancia es mayor, corto el link, tanto rewire como normal
+        // y no incremento idxRew
         if(sqDistij(idx,idxAux,n)>dist2){
           graphRewireRm(graphAux, idx, idxAux);
           graphEdgesRm(graphAux, idx, idxAux);
@@ -189,10 +194,12 @@ int listDistantLinks(vertex* graph, int n, int dist2, int** src, int** dest){
           (*dest)[cont] = idxAux;
           cont++;
         }
+        else idxRew++;
       }
     }
     else{ // si no es hay links de rewire
-      for(int idxEdges = 0; idxEdges < nEdges; idxEdges++){
+      int idxEdges = 0;
+      while(idxEdges < graphAux[idx].nEdges){
         idxAux = graphAux[idx].edges[idxEdges]; //indice del vecino
         // si la distancia es mayor, corto el link
         if(sqDistij(idx,idxAux,n)>dist2){
@@ -201,6 +208,7 @@ int listDistantLinks(vertex* graph, int n, int dist2, int** src, int** dest){
           (*dest)[cont] = idxAux;
           cont++;
         }
+        else idxEdges++;
       }
     }
   }
@@ -209,7 +217,8 @@ int listDistantLinks(vertex* graph, int n, int dist2, int** src, int** dest){
   return nLinksTot;
 }
 
-/* cutNDistantLinks corta nLinks de los links totales*/
+/* cutNDistantLinks corta nLinks de los links totales, devuelve 1 en el caso de
+  que se este pidiendo cortar mas links que los totales */
 
 int cutNDistantLinks(vertex* graph, int n, int dist2, int nLinks){
   // primero obtengo la lista de links distantes a dist2
@@ -217,6 +226,8 @@ int cutNDistantLinks(vertex* graph, int n, int dist2, int nLinks){
   int* dest;
   int nSrcDest;
   nSrcDest = listDistantLinks(graph, n, dist2, &src, &dest);
+
+  if(nLinks > nSrcDest) return 1;
 
   int idxSrc, idxDest, nRewire;
   // mezclo los arrays
