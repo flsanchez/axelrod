@@ -236,6 +236,31 @@ int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
   return 0;
 }
 
+/* latticeTransformVaccToBinary() settea como vacunador o no vacunador
+  en funcion del valor del ultimo feature */
+
+int latticeTransformVaccToBinary(agent* lattice, int n){
+  int f, q;
+  float r, prob;
+  for(int idx = 0; idx < n*n; idx++){
+    f = lattice[idx].f;
+    q = lattice[idx].q;
+    prob = ((float)(lattice[idx].feat[f-1]))/(q-1);
+    r = ((float) rand() / (float) RAND_MAX);
+    //si el agente no es taliban
+    if(lattice[idx].stub == 0){
+      //pongo el ultimo feat a 1 con probabilidad prob
+      if(r<prob) lattice[idx].vacc = 1;
+      else lattice[idx].vacc = 0;
+    }
+    else lattice[idx].vacc = 0;
+  }
+  return 0;
+}
+
+/* latticeTransformVaccToBinary() settea como vacunador o no vacunador
+  en funcion del valor del ultimo feature */
+
 int latticeTransformVaccToBinary(agent* lattice, int n){
   int f, q;
   float r, prob;

@@ -184,3 +184,17 @@ int loadFromTxt(FILE* fs, int* array){
   while( fscanf(fs, "%d ", &n) > 0 ) array[i++] = n;
   return 0;
 }
+
+struct tm* printDate(){
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer [80];
+
+  time (&rawtime);
+  timeinfo = localtime (&rawtime);
+
+  strftime (buffer,80,"%c\n",timeinfo);
+  puts(buffer);
+
+  return timeinfo;
+}

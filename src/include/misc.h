@@ -9,5 +9,6 @@ int patternFill(int** patterni, int** patternj, int n, int neigOrd);
 int fillNeigArray(int* patterni, int* patternj, int nPattern, int** neigArray,
                   int idx, int n);
 int loadFromTxt(FILE* fs, int* array);
+struct tm* printDate();
 
 #endif
