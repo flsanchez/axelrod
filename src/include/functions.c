@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include "agent.h"
 #include "graph.h"
-#include "misc.h"
+#include "agent.h"
 #include "functions.h"
+#include "misc.h"
 
 /* minDist() devuelve, dada una lista con las distancias y si esta marcado o no
   el vertice, el indice del vertice que tiene la minima distancia */
@@ -47,7 +47,7 @@ int minPathLen(vertex* graph, int* dist, int n, int src){
 
   }
 
-  free(mark);
+  free(mark); // oh, hi mark!
 
   return 0;
 }
@@ -97,6 +97,58 @@ int nonVaccinatorList(agent* lattice, int n, int** nonVaccList){
     }
   }
   return nonVacTot;
+}
+
+/* vaccinatorList() devuelve la cantidad de vacunados y en una lista que
+  se pasa como argumento se llena las posiciones de los vacunadores */
+
+int vaccinatorList(agent* lattice, int n, int** vaccList){
+  int vacTot = n*n - nonVaccinatorTotal(lattice,n);
+  int vacIdx = 0;
+  *vaccList = malloc(vacTot*sizeof(int));
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].vacc == 1){
+      (*vaccList)[vacIdx] = idx;
+      vacIdx++;
+    }
+  }
+  return vacTot;
+}
+
+/* nonImmuCount() suma 1 en la posicion i de nonImmuAcum si el agente i de
+  lattice es no inmunizado */
+
+int nonImmuCount(agent* lattice, int n, int* nonImmuAcum){
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].immu == 0) nonImmuAcum[idx]++;
+  }
+  return 0;
+}
+
+/* nonImmuTotal() simplemente cuenta la masa de no inmunizados */
+
+int nonImmuTotal(agent* lattice, int n){
+  int nonImmuTot = 0;
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].immu == 0) nonImmuTot++;
+  }
+  return nonImmuTot;
+}
+
+/* nonImmuList() devuelve la cantidad de no inmunizados y en una lista que
+  se pasa como argumento se llena las posiciones de los no inmunizados */
+
+int nonImmuList(agent* lattice, int n, int** nonImmuList){
+  int nonImmuTot = nonImmuTotal(lattice,n);
+  int nonImmuIdx = 0;
+  *nonImmuList = malloc(nonImmuTot*sizeof(int));
+  for(int idx = 0; idx < n*n; idx++){
+    if(lattice[idx].immu == 0){
+      (*nonImmuList)[nonImmuIdx] = idx;
+      nonImmuIdx++;
+    }
+  }
+  return nonImmuTot;
 }
 
 // sqDistij() calcula la distancia cuadrada entre dos agentes i,j de la red

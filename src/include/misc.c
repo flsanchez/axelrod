@@ -32,6 +32,24 @@ int shuffleArray(int* shuffled, int n){
   return 0;
 }
 
+/* shuffleArrayFloat() mezcla los elementos del array */
+
+int shuffleArrayFloat(float* shuffled, int n){
+  float* res = (float*) malloc(sizeof(float)*n);
+  for(int i = 0; i<n;i++) res[i] = shuffled[i];
+  int idx,aux;
+  for(int i = 0; i<n; i++){
+    idx = getRand(n-i);
+    shuffled[i] = res[idx];
+    aux = res[idx];
+    res[idx] = res[n-i-1];
+    res[n-i-1] = aux;
+    res = (float*) realloc(res,sizeof(float)*(n-i-1));
+  }
+  free(res);
+  return 0;
+}
+
 /* shuffleArrays() mezcla los elementos de 2 arrays de manera sincronica */
 
 int shuffleArrays(int* shuffled1, int* shuffled2, int n){

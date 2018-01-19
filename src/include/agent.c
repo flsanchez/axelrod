@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "misc.h"
 #include "agent.h"
+#include "graph.h"
+#include "functions.h"
+#include "misc.h"
 
 /* agentInit() inicializa el agente idx con los valores dados en el input*/
 
@@ -12,7 +14,8 @@ int agentInit(agent *lattice, int idx, int f){
   lattice[idx].feat = malloc((lattice[idx].f) * sizeof(int));
   lattice[idx].label = 0;
   lattice[idx].stub = 0; //por default, inicializan como vacunadores
-  lattice[idx].vacc = 1;  // idem
+  lattice[idx].vacc = 1; // idem
+  lattice[idx].immu = 1; // iniciliza como inmunizado por defecto
   return 0;
 
 }
@@ -131,9 +134,6 @@ int latticeSetNonVacc(agent* lattice, int n, int nonVacc, int nStub){
   int countNonVacc = 0; // contador de no vacunadores no talibanes
   int idxList = 0; // indice para recorrer auxList
   int idx;
-  /*int talC = 0;
-  for(int idx = 0; idx < n*n; idx++) talC = talC + (int)lattice[idx].stub;
-  printf("TalC = %d\n", talC);*/
   // asigno como no vacunadores una cantidad de agentes nonVaccToSet
   while(countNonVacc < nonVaccToSet){
     idx = auxList[idxList];
@@ -148,6 +148,38 @@ int latticeSetNonVacc(agent* lattice, int n, int nonVacc, int nStub){
     idx = auxList[i];
     if(lattice[idx].stub != 1) lattice[idx].vacc = 1;
     else lattice[idx].vacc = 0;
+  }
+  free(auxList);
+  return 0;
+}
+
+// latticeSetNonImmu() setea como no inmunizados una cantidad nonImmu al azar,
+// pero dentro de estos nonImmu se encuentran los nStub, o sea, setteo al azar
+// una cantidad de agentes nonVacc-nStub
+
+int latticeSetNonImmu(agent* lattice, int n, int nonImmu, int nStub){
+  int nonImmuToSet = nonImmu-nStub; // la cantidad de noVacunadores neta a settear
+  int* auxList = malloc(n*n*sizeof(int));
+  // array con indices
+  for(int idx = 0; idx < n*n; idx++) auxList[idx] = idx;
+  shuffleArray(auxList,n*n); // mezclo el array
+  int countNonImmu = 0; // contador de no inmunizados no talibanes
+  int idxList = 0; // indice para recorrer auxList
+  int idx;
+  // asigno como no inmunizados una cantidad de agentes nonImmuToSet
+  while(countNonImmu < nonImmuToSet){
+    idx = auxList[idxList];
+    // si el agente no es taliban, sumo 1 a la cuenta
+    if(lattice[idx].stub != 1) countNonImmu++;
+    lattice[idx].immu = 0;
+    idxList++;
+  }
+  // asigno el resto de los agentes que sobran como inmunizados, salvo que sean
+  // talibanes, en cuyo caso los pongo como no inmunizados
+  for(int i = idxList; i < n*n; i++){
+    idx = auxList[i];
+    if(lattice[idx].stub != 1) lattice[idx].immu = 1;
+    else lattice[idx].immu = 0;
   }
   free(auxList);
   return 0;
@@ -237,7 +269,8 @@ int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs){
 }
 
 /* latticeTransformVaccToBinary() settea como vacunador o no vacunador
-  en funcion del valor del ultimo feature */
+  en funcion del valor del ultimo feature. Por defecto asume 100% eficiencia de
+  vacuna e inmuniza o no en funcion de si esta vacunado o no respectivamente */
 
 int latticeTransformVaccToBinary(agent* lattice, int n){
   int f, q;
@@ -250,33 +283,84 @@ int latticeTransformVaccToBinary(agent* lattice, int n){
     //si el agente no es taliban
     if(lattice[idx].stub == 0){
       //pongo el ultimo feat a 1 con probabilidad prob
-      if(r<prob) lattice[idx].vacc = 1;
-      else lattice[idx].vacc = 0;
+      if(r<prob){
+        lattice[idx].vacc = 1;
+        lattice[idx].immu = 1;
+      }
+      else{
+        lattice[idx].vacc = 0;
+        lattice[idx].immu = 0;
+      }
     }
-    else lattice[idx].vacc = 0;
+    else{
+      lattice[idx].vacc = 0;
+      lattice[idx].immu = 0;
+    }
   }
   return 0;
 }
 
-/* latticeTransformVaccToBinary() settea como vacunador o no vacunador
+/* latticeVaccEfficiencyFromList() settea como vacunador o no vacunador
   en funcion del valor del ultimo feature */
 
-int latticeTransformVaccToBinary(agent* lattice, int n){
-  int f, q;
-  float r, prob;
-  for(int idx = 0; idx < n*n; idx++){
-    f = lattice[idx].f;
-    q = lattice[idx].q;
-    prob = ((float)(lattice[idx].feat[f-1]))/(q-1);
-    r = ((float) rand() / (float) RAND_MAX);
-    //si el agente no es taliban
-    if(lattice[idx].stub == 0){
-      //pongo el ultimo feat a 1 con probabilidad prob
-      if(r<prob) lattice[idx].vacc = 1;
-      else lattice[idx].vacc = 0;
-    }
-    else lattice[idx].vacc = 0;
+int latticeVaccEfficiencyFromList(agent* lattice, int n, float* effList,
+                                          float* effProp, int nEffList)
+{
+  float r, eff;
+  // obtengo la lista de vacunados
+  int vacTot;
+  int* vaccList;
+  vacTot = vaccinatorList(lattice, n, &vaccList);
+
+  // hago la lista de probabilidades en base a las eficiencias
+  // y las proporciones dadas para cada eficiencia
+  float* probArray = malloc(sizeof(float)*vacTot); // probas de inmunizar para
+                                                   // cada agente
+  int* effPropTot = malloc(sizeof(int)*nEffList); // numero de agentes con cada
+                                                  // eficiencia
+  // asigno los numeros de agentes con cada eficiencia
+  int effPropCumSum = 0; // suma acumulada de la cantidad de agentes asignada
+  for(int effIdx = 0; effIdx < nEffList-1; effIdx++){
+    effPropTot[effIdx] = effProp[effIdx]*vacTot;
+    effPropCumSum = effPropCumSum + effPropTot[effIdx];
   }
+  // el ultimo lugar lo guardo en funcion de los que faltan, para evitar
+  // inconsistencias por redondeo
+  effPropTot[nEffList-1] = vacTot - effPropCumSum;
+
+  // voy a asignar las probabilidades con las proporciones dadas
+  int effCount; // cuantos vacunados va a haber con una eficiencia
+  int effCountCumSum = 0; // acumula la cantidad asignada
+  int probIdx = 0; // este indice me mueve en el vector probArray
+  for(int effIdx = 0; effIdx < nEffList; effIdx++){
+    effCount = effPropTot[effIdx];
+    effCountCumSum = effCount + effCountCumSum;
+    for(int idx = probIdx; idx < effCountCumSum; idx++){
+      probArray[idx] = effList[effIdx]; // asigno las probabilidades
+    }
+    probIdx = effCountCumSum;
+  }
+  // una vez asignadas, las mezclo
+  shuffleArrayFloat(probArray, vacTot);
+
+  /*printf("effPropTot = [ ");
+  for(int i = 0; i < nEffList; i++) printf("%d ", effPropTot[i]);
+  printf("]\n");
+  printf("probArray = [ ");
+  for(int i = 0; i < vacTot; i++) printf("%.3f ", probArray[i]);
+  printf("]\n");*/
+
+  // inmunizo con la probabilidad de probArray
+  for(int idx = 0; idx < vacTot; idx++){
+    int idxVac = vaccList[idx];
+    eff = probArray[idx];
+    r = ((float) rand() / (float) RAND_MAX);
+    if(r<eff) lattice[idxVac].immu = 1;
+    else lattice[idxVac].immu = 0;
+  }
+  free(vaccList);
+  free(effPropTot);
+  free(probArray);
   return 0;
 }
 
@@ -331,6 +415,11 @@ int latticeSaveToFile(agent *lattice, int n, FILE* fs){
   fprintf(fs, "vacc ");
   for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].vacc);
   fprintf(fs, "%d\n", lattice[n*n-1].vacc);
+
+  // grabo la immu
+  fprintf(fs, "immu ");
+  for(int i = 0; i<n*n-1; i++) fprintf(fs, "%d ", lattice[i].immu);
+  fprintf(fs, "%d\n", lattice[n*n-1].immu);
 
   return 0;
 }
@@ -427,6 +516,16 @@ int latticeLoadFromFile(agent** lattice, FILE* fs){
   st = fscanf(fs, "%d\n", &vacc);
   auxLatt[n*n-1].vacc = vacc;
 
+  /* voy a leer los immu */
+  st = fscanf(fs, "immu ");
+  int immu;
+  for(int idx = 0; idx<n*n-1; idx++){
+    st = fscanf(fs, "%d ", &immu);
+    auxLatt[idx].immu = immu;
+  }
+  st = fscanf(fs, "%d\n", &immu);
+  auxLatt[n*n-1].immu = immu;
+
   if(st == 0) st = 1;
 
   * lattice = auxLatt;
@@ -444,6 +543,8 @@ int latticeCompare(agent* lattice1, agent* lattice2, int n){
     if(lattice1[idx].qF != lattice2[idx].qF) return 0;
     if(lattice1[idx].label != lattice2[idx].label) return 0;
     if(lattice1[idx].stub != lattice2[idx].stub) return 0;
+    if(lattice1[idx].vacc != lattice2[idx].vacc) return 0;
+    if(lattice1[idx].immu != lattice2[idx].immu) return 0;
   }
   for(int idx = 0; idx<n*n; idx++){
     int f = lattice1[idx].f;
