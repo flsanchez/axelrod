@@ -286,11 +286,11 @@ int latticeLabelMax(agent *lattice, int n, int frag, int* Smax){
 
 }
 
-// latticeGetMaxClusterList() devuelve el tamaño del cluster mas grande de no
+// latticeGetMaxClusterListVacc() devuelve el tamaño del cluster mas grande de no
 // vacunadores, y por referencia llena una lista con los indices de los agentes
 // que pertenecen al mismo.
 
-int latticeGetMaxClusterList(vertex* graph, agent* lattice, int n,
+int latticeGetMaxClusterListVacc(vertex* graph, agent* lattice, int n,
                               int** maxClusterList)
 {
   int nMaxClusterList;

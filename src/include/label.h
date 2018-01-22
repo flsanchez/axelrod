@@ -8,7 +8,7 @@ int latticeLabelVac(vertex* graph, agent* lattice, int n);
 int latticeLabelImmu(vertex* graph, agent* lattice, int n);
 int latticeLabelCultural(vertex* graph, agent* lattice, int n);
 int latticeLabelMax(agent* lattice, int n, int frag, int* Smax);
-int latticeGetMaxClusterList(vertex* graph, agent* lattice, int n,
+int latticeGetMaxClusterListVacc(vertex* graph, agent* lattice, int n,
                             int** maxClusterList);
 int latticeGetMaxClusterListImmu(vertex* graph, agent* lattice, int n,
                             int** maxClusterList);
