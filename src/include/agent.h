@@ -17,12 +17,14 @@ typedef struct agent
 int agentInit(agent *lattice, int idx, int f);
 int agentFill(int *feat, int f, int q, int qF);
 int agentPrint(agent *agent, int n, int idx);
+int agentSwap(agent* lattice, int src, int dest);
 int latticeInit(agent *lattice, int n, int f);
 int latticeFill(agent *lattice, int n, int q, int qF);
 int latticeSetStub(agent* lattice, int n, int nStub);
 int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray);
 int latticeClusterNList(agent* lattice, int n, int labelClusN,
                         int** clusterArray);
+int latticeShuffleNonVacc(agent* lattice, int n, int nonVacc);
 int latticeSetNonVacc(agent* lattice, int n, int nonVacc, int nStub);
 int latticeSetNonImmu(agent* lattice, int n, int nonImmu, int nStub);
 int latticePrintFeats(agent *lattice, int n);
@@ -33,7 +35,7 @@ int latticePrintStub(agent* lattice, int n);
 int latticePrintFeatsToFile(agent* lattice, int n, FILE* fs);
 int latticePrintFeatNToFile(agent *lattice, int n, int featNIdx, FILE* fs);
 int latticeTransformVaccToBinary(agent* lattice, int n);
-int latticeVaccEfficiencyFromList(agent* lattice, int n, float* effList,
+int latticeVaccEffectFromList(agent* lattice, int n, float* effList,
                                           float* effProp, int nEffList);
 int latticeSaveToFile(agent* lattice, int n, FILE* fs);
 int latticeLoadFromFile(agent** lattice, FILE* fs);

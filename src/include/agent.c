@@ -46,6 +46,53 @@ int agentPrint(agent *lattice, int n, int idx){
 
 }
 
+// FALTA TESTEAR!!!
+/* agentSwap() intercambia el agente en src con el agente en dest */
+int agentSwap(agent* lattice, int src, int dest){
+  // aca voy a alojar los valores de src
+  int fSrc, labelSrc, stubSrc, vaccSrc, immuSrc;
+  int* featSrc;
+
+  // copio los valores del agente src
+  fSrc = lattice[src].f;
+  labelSrc = lattice[src].label;
+  stubSrc = lattice[src].stub;
+  vaccSrc = lattice[src].vacc;
+  immuSrc = lattice[src].immu;
+  // copio su vector de features
+  featSrc = malloc(sizeof(int)*fSrc);
+  for(int i = 0; i < fSrc; i++) featSrc[i] = lattice[src].feat[i];
+
+  free(lattice[src].feat);
+
+  // copio dest->src
+  lattice[src].f = lattice[dest].f;
+  lattice[src].label = lattice[dest].label;
+  lattice[src].stub = lattice[dest].stub;
+  lattice[src].vacc = lattice[dest].vacc;
+  lattice[src].immu = lattice[dest].immu;
+  lattice[src].feat = malloc(sizeof(int)*lattice[src].f);
+  for(int i = 0; i < lattice[src].f; i++){
+    lattice[src].feat[i] = lattice[dest].feat[i];
+  }
+
+  // copio src->dest, a traves de lo que copie al principio
+  lattice[dest].f = fSrc;
+  lattice[dest].label = labelSrc;
+  lattice[dest].stub = stubSrc;
+  lattice[dest].vacc = vaccSrc;
+  lattice[dest].immu = immuSrc;
+  free(lattice[dest].feat);
+  lattice[dest].feat = malloc(sizeof(int)*lattice[dest].f);
+  for(int i = 0; i < lattice[dest].f; i++){
+    lattice[dest].feat[i] = featSrc[i];
+  }
+
+  free(featSrc);
+
+  return 0;
+}
+
 /* latticeInit() inicializa la red de agentes con f features, q traits para
   los features [0,f-2] y qF traits para el feature f-1 */
 
@@ -93,6 +140,7 @@ int latticeSetStubFromArray(agent* lattice, int n, int* idxList, int nArray){
     lattice[idx].stub = 1;
     lattice[idx].feat[f-1] = 0;
     lattice[idx].vacc = 0;
+    lattice[idx].immu = 0;
   }
   return 0;
 }
@@ -120,6 +168,30 @@ int latticeClusterNList(agent* lattice, int n, int labelClusN, int** clusterArra
   *clusterArray = clusterNList;
   return nArray;
 }
+
+// latticeShuffleNonVacc() distribuye los nonVacc agentes no vacunadores al azar
+// en la red, sin importar si son talibanes o no
+int latticeShuffleNonVacc(agent* lattice, int n, int nonVacc){
+  int* auxList = malloc(n*n*sizeof(int));
+  // array con indices
+  for(int idx = 0; idx < n*n; idx++) auxList[idx] = idx;
+  shuffleArray(auxList,n*n); // mezclo el array
+  int idxList = 0; // indice para recorrer auxList
+  int idx;
+  // asigno como no vacunadores una cantidad de agentes nonVacc
+  for(idxList = 0; idxList < nonVacc; idxList++){
+    idx = auxList[idxList];
+    lattice[idx].vacc = 0;
+  }
+  // asigno el resto de los agentes que sobran como vacunadores
+  for(int i = idxList; i < n*n; i++){
+    idx = auxList[i];
+    lattice[idx].vacc = 1;
+  }
+  free(auxList);
+  return 0;
+}
+
 
 // latticeSetNonVacc() setea como no vacunadores una cantidad nonVacc al azar,
 // pero dentro de estos nonVacc se encuentran los nStub, o sea, setteo al azar
@@ -300,10 +372,10 @@ int latticeTransformVaccToBinary(agent* lattice, int n){
   return 0;
 }
 
-/* latticeVaccEfficiencyFromList() settea como vacunador o no vacunador
-  en funcion del valor del ultimo feature */
+/* latticeVaccEffectFromList() settea como inmunizado o no inmunizado
+  en funcion de la mezcla de proporciones con distintas efectividades que haya */
 
-int latticeVaccEfficiencyFromList(agent* lattice, int n, float* effList,
+int latticeVaccEffectFromList(agent* lattice, int n, float* effList,
                                           float* effProp, int nEffList)
 {
   float r, eff;
@@ -358,9 +430,20 @@ int latticeVaccEfficiencyFromList(agent* lattice, int n, float* effList,
     if(r<eff) lattice[idxVac].immu = 1;
     else lattice[idxVac].immu = 0;
   }
+  // pongo el resto de los agentes (no Vacunados) como no inmunizados
+  int nonVacTot;
+  int* nonVaccList;
+  // lista de no vacunados
+  nonVacTot = nonVaccinatorList(lattice, n, &nonVaccList);
+  for(int idx = 0; idx < nonVacTot; idx++){
+    int idxNonVacc = nonVaccList[idx];
+    lattice[idxNonVacc].immu = 0;
+  }
+
   free(vaccList);
   free(effPropTot);
   free(probArray);
+  free(nonVaccList);
   return 0;
 }
 
